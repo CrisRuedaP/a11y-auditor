@@ -66,6 +66,7 @@ class AuditUI {
     style.textContent = `
       /* Panel Principal */
       .a11y-audit-sidebar {
+        display: none;
         position: fixed;
         right: 0;
         top: 0;
@@ -76,10 +77,19 @@ class AuditUI {
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
         z-index: 999999;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        display: flex;
         flex-direction: column;
         overflow: hidden;
+      }
+
+      .a11y-audit-sidebar.a11y-audit-open {
+        display: flex;
         animation: slideIn 0.3s ease-out;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .a11y-audit-sidebar.a11y-audit-open {
+          animation: none;
+        }
       }
 
       @keyframes slideIn {
@@ -416,17 +426,29 @@ class AuditUI {
     let totalWarnings = 0;
     let totalPassed = 0;
 
-    Object.entries(this.results).forEach(([name, result], index) => {
+    // Cada analizador termina en un momento distinto (axe-core en particular
+    // puede tardar bastante en páginas grandes), y cada uno dispara un
+    // re-render completo. Si no recordáramos qué pestaña eligió la persona
+    // usuaria, cada re-render la resetearía a la primera pestaña disponible.
+    const activeTabExists =
+      this.activeTab && Object.prototype.hasOwnProperty.call(this.results, this.activeTab);
+    if (!activeTabExists) {
+      this.activeTab = Object.keys(this.results)[0] || null;
+    }
+
+    Object.entries(this.results).forEach(([name, result]) => {
+      const isActive = name === this.activeTab;
+
       // Crear tab
       const tab = document.createElement("button");
-      tab.className = `a11y-audit-tab ${index === 0 ? "active" : ""}`;
+      tab.className = `a11y-audit-tab ${isActive ? "active" : ""}`;
       tab.textContent = name;
       tab.addEventListener("click", () => this._switchTab(name));
       tabsContainer.appendChild(tab);
 
       // Crear contenido
       const pane = document.createElement("div");
-      pane.className = `a11y-audit-tab-pane ${index === 0 ? "active" : ""}`;
+      pane.className = `a11y-audit-tab-pane ${isActive ? "active" : ""}`;
       pane.dataset.analyzer = name;
 
       if (result.issues && result.issues.length > 0) {
@@ -472,20 +494,14 @@ class AuditUI {
    * @private
    */
   _switchTab(analyzerName) {
+    this.activeTab = analyzerName;
+
     const tabs = this.container?.querySelectorAll(".a11y-audit-tab");
     const panes = this.container?.querySelectorAll(".a11y-audit-tab-pane");
 
     tabs?.forEach((tab) => tab.classList.remove("active"));
     panes?.forEach((pane) => pane.classList.remove("active"));
 
-    this.container
-      ?.querySelector(`.a11y-audit-tab:contains("${analyzerName}")`)
-      ?.classList.add("active");
-    this.container
-      ?.querySelector(`[data-analyzer="${analyzerName}"]`)
-      ?.classList.add("active");
-
-    // Fix: querySelector con :contains no funciona, usar alternativa
     Array.from(tabs || [])
       .find((tab) => tab.textContent === analyzerName)
       ?.classList.add("active");
