@@ -274,6 +274,52 @@ class AuditUI {
         font-size: 11px;
       }
 
+      .a11y-audit-issue[role="button"] {
+        cursor: pointer;
+      }
+
+      .a11y-audit-issue[role="button"]:hover {
+        filter: brightness(0.97);
+      }
+
+      .a11y-audit-issue[role="button"]:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      .a11y-audit-issue-hint {
+        margin-top: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #2563eb;
+      }
+
+      /* Resaltado "recién clickeado" en la página auditada, para distinguirlo
+         de otros elementos ya resaltados antes */
+      .a11y-audit-highlight-pulse {
+        animation: a11yAuditPulse 1.6s ease-out;
+      }
+
+      @keyframes a11yAuditPulse {
+        0%,
+        100% {
+          outline-color: #dc2626;
+          outline-width: 2px;
+        }
+        50% {
+          outline-color: #fbbf24;
+          outline-width: 4px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .a11y-audit-highlight-pulse {
+          animation: none;
+          outline-width: 4px !important;
+          outline-color: #fbbf24 !important;
+        }
+      }
+
       /* Empty State */
       .a11y-audit-empty {
         padding: 24px 16px;
@@ -453,14 +499,7 @@ class AuditUI {
 
       if (result.issues && result.issues.length > 0) {
         result.issues.forEach((issue) => {
-          const issueEl = document.createElement("div");
-          issueEl.className = `a11y-audit-issue ${issue.severity}`;
-          issueEl.innerHTML = `
-            <div class="a11y-audit-issue-message">${this._escapeHtml(issue.message)}</div>
-            ${issue.selector ? `<div class="a11y-audit-issue-selector">${this._escapeHtml(issue.selector)}</div>` : ""}
-            ${issue.elementInfo ? `<div class="a11y-audit-issue-metadata">${this._escapeHtml(issue.elementInfo.tag)}</div>` : ""}
-          `;
-          pane.appendChild(issueEl);
+          pane.appendChild(this._buildIssueElement(issue));
         });
       } else {
         pane.innerHTML =
@@ -508,6 +547,105 @@ class AuditUI {
     Array.from(panes || [])
       .find((pane) => pane.dataset.analyzer === analyzerName)
       ?.classList.add("active");
+  }
+
+  /**
+   * Construye la fila de un issue. Si tiene selector, es clickeable
+   * (mouse y teclado) para resaltar y hacer scroll hasta el elemento real.
+   * @private
+   */
+  _buildIssueElement(issue) {
+    const issueEl = document.createElement("div");
+    issueEl.className = `a11y-audit-issue ${issue.severity}`;
+
+    const messageEl = document.createElement("div");
+    messageEl.className = "a11y-audit-issue-message";
+    messageEl.textContent = issue.message;
+    issueEl.appendChild(messageEl);
+
+    if (issue.elementInfo) {
+      const metaEl = document.createElement("div");
+      metaEl.className = "a11y-audit-issue-metadata";
+      metaEl.textContent = this._describeElement(issue.elementInfo);
+      issueEl.appendChild(metaEl);
+    }
+
+    if (issue.selector) {
+      const selectorEl = document.createElement("div");
+      selectorEl.className = "a11y-audit-issue-selector";
+      selectorEl.textContent = issue.selector;
+      issueEl.appendChild(selectorEl);
+
+      const hintEl = document.createElement("div");
+      hintEl.className = "a11y-audit-issue-hint";
+      hintEl.textContent = "👁 Ver en la página";
+      issueEl.appendChild(hintEl);
+
+      issueEl.setAttribute("role", "button");
+      issueEl.setAttribute("tabindex", "0");
+      issueEl.setAttribute("aria-label", `${issue.message}. Ver elemento en la página`);
+
+      const jump = () => this._jumpToIssue(issue, issueEl, hintEl);
+      issueEl.addEventListener("click", jump);
+      issueEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          jump();
+        }
+      });
+    }
+
+    return issueEl;
+  }
+
+  /**
+   * Arma una descripción legible del elemento (mejor que solo el tag)
+   * @private
+   */
+  _describeElement(info) {
+    let label = `<${info.tag}>`;
+    if (info.id) label += `#${info.id}`;
+    if (info.text) {
+      const text = info.text.length > 40 ? `${info.text.slice(0, 40)}…` : info.text;
+      label += ` — "${text}"`;
+    }
+    return label;
+  }
+
+  /**
+   * Busca el elemento real por su selector, hace scroll y lo resalta.
+   * @private
+   */
+  _jumpToIssue(issue, issueEl, hintEl) {
+    let element = null;
+    try {
+      element = document.querySelector(issue.selector);
+    } catch {
+      element = null;
+    }
+
+    if (!element) {
+      this._flashHint(hintEl, "No se encontró (¿cambió la página?)");
+      return;
+    }
+
+    this.highlightElement(element);
+    element.classList.add("a11y-audit-highlight-pulse");
+    setTimeout(() => element.classList.remove("a11y-audit-highlight-pulse"), 1600);
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  /**
+   * Reemplaza temporalmente el texto de una pista y lo restaura
+   * @private
+   */
+  _flashHint(hintEl, text) {
+    if (!hintEl) return;
+    const original = hintEl.textContent;
+    hintEl.textContent = text;
+    setTimeout(() => {
+      hintEl.textContent = original;
+    }, 2000);
   }
 
   /**
