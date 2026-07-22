@@ -158,6 +158,17 @@ class Analyzer {
   _getComputedStyle(element) {
     return window.getComputedStyle(element);
   }
+
+  /**
+   * Un elemento oculto por CSS (display:none o visibility:hidden) no es
+   * perceivable por nadie ahora mismo, así que no debería contar para
+   * chequeos que dependen de lo que la página muestra realmente.
+   * @protected
+   */
+  _isVisible(element) {
+    const style = this._getComputedStyle(element);
+    return style.display !== "none" && style.visibility !== "hidden";
+  }
 }
 
 /**
@@ -436,6 +447,52 @@ class AuditUI {
         font-size: 11px;
       }
 
+      .a11y-audit-issue[role="button"] {
+        cursor: pointer;
+      }
+
+      .a11y-audit-issue[role="button"]:hover {
+        filter: brightness(0.97);
+      }
+
+      .a11y-audit-issue[role="button"]:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      .a11y-audit-issue-hint {
+        margin-top: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #2563eb;
+      }
+
+      /* Resaltado "recién clickeado" en la página auditada, para distinguirlo
+         de otros elementos ya resaltados antes */
+      .a11y-audit-highlight-pulse {
+        animation: a11yAuditPulse 1.6s ease-out;
+      }
+
+      @keyframes a11yAuditPulse {
+        0%,
+        100% {
+          outline-color: #dc2626;
+          outline-width: 2px;
+        }
+        50% {
+          outline-color: #fbbf24;
+          outline-width: 4px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .a11y-audit-highlight-pulse {
+          animation: none;
+          outline-width: 4px !important;
+          outline-color: #fbbf24 !important;
+        }
+      }
+
       /* Empty State */
       .a11y-audit-empty {
         padding: 24px 16px;
@@ -615,14 +672,7 @@ class AuditUI {
 
       if (result.issues && result.issues.length > 0) {
         result.issues.forEach((issue) => {
-          const issueEl = document.createElement("div");
-          issueEl.className = `a11y-audit-issue ${issue.severity}`;
-          issueEl.innerHTML = `
-            <div class="a11y-audit-issue-message">${this._escapeHtml(issue.message)}</div>
-            ${issue.selector ? `<div class="a11y-audit-issue-selector">${this._escapeHtml(issue.selector)}</div>` : ""}
-            ${issue.elementInfo ? `<div class="a11y-audit-issue-metadata">${this._escapeHtml(issue.elementInfo.tag)}</div>` : ""}
-          `;
-          pane.appendChild(issueEl);
+          pane.appendChild(this._buildIssueElement(issue));
         });
       } else {
         pane.innerHTML =
@@ -670,6 +720,105 @@ class AuditUI {
     Array.from(panes || [])
       .find((pane) => pane.dataset.analyzer === analyzerName)
       ?.classList.add("active");
+  }
+
+  /**
+   * Construye la fila de un issue. Si tiene selector, es clickeable
+   * (mouse y teclado) para resaltar y hacer scroll hasta el elemento real.
+   * @private
+   */
+  _buildIssueElement(issue) {
+    const issueEl = document.createElement("div");
+    issueEl.className = `a11y-audit-issue ${issue.severity}`;
+
+    const messageEl = document.createElement("div");
+    messageEl.className = "a11y-audit-issue-message";
+    messageEl.textContent = issue.message;
+    issueEl.appendChild(messageEl);
+
+    if (issue.elementInfo) {
+      const metaEl = document.createElement("div");
+      metaEl.className = "a11y-audit-issue-metadata";
+      metaEl.textContent = this._describeElement(issue.elementInfo);
+      issueEl.appendChild(metaEl);
+    }
+
+    if (issue.selector) {
+      const selectorEl = document.createElement("div");
+      selectorEl.className = "a11y-audit-issue-selector";
+      selectorEl.textContent = issue.selector;
+      issueEl.appendChild(selectorEl);
+
+      const hintEl = document.createElement("div");
+      hintEl.className = "a11y-audit-issue-hint";
+      hintEl.textContent = "👁 Ver en la página";
+      issueEl.appendChild(hintEl);
+
+      issueEl.setAttribute("role", "button");
+      issueEl.setAttribute("tabindex", "0");
+      issueEl.setAttribute("aria-label", `${issue.message}. Ver elemento en la página`);
+
+      const jump = () => this._jumpToIssue(issue, issueEl, hintEl);
+      issueEl.addEventListener("click", jump);
+      issueEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          jump();
+        }
+      });
+    }
+
+    return issueEl;
+  }
+
+  /**
+   * Arma una descripción legible del elemento (mejor que solo el tag)
+   * @private
+   */
+  _describeElement(info) {
+    let label = `<${info.tag}>`;
+    if (info.id) label += `#${info.id}`;
+    if (info.text) {
+      const text = info.text.length > 40 ? `${info.text.slice(0, 40)}…` : info.text;
+      label += ` — "${text}"`;
+    }
+    return label;
+  }
+
+  /**
+   * Busca el elemento real por su selector, hace scroll y lo resalta.
+   * @private
+   */
+  _jumpToIssue(issue, issueEl, hintEl) {
+    let element = null;
+    try {
+      element = document.querySelector(issue.selector);
+    } catch {
+      element = null;
+    }
+
+    if (!element) {
+      this._flashHint(hintEl, "No se encontró (¿cambió la página?)");
+      return;
+    }
+
+    this.highlightElement(element);
+    element.classList.add("a11y-audit-highlight-pulse");
+    setTimeout(() => element.classList.remove("a11y-audit-highlight-pulse"), 1600);
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  /**
+   * Reemplaza temporalmente el texto de una pista y lo restaura
+   * @private
+   */
+  _flashHint(hintEl, text) {
+    if (!hintEl) return;
+    const original = hintEl.textContent;
+    hintEl.textContent = text;
+    setTimeout(() => {
+      hintEl.textContent = original;
+    }, 2000);
   }
 
   /**
@@ -748,7 +897,9 @@ class HeadingsAnalyzer extends Analyzer {
 
   async run() {
     this.reset();
-    const headings = this._querySelectorAll("h1, h2, h3, h4, h5, h6");
+    const headings = this._querySelectorAll("h1, h2, h3, h4, h5, h6").filter(
+      (heading) => this._isVisible(heading),
+    );
 
     if (headings.length === 0) {
       this.addIssue(
@@ -947,8 +1098,8 @@ class ImagesAnalyzer extends Analyzer {
     this.reset();
 
     // Encontrar todas las imágenes
-    const images = this._querySelectorAll("img");
-    const svgs = this._querySelectorAll("svg");
+    const images = this._querySelectorAll("img").filter((img) => this._isVisible(img));
+    const svgs = this._querySelectorAll("svg").filter((svg) => this._isVisible(svg));
     const backgroundImages = this._findBackgroundImages();
 
     const totalImages = images.length + svgs.length + backgroundImages.length;
@@ -1066,17 +1217,24 @@ class ContrastAnalyzer extends Analyzer {
     );
 
     let checkedCount = 0;
+    let skippedCount = 0;
 
     textElements.forEach((element) => {
-      // Saltar elementos sin texto visible
-      if (!element.textContent.trim()) return;
+      // Solo evaluar elementos que renderizan texto directamente. Un <div>
+      // que solo envuelve a un <span> con su propio color no es quien
+      // pinta el texto: comparar SU color contra el fondo da un resultado
+      // que no corresponde a nada visible en la página.
+      if (!this._hasOwnVisibleText(element)) return;
 
       // Saltar elementos ocultos
       const style = this._getComputedStyle(element);
       if (style.display === "none" || style.visibility === "hidden") return;
 
       const colors = this._getColorInfo(element);
-      if (!colors) return;
+      if (!colors) {
+        skippedCount++;
+        return;
+      }
 
       checkedCount++;
 
@@ -1104,11 +1262,41 @@ class ContrastAnalyzer extends Analyzer {
       }
     });
 
-    if (checkedCount === 0) {
+    if (checkedCount === 0 && skippedCount === 0) {
+      // No había ningún elemento de texto que evaluar en la página.
       this.markPassed();
+    } else if (skippedCount > 0) {
+      this.addIssue(
+        "info",
+        `No se pudo determinar el fondo real de ${skippedCount} elemento(s) con imagen/gradiente de fondo — revisar el contraste ahí manualmente`,
+        null,
+        { skipped: skippedCount },
+      );
     }
 
     return this.getSummary();
+  }
+
+  /**
+   * Detecta si un elemento tiene un nodo de texto propio (hijo directo),
+   * en vez de texto que solo existe porque un descendiente lo aporta.
+   * @private
+   */
+  _hasOwnVisibleText(element) {
+    return Array.from(element.childNodes).some(
+      (node) => node.nodeType === 3 && node.textContent.trim().length > 0,
+    );
+  }
+
+  /**
+   * @private
+   */
+  _isTransparent(backgroundColor) {
+    return (
+      !backgroundColor ||
+      backgroundColor === "rgba(0, 0, 0, 0)" ||
+      backgroundColor === "transparent"
+    );
   }
 
   /**
@@ -1119,25 +1307,35 @@ class ContrastAnalyzer extends Analyzer {
     const style = this._getComputedStyle(element);
     const color = style.color;
     let backgroundColor = style.backgroundColor;
+    let sawBackgroundImage =
+      style.backgroundImage && style.backgroundImage !== "none";
 
-    // Si el background es transparent, buscar en padres
-    if (
-      backgroundColor === "rgba(0, 0, 0, 0)" ||
-      backgroundColor === "transparent"
-    ) {
-      let parent = element.parentElement;
-      while (parent) {
-        const parentStyle = this._getComputedStyle(parent);
-        const parentBg = parentStyle.backgroundColor;
-        if (parentBg !== "rgba(0, 0, 0, 0)" && parentBg !== "transparent") {
-          backgroundColor = parentBg;
-          break;
-        }
-        parent = parent.parentElement;
+    // Si el background es transparente, buscar en los padres
+    let parent = element.parentElement;
+    while (this._isTransparent(backgroundColor) && parent) {
+      const parentStyle = this._getComputedStyle(parent);
+      if (parentStyle.backgroundImage && parentStyle.backgroundImage !== "none") {
+        sawBackgroundImage = true;
       }
+      if (!this._isTransparent(parentStyle.backgroundColor)) {
+        backgroundColor = parentStyle.backgroundColor;
+      }
+      parent = parent.parentElement;
     }
 
-    if (!color || !backgroundColor) return null;
+    if (this._isTransparent(backgroundColor)) {
+      if (sawBackgroundImage) {
+        // El fondo real viene de una imagen o gradiente (background-image):
+        // no podemos calcularlo de forma confiable sin renderizar el
+        // elemento. Mejor no evaluar que asumir un color equivocado.
+        return null;
+      }
+      // Nadie definió background-color ni background-image en la cadena:
+      // es el lienzo blanco por defecto del navegador.
+      backgroundColor = "rgb(255, 255, 255)";
+    }
+
+    if (!color) return null;
 
     return {
       foreground: this._rgbToHex(color),
@@ -1237,7 +1435,7 @@ class AriaAnalyzer extends Analyzer {
 
     const ariaElements = this._querySelectorAll(
       "[role], [aria-label], [aria-labelledby], [aria-describedby], [aria-hidden], [aria-live]",
-    );
+    ).filter((element) => this._isVisible(element));
 
     if (ariaElements.length === 0) {
       this.markPassed();
@@ -1388,8 +1586,13 @@ class AriaAnalyzer extends Analyzer {
         "textarea",
       ].includes(tagName);
 
+      // aria-hidden="true" saca al elemento del árbol de accesibilidad a
+      // propósito: pedirle un nombre accesible ahí no tiene sentido.
+      const isHiddenFromAT = element.getAttribute("aria-hidden") === "true";
+
       if (
         isInteractive &&
+        !isHiddenFromAT &&
         !ariaLabel &&
         !ariaLabelledBy &&
         !element.textContent.trim()
@@ -1422,7 +1625,9 @@ class FormsAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    const inputs = this._querySelectorAll("input, select, textarea");
+    const inputs = this._querySelectorAll("input, select, textarea").filter(
+      (input) => this._isVisible(input),
+    );
     const labels = this._querySelectorAll("label");
 
     if (inputs.length === 0) {
@@ -1480,11 +1685,11 @@ class FormsAnalyzer extends Analyzer {
 
       if (ariaLabel || ariaLabelledBy) {
         hasLabel = true;
-      } else if (id) {
-        const associatedLabel = document.querySelector(`label[for="${id}"]`);
-        if (associatedLabel) {
-          hasLabel = true;
-        }
+      } else if (id && document.querySelector(`label[for="${id}"]`)) {
+        hasLabel = true;
+      } else if (input.closest("label")) {
+        // Label implícito: <label>Nombre <input></label>, válido sin for/id
+        hasLabel = true;
       }
 
       // Algunos tipos no requieren label
@@ -1786,22 +1991,22 @@ class KeyboardAnalyzer extends Analyzer {
         }
       }
 
-      // Verificar focus visible
-      const style = this._getComputedStyle(element);
-      const outline = style.outline || style.outlineWidth;
-      const boxShadow = style.boxShadow;
-
-      if (
-        (outline === "none" || outline === "0px") &&
-        !boxShadow?.includes("rgb")
-      ) {
-        this.addIssue("info", "Sin indicador visual de focus", element, {
-          tag: element.tagName.toLowerCase(),
-        });
-      } else {
-        this.markPassed();
-      }
     });
+
+    if (interactiveElements.length > 0) {
+      // No podemos comprobar el indicador de foco automáticamente: el
+      // propio bookmarklet solo se dispara con un clic de mouse, y en
+      // cuanto el navegador registra un clic deja de aplicar
+      // :focus-visible a los foco()s programáticos siguientes (es una
+      // protección del navegador contra scripts que simulan teclado, no
+      // algo que se pueda evitar). Revisar manualmente con Tab.
+      this.addIssue(
+        "info",
+        "El indicador de foco (:focus-visible) no se puede comprobar desde un bookmarklet — navegá la página con Tab y revisalo a simple vista",
+        null,
+        { interactiveElements: interactiveElements.length },
+      );
+    }
 
     // Buscar modal traps (focus no puede escapar)
     const modals = this._querySelectorAll('[role="dialog"], dialog');
@@ -1859,7 +2064,9 @@ class LinksAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    const links = this._querySelectorAll("a");
+    const links = this._querySelectorAll("a").filter((link) =>
+      this._isVisible(link),
+    );
 
     if (links.length === 0) {
       this.markPassed();
