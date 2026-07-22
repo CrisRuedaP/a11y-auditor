@@ -74,6 +74,15 @@ revisar el código o copiarlo a mano) y `bookmarklets/page/bookmarklets.data.js`
 (que la página de instalación consume para armar los botones). Ejecuta el
 build después de tocar cualquier archivo en `src/`.
 
+```bash
+npm test
+```
+
+Corre los 9 analizadores contra una página de prueba con casos normales y
+casos borde (ver [`bookmarklets/README.md`](bookmarklets/README.md#tests)).
+Es la única dependencia de npm del repo (Playwright) — solo para quien
+desarrolla el kit, nunca se empaqueta en el bookmarklet final.
+
 Para añadir un analizador nuevo:
 
 1. Crea `src/analyzers/mi-analizador.js` heredando de `Analyzer`

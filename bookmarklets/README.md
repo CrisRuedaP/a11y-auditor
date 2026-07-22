@@ -30,6 +30,7 @@ src/
 build.js                 # empaqueta src/ en bookmarklets javascript: reales
 dist/                     # salida de build.js (generada, no editar a mano)
 page/                     # sitio estático de instalación / guía / visor
+test/                     # suite de regresión (ver más abajo)
 ```
 
 ## Build
@@ -52,6 +53,48 @@ Genera:
   encodeado, que `page/index.html` usa para poblar los botones de instalar.
 
 No hay dependencias de npm; el script solo usa `fs` y `path` del propio Node.
+
+## Tests
+
+`npm test` corre los 9 analizadores contra `test/fixtures/audit.html` (una
+página con casos normales y casos borde a propósito) y compara el resultado
+contra lo esperado, usando Playwright para ejecutar el bookmarklet real en un
+Chromium sin cabeza:
+
+```bash
+npm test
+```
+
+Esta es la **única** dependencia de npm del repo, y es solo para quien
+desarrolla/mantiene el kit — el bookmarklet que instala una persona usuaria
+final sigue siendo JS puro sin dependencias. La primera vez que corras los
+tests puede que necesites descargar el navegador de Playwright:
+
+```bash
+npx playwright install chromium
+```
+
+Los casos borde en `test/fixtures/audit.html` existen porque ya atraparon
+bugs reales (falsos positivos) antes de que llegaran a producción:
+
+- Un `<div>` que envuelve un `<span>` con su propio color no es quien pinta
+  el texto — evaluar el contraste del div daba resultados sin sentido.
+- Un fondo con gradiente/imagen (`background-image`, sin `background-color`)
+  no se puede calcular de forma confiable; el analizador ahora lo dice en
+  vez de asumir negro.
+- Un elemento oculto por CSS (`display:none`) no debería contar para
+  chequeos de "cuántos H1/links hay" — no es perceivable por nadie ahora.
+- `aria-hidden="true"` saca al elemento del árbol de accesibilidad: pedirle
+  un nombre accesible ahí no tiene sentido.
+- Un `<label>` que envuelve un `<input>` (label implícito, sin `for`/`id`)
+  es una forma válida de asociar la etiqueta.
+- El indicador de foco (`:focus-visible`) **no se puede comprobar de forma
+  confiable desde un bookmarklet**: en cuanto el navegador registra el clic
+  que dispara el propio bookmarklet, dejar de aplicar `:focus-visible` a
+  cualquier `focus()` programático posterior es una protección real del
+  navegador (evita que un script simule "esto se enfocó por teclado"). El
+  analizador de Teclado avisa esto una sola vez en vez de inventar un
+  veredicto por elemento.
 
 ## Formato de resultados (JSON)
 
