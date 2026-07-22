@@ -28,6 +28,13 @@ class Auditor {
     ];
     this.results = {};
     this.isRunning = false;
+
+    // Le da al panel una forma de pedir el JSON completo (con metadata y
+    // summary), no solo el mapa interno de analizadores que usa para
+    // pintar las pestañas.
+    if (this.ui) {
+      this.ui.getFullResults = () => this.getResults();
+    }
   }
 
   /**

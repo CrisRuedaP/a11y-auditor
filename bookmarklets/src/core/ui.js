@@ -7,6 +7,7 @@ class AuditUI {
     this.isOpen = false;
     this.container = null;
     this.highlightedElements = new Set();
+    this.floatingTag = null;
     this.results = {};
     this.activeTab = null;
   }
@@ -320,6 +321,54 @@ class AuditUI {
         }
       }
 
+      /* Etiqueta flotante sobre el elemento resaltado en la página */
+      .a11y-audit-floating-tag {
+        position: fixed;
+        z-index: 1000000;
+        max-width: 300px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: none;
+        animation: a11yAuditFadeIn 0.15s ease-out;
+      }
+
+      .a11y-audit-floating-tag.error {
+        background: #dc2626;
+      }
+
+      .a11y-audit-floating-tag.warning {
+        background: #f59e0b;
+      }
+
+      .a11y-audit-floating-tag.info {
+        background: #3b82f6;
+      }
+
+      @keyframes a11yAuditFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .a11y-audit-floating-tag {
+          animation: none;
+        }
+      }
+
       /* Empty State */
       .a11y-audit-empty {
         padding: 24px 16px;
@@ -629,10 +678,50 @@ class AuditUI {
       return;
     }
 
+    // Un solo elemento resaltado a la vez: si dejáramos acumular los
+    // clics anteriores, después de un rato no se distingue cuál hallazgo
+    // es cuál.
+    this._clearHighlights();
     this.highlightElement(element);
     element.classList.add("a11y-audit-highlight-pulse");
     setTimeout(() => element.classList.remove("a11y-audit-highlight-pulse"), 1600);
     element.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // El scroll suave tarda un instante; recién cuando termina sabemos
+    // dónde va a quedar el elemento en pantalla para poner la etiqueta.
+    setTimeout(() => this._showFloatingTag(element, issue), 350);
+  }
+
+  /**
+   * Etiqueta flotante sobre el elemento resaltado, con el mensaje real del
+   * hallazgo — el mismo lenguaje visual que usa la página de instalación.
+   * @private
+   */
+  _showFloatingTag(element, issue) {
+    this._removeFloatingTag();
+
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return; // ya no está en pantalla
+
+    const tag = document.createElement("div");
+    tag.className = `a11y-audit-floating-tag ${issue.severity}`;
+    tag.textContent = issue.message;
+    tag.style.top = `${Math.max(8, rect.top - 34)}px`;
+    tag.style.left = `${Math.min(
+      Math.max(8, rect.left),
+      window.innerWidth - 320,
+    )}px`;
+
+    document.body.appendChild(tag);
+    this.floatingTag = tag;
+  }
+
+  /**
+   * @private
+   */
+  _removeFloatingTag() {
+    this.floatingTag?.remove();
+    this.floatingTag = null;
   }
 
   /**
@@ -663,6 +752,7 @@ class AuditUI {
    * @private
    */
   _clearHighlights() {
+    this._removeFloatingTag();
     this.highlightedElements.forEach((el) => {
       el.classList.remove("a11y-audit-highlight");
     });
@@ -674,7 +764,14 @@ class AuditUI {
    * @private
    */
   _copyResultsToClipboard() {
-    const json = JSON.stringify(this.results, null, 2);
+    // Si hay un Auditor conectado, usa el JSON completo (metadata + summary
+    // + resultados) — es el mismo formato que espera el visor de
+    // resultados. Sin Auditor, cae al mapa interno como antes.
+    const payload =
+      typeof this.getFullResults === "function"
+        ? this.getFullResults()
+        : this.results;
+    const json = JSON.stringify(payload, null, 2);
     navigator.clipboard.writeText(json).then(() => {
       // Feedback visual
       const button = this.container?.querySelector("#a11y-copy-json");
