@@ -236,6 +236,16 @@
       .error-message.active {
         display: block;
       }
+
+      .tip {
+        background: var(--accent-focus-bg);
+        border-left: 3px solid var(--accent-focus);
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: var(--ink);
+      }
     </style>
   </head>
   <body>
@@ -281,8 +291,13 @@
               <button class="btn btn-outline" type="button" onclick="pasteFromClipboard()">
                 Pegar del portapapeles
               </button>
-              <button class="btn btn-outline" type="button" onclick="loadSampleData()">
-                Cargar ejemplo
+              <button
+                class="btn btn-outline"
+                type="button"
+                onclick="loadSampleData()"
+                title="Carga datos inventados para ver cómo se ve este visor, sin necesidad de auditar una página real"
+              >
+                Ver ejemplo (datos de muestra)
               </button>
             </div>
 
@@ -301,6 +316,12 @@
         </section>
 
         <section class="results-section" id="resultsSection">
+          <div class="tip" id="sampleBanner" hidden>
+            Estos son <strong>datos de muestra inventados</strong>, no una
+            auditoría real. Instalá el bookmarklet en
+            <a href="index.html">la página de inicio</a> y pegá acá el JSON
+            de una auditoría real para ver tus propios resultados.
+          </div>
           <div class="card metadata" id="metadataSection"></div>
           <div class="card summary" id="summarySection"></div>
 
@@ -346,7 +367,7 @@
         }
       }
 
-      function parseAndDisplay() {
+      function parseAndDisplay(isSample = false) {
         const jsonText = document.getElementById("jsonInput").value;
 
         try {
@@ -355,6 +376,7 @@
           document.getElementById("resultsSection").classList.add("active");
           document.getElementById("emptyState").style.display = "none";
           document.getElementById("errorMessage").classList.remove("active");
+          document.getElementById("sampleBanner").hidden = !isSample;
         } catch (err) {
           showError("JSON inválido: " + err.message);
         }
@@ -505,7 +527,7 @@
           },
         };
         document.getElementById("jsonInput").value = JSON.stringify(sample, null, 2);
-        parseAndDisplay();
+        parseAndDisplay(true);
       }
 
       function showError(message) {
