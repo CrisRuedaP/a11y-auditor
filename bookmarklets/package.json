@@ -1,0 +1,10 @@
+{
+  "name": "a11y-auditor",
+  "version": "1.0.0",
+  "description": "Bookmarklets para auditar la accesibilidad web (WCAG 2.1/2.2) en tiempo real",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "license": "MIT"
+}
