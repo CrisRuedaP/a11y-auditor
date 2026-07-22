@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visor de resultados — A11Y Auditor</title>
+    <meta
+      name="description"
+      content="Pega el JSON exportado por A11Y Auditor y navega los hallazgos en un dashboard."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .page-header {
+        padding: 48px 0 32px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .page-header h1 {
+        font-size: clamp(28px, 4vw, 38px);
+        margin-bottom: 10px;
+      }
+
+      .section {
+        padding: 32px 0;
+      }
+
+      .upload-card {
+        padding: 24px;
+      }
+
+      .upload-card h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+      }
+
+      .upload-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+
+      label.field-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        margin-bottom: 6px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        margin-bottom: 12px;
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      #fileInput {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+      }
+
+      .results-section {
+        display: none;
+      }
+
+      .results-section.active {
+        display: block;
+      }
+
+      .metadata,
+      .summary {
+        padding: 20px 24px;
+        margin-bottom: 20px;
+      }
+
+      .metadata h3,
+      .summary h3 {
+        font-size: 16px;
+        margin-bottom: 14px;
+      }
+
+      .metadata-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+      }
+
+      .metadata-item {
+        padding: 10px 12px;
+        background: var(--paper);
+        border-radius: var(--radius-sm);
+      }
+
+      .metadata-label {
+        font-size: 11px;
+        color: var(--ink-soft);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        margin-bottom: 4px;
+      }
+
+      .metadata-value {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        word-break: break-all;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+      }
+
+      .summary-stat {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        text-align: center;
+      }
+
+      .summary-stat-value {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+      }
+
+      .summary-stat-label {
+        font-size: 12px;
+        color: var(--ink-soft);
+        margin-top: 2px;
+      }
+
+      .summary-stat.errors .summary-stat-value {
+        color: var(--accent-flag);
+      }
+      .summary-stat.warnings .summary-stat-value {
+        color: var(--accent-warn);
+      }
+      .summary-stat.passed .summary-stat-value {
+        color: var(--accent-pass);
+      }
+
+      .analyzers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 18px;
+      }
+
+      .analyzer-card {
+        overflow: hidden;
+      }
+
+      .analyzer-header {
+        background: var(--paper);
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .analyzer-header h3 {
+        font-size: 15px;
+        margin-bottom: 8px;
+      }
+
+      .analyzer-stats {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .analyzer-issues {
+        padding: 14px 16px;
+        max-height: 360px;
+        overflow-y: auto;
+      }
+
+      .issue {
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid;
+        background: var(--paper);
+        border-radius: 4px;
+        font-size: 12.5px;
+      }
+
+      .issue.error {
+        border-color: var(--accent-flag);
+      }
+      .issue.warning {
+        border-color: var(--accent-warn);
+      }
+      .issue.info {
+        border-color: var(--accent-focus);
+      }
+
+      .issue-message {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--ink);
+      }
+
+      .issue-details {
+        font-size: 11px;
+        color: var(--ink-soft);
+        margin-top: 4px;
+        font-family: var(--font-mono);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--ink-soft);
+      }
+
+      .error-message {
+        background: var(--accent-flag-bg);
+        border-left: 3px solid var(--accent-flag);
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        color: var(--accent-flag);
+        margin-bottom: 20px;
+        display: none;
+        font-size: 14px;
+      }
+
+      .error-message.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-logo" href="index.html">
+          <span class="mark" aria-hidden="true">A11Y</span>
+          A11Y Auditor
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="index.html">Inicio</a>
+          <a href="install-guide.html">Guía de uso</a>
+          <a href="results-viewer.html" aria-current="page">Visor de resultados</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="page-header">
+        <div class="wrap">
+          <h1>Visor de resultados</h1>
+          <p>Carga o pega el JSON exportado por el bookmarklet para explorar los hallazgos.</p>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <section class="section">
+          <div class="card upload-card">
+            <h2>Cargar resultados</h2>
+
+            <div class="error-message" id="errorMessage" role="alert"></div>
+
+            <div class="upload-options">
+              <button
+                class="btn btn-primary"
+                type="button"
+                onclick="document.getElementById('fileInput').click()"
+              >
+                Cargar archivo JSON
+              </button>
+              <button class="btn btn-outline" type="button" onclick="pasteFromClipboard()">
+                Pegar del portapapeles
+              </button>
+              <button class="btn btn-outline" type="button" onclick="loadSampleData()">
+                Cargar ejemplo
+              </button>
+            </div>
+
+            <label class="field-label" for="jsonInput">JSON de resultados</label>
+            <textarea
+              id="jsonInput"
+              placeholder="Pega aquí el JSON exportado por el bookmarklet..."
+            ></textarea>
+            <button class="btn btn-primary" type="button" onclick="parseAndDisplay()">
+              Procesar resultados
+            </button>
+
+            <label class="visually-hidden" for="fileInput">Archivo JSON de resultados</label>
+            <input type="file" id="fileInput" accept=".json" onchange="handleFileUpload(event)" />
+          </div>
+        </section>
+
+        <section class="results-section" id="resultsSection">
+          <div class="card metadata" id="metadataSection"></div>
+          <div class="card summary" id="summarySection"></div>
+
+          <div>
+            <h2 style="font-size: 20px; margin-bottom: 16px">Resultados por analizador</h2>
+            <div class="analyzers-grid" id="analyzersGrid"></div>
+          </div>
+        </section>
+
+        <div class="empty-state" id="emptyState">
+          <p>Carga un archivo JSON o pega los resultados de la auditoría para empezar.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>A11Y Auditor — se ejecuta 100% en tu navegador, sin servidor.</span>
+        <a href="install-guide.html">Guía de uso</a>
+      </div>
+    </footer>
+
+    <script>
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById("jsonInput").value = e.target.result;
+          parseAndDisplay();
+        };
+        reader.readAsText(file);
+      }
+
+      async function pasteFromClipboard() {
+        try {
+          const text = await navigator.clipboard.readText();
+          document.getElementById("jsonInput").value = text;
+          parseAndDisplay();
+        } catch (err) {
+          showError("No se pudo acceder al portapapeles");
+        }
+      }
+
+      function parseAndDisplay() {
+        const jsonText = document.getElementById("jsonInput").value;
+
+        try {
+          const data = JSON.parse(jsonText);
+          displayResults(data);
+          document.getElementById("resultsSection").classList.add("active");
+          document.getElementById("emptyState").style.display = "none";
+          document.getElementById("errorMessage").classList.remove("active");
+        } catch (err) {
+          showError("JSON inválido: " + err.message);
+        }
+      }
+
+      function displayResults(data) {
+        if (data.metadata) {
+          document.getElementById("metadataSection").innerHTML = `
+            <h3>Información de la auditoría</h3>
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <div class="metadata-label">URL</div>
+                <div class="metadata-value">${escapeHtml(data.metadata.url || "N/A")}</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-label">Fecha</div>
+                <div class="metadata-value">${data.metadata.timestamp ? new Date(data.metadata.timestamp).toLocaleString() : "N/A"}</div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-label">Viewport</div>
+                <div class="metadata-value">${data.metadata.viewport?.width || "?"}×${data.metadata.viewport?.height || "?"}</div>
+              </div>
+            </div>
+          `;
+        }
+
+        if (data.summary) {
+          const summary = data.summary;
+          document.getElementById("summarySection").innerHTML = `
+            <h3>Resumen general</h3>
+            <div class="summary-grid">
+              <div class="summary-stat passed">
+                <div class="summary-stat-value">${summary.totalPassed || 0}</div>
+                <div class="summary-stat-label">Aprobados</div>
+              </div>
+              <div class="summary-stat errors">
+                <div class="summary-stat-value">${summary.totalFailed || 0}</div>
+                <div class="summary-stat-label">Errores</div>
+              </div>
+              <div class="summary-stat warnings">
+                <div class="summary-stat-value">${summary.totalWarnings || 0}</div>
+                <div class="summary-stat-label">Advertencias</div>
+              </div>
+              <div class="summary-stat">
+                <div class="summary-stat-value">${summary.totalIssues || 0}</div>
+                <div class="summary-stat-label">Total issues</div>
+              </div>
+            </div>
+          `;
+        }
+
+        if (data.results) {
+          let html = "";
+          for (const [name, result] of Object.entries(data.results)) {
+            html += createAnalyzerCard(name, result);
+          }
+          document.getElementById("analyzersGrid").innerHTML = html;
+        }
+      }
+
+      function createAnalyzerCard(name, result) {
+        const passed = result.passed || 0;
+        const failed = result.failed || 0;
+        const warnings = result.warnings || 0;
+        const issues = result.issues || [];
+
+        let issuesHtml = "";
+        if (issues.length > 0) {
+          issuesHtml = issues
+            .map((issue) => {
+              return `
+                <div class="issue ${issue.severity}">
+                  <div class="issue-message">${escapeHtml(issue.message)}</div>
+                  ${issue.selector ? `<div class="issue-details">${escapeHtml(issue.selector)}</div>` : ""}
+                </div>
+              `;
+            })
+            .join("");
+        } else {
+          issuesHtml =
+            '<div style="padding: 8px 4px; color: var(--accent-pass); font-size: 13px;">Sin problemas detectados</div>';
+        }
+
+        return `
+          <div class="card analyzer-card">
+            <div class="analyzer-header">
+              <h3>${escapeHtml(name)}</h3>
+              <div class="analyzer-stats">
+                <span class="tag tag-pass">${passed} ok</span>
+                <span class="tag tag-error">${failed} error</span>
+                <span class="tag tag-warning">${warnings} warning</span>
+              </div>
+            </div>
+            <div class="analyzer-issues">${issuesHtml}</div>
+          </div>
+        `;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = String(text);
+        return div.innerHTML;
+      }
+
+      function loadSampleData() {
+        const sample = {
+          metadata: {
+            timestamp: new Date().toISOString(),
+            url: "https://ejemplo.com",
+            viewport: { width: 1920, height: 1080 },
+          },
+          summary: {
+            totalPassed: 45,
+            totalFailed: 3,
+            totalWarnings: 8,
+            totalIssues: 11,
+          },
+          results: {
+            Headings: {
+              passed: 3,
+              failed: 1,
+              warnings: 1,
+              issues: [
+                {
+                  severity: "error",
+                  message: "No hay H1 en la página",
+                  selector: null,
+                },
+                {
+                  severity: "warning",
+                  message: "Salto de jerarquía: de H2 a H4",
+                  selector: "main > section:nth-of-type(2) > h4",
+                },
+              ],
+            },
+            Imágenes: {
+              passed: 8,
+              failed: 1,
+              warnings: 0,
+              issues: [
+                {
+                  severity: "error",
+                  message: "Imagen sin atributo alt",
+                  selector: "img.logo",
+                },
+              ],
+            },
+          },
+        };
+        document.getElementById("jsonInput").value = JSON.stringify(sample, null, 2);
+        parseAndDisplay();
+      }
+
+      function showError(message) {
+        const errorEl = document.getElementById("errorMessage");
+        errorEl.textContent = message;
+        errorEl.classList.add("active");
+        setTimeout(() => {
+          errorEl.classList.remove("active");
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

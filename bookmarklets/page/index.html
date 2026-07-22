@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A11Y Auditor — Bookmarklets de accesibilidad web</title>
+    <meta
+      name="description"
+      content="Kit de bookmarklets para auditar la accesibilidad de cualquier página (WCAG 2.1/2.2) directamente en el navegador, sin instalar nada."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* ---- hero ---- */
+      .hero {
+        padding: 64px 0 56px;
+      }
+
+      .hero .wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+        gap: 48px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--ink-soft);
+        border: 1px solid var(--line);
+        background: var(--paper-raised);
+        padding: 6px 12px;
+        border-radius: 999px;
+        margin-bottom: 20px;
+      }
+
+      .hero h1 {
+        font-size: clamp(32px, 4.4vw, 46px);
+        letter-spacing: -0.01em;
+        margin-bottom: 20px;
+      }
+
+      .hero .lede {
+        font-size: 17px;
+        max-width: 46ch;
+        margin-bottom: 28px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      /* ---- mockup de inspección (elemento de firma) ---- */
+      .mock-browser {
+        background: var(--paper-raised);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: var(--shadow-card);
+        overflow: visible;
+        position: relative;
+      }
+
+      .mock-browser-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .mock-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--line-strong);
+      }
+
+      .mock-url {
+        margin-left: 10px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--ink-soft);
+        background: var(--paper);
+        border-radius: 999px;
+        padding: 3px 10px;
+      }
+
+      .mock-page {
+        padding: 22px 20px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .mock-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .mock-logo-block {
+        width: 64px;
+        height: 10px;
+        border-radius: 3px;
+        background: var(--line-strong);
+      }
+
+      .mock-link {
+        font-size: 12px;
+        color: var(--ink-soft);
+        text-decoration: underline;
+        position: relative;
+      }
+
+      .mock-img {
+        height: 84px;
+        border-radius: 8px;
+        background: repeating-linear-gradient(
+          135deg,
+          var(--paper) 0 8px,
+          #ebe9e3 8px 16px
+        );
+        position: relative;
+      }
+
+      .mock-title {
+        font-family: var(--font-display);
+        font-size: 17px;
+        color: var(--ink);
+      }
+
+      .mock-lowcontrast {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 0;
+      }
+
+      .mock-lowcontrast .mock-line {
+        height: 9px;
+        border-radius: 3px;
+        background: #e4e1d8;
+      }
+
+      .mock-lowcontrast .mock-line:first-child {
+        width: 85%;
+      }
+
+      .mock-lowcontrast .mock-line:last-child {
+        width: 55%;
+      }
+
+      .mock-btn {
+        align-self: flex-start;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--ink);
+        color: var(--paper);
+        padding: 7px 14px;
+        border-radius: 6px;
+        position: relative;
+      }
+
+      .finding-tag.inline {
+        position: static;
+        display: inline-flex;
+        align-self: flex-start;
+        margin-top: -2px;
+      }
+
+      .flagged {
+        outline: 2px solid var(--accent-flag);
+        outline-offset: 3px;
+      }
+
+      .flagged.warn {
+        outline-color: var(--accent-warn);
+      }
+
+      .flagged.ok {
+        outline: 2px solid var(--accent-pass);
+      }
+
+      .finding-tag {
+        position: absolute;
+        white-space: nowrap;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 500;
+        padding: 3px 8px;
+        border-radius: 999px;
+        z-index: 2;
+      }
+
+      .finding-tag.error {
+        background: var(--accent-flag);
+        color: #fff;
+      }
+      .finding-tag.warning {
+        background: var(--accent-warn);
+        color: #fff;
+      }
+      .finding-tag.pass {
+        background: var(--accent-pass);
+        color: #fff;
+      }
+
+      .mock-link .finding-tag {
+        top: -26px;
+        right: -8px;
+      }
+      .mock-img .finding-tag {
+        top: -12px;
+        left: 10px;
+      }
+      .mock-btn .finding-tag {
+        top: -12px;
+        right: -10px;
+      }
+
+      @media (max-width: 860px) {
+        .hero .wrap {
+          grid-template-columns: 1fr;
+        }
+        .mock-browser {
+          max-width: 460px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .mock-browser {
+          display: none;
+        }
+      }
+
+      /* ---- pasos de instalación ---- */
+      .steps {
+        padding: 40px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .step-card .step-number {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: var(--accent-focus);
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .step-card h3 {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .step-card p {
+        font-size: 14px;
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 720px) {
+        .steps-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---- instalación ---- */
+      .install {
+        padding: 40px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .section-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+
+      .section-head h2 {
+        font-size: 26px;
+      }
+
+      .section-head p {
+        margin: 6px 0 0;
+        font-size: 14px;
+      }
+
+      .install-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+
+      .install-card {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .install-card.main {
+        border-color: var(--ink);
+        grid-column: span 2;
+      }
+
+      .install-card h3 {
+        font-size: 16px;
+      }
+
+      .install-card p {
+        font-size: 13px;
+        margin-bottom: 4px;
+        flex: 1;
+      }
+
+      .install-card .btn-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .drag-hint {
+        font-size: 12px;
+        color: var(--accent-focus);
+        background: var(--accent-focus-bg);
+        border-radius: var(--radius-sm);
+        padding: 8px 10px;
+      }
+
+      @media (max-width: 720px) {
+        .install-card.main {
+          grid-column: span 1;
+        }
+      }
+
+      /* ---- analizadores ---- */
+      .analyzers {
+        padding: 40px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .analyzers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+      }
+
+      .analyzer-card {
+        padding: 20px;
+      }
+
+      .analyzer-card h3 {
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+
+      .analyzer-card p {
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      /* ---- callouts secundarios ---- */
+      .callouts {
+        padding: 40px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .callouts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      .callout-card {
+        padding: 24px;
+      }
+
+      .callout-card h3 {
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+
+      .callout-card p {
+        font-size: 14px;
+      }
+
+      /* ---- nota de límites ---- */
+      .limits {
+        padding: 32px 0 56px;
+      }
+
+      .limits .card {
+        padding: 20px 24px;
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+
+      .limits strong {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-logo" href="index.html">
+          <span class="mark" aria-hidden="true">A11Y</span>
+          A11Y Auditor
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="index.html" aria-current="page">Inicio</a>
+          <a href="install-guide.html">Guía de uso</a>
+          <a href="results-viewer.html">Visor de resultados</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="wrap">
+          <div>
+            <span class="eyebrow">WCAG 2.1 · WCAG 2.2 · 100% en tu navegador</span>
+            <h1>Audita la accesibilidad de cualquier página sin salir del navegador</h1>
+            <p class="lede">
+              Un clic y el auditor señala, sobre la propia página, qué falla
+              y por qué: alt ausente, contraste insuficiente, formularios sin
+              label, jerarquía de encabezados rota. Sin build, sin cuenta,
+              sin enviar nada a un servidor.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#instalar">Instalar el auditor</a>
+              <a class="btn btn-outline" href="install-guide.html">Ver cómo funciona</a>
+            </div>
+          </div>
+
+          <div class="mock-browser" aria-hidden="true">
+            <div class="mock-browser-bar">
+              <span class="mock-dot"></span>
+              <span class="mock-dot"></span>
+              <span class="mock-dot"></span>
+              <span class="mock-url">tusitio.com</span>
+            </div>
+            <div class="mock-page">
+              <div class="mock-nav">
+                <span class="mock-logo-block"></span>
+                <span class="mock-link flagged warn"
+                  >click aquí
+                  <span class="finding-tag warning">texto de enlace genérico</span>
+                </span>
+              </div>
+              <div class="mock-img flagged">
+                <span class="finding-tag error">img sin alt</span>
+              </div>
+              <p class="mock-title">Bienvenido a nuestro sitio</p>
+              <div class="mock-lowcontrast">
+                <span class="mock-line"></span>
+                <span class="mock-line"></span>
+              </div>
+              <span class="finding-tag error inline">2.1:1 · falta 4.5:1</span>
+              <span class="mock-btn flagged ok"
+                >Enviar
+                <span class="finding-tag pass">label accesible ✓</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="steps">
+        <div class="wrap">
+          <h2>Tres pasos, sin dependencias que instalar</h2>
+          <div class="steps-grid">
+            <div class="step-card">
+              <span class="step-number">01</span>
+              <h3>Arrastra el marcador</h3>
+              <p>
+                Arrastra el botón de instalación a tu barra de marcadores.
+                No hace falta hacer clic ni descargar nada.
+              </p>
+            </div>
+            <div class="step-card">
+              <span class="step-number">02</span>
+              <h3>Abre la página a revisar</h3>
+              <p>
+                Funciona en cualquier sitio, incluido el tuyo en desarrollo
+                local o detrás de un login.
+              </p>
+            </div>
+            <div class="step-card">
+              <span class="step-number">03</span>
+              <h3>Haz clic en el marcador</h3>
+              <p>
+                Se abre un panel con los hallazgos y el JSON queda copiado
+                en el portapapeles, listo para compartir o pegar en un LLM.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="install" id="instalar">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2>Instala tu bookmarklet</h2>
+              <p>
+                Arrastra cualquiera de estos botones a tu barra de
+                marcadores. Si prefieres instalarlo a mano, usa "Copiar
+                código" y sigue la
+                <a href="install-guide.html#instalacion-manual"
+                  >instalación manual</a
+                >.
+              </p>
+            </div>
+          </div>
+
+          <div class="install-grid">
+            <div class="card install-card main">
+              <span class="tag tag-neutral">recomendado</span>
+              <h3>A11Y Auditor — Completo</h3>
+              <p>
+                Abre un panel lateral con los 9 analizadores (encabezados,
+                axe-core, imágenes, contraste, ARIA, formularios,
+                landmarks, teclado y links) y exporta el resultado en JSON.
+              </p>
+              <div class="btn-row">
+                <a
+                  class="btn btn-primary"
+                  data-bookmarklet="main"
+                  href="#"
+                  >📌 Arrastra a marcadores</a
+                >
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  data-copy-bookmarklet="main"
+                >
+                  Copiar código
+                </button>
+              </div>
+              <p class="drag-hint" hidden data-drag-hint>
+                Arrastra este botón a tu barra de marcadores; un clic solo
+                lo ejecuta aquí mismo.
+              </p>
+            </div>
+
+            <div class="card install-card">
+              <span class="tag tag-neutral">rápido</span>
+              <h3>Headings</h3>
+              <p>Jerarquía h1–h6, niveles saltados y encabezados vacíos.</p>
+              <div class="btn-row">
+                <a class="btn btn-outline" data-bookmarklet="headings" href="#"
+                  >📌 Marcadores</a
+                >
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  data-copy-bookmarklet="headings"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p class="drag-hint" hidden data-drag-hint>
+                Arrastra este botón a tu barra de marcadores; un clic solo
+                lo ejecuta aquí mismo.
+              </p>
+            </div>
+
+            <div class="card install-card">
+              <span class="tag tag-neutral">rápido</span>
+              <h3>Axe-core</h3>
+              <p>Auditoría WCAG 2.1 completa con el motor de Deque.</p>
+              <div class="btn-row">
+                <a class="btn btn-outline" data-bookmarklet="axe" href="#"
+                  >📌 Marcadores</a
+                >
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  data-copy-bookmarklet="axe"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p class="drag-hint" hidden data-drag-hint>
+                Arrastra este botón a tu barra de marcadores; un clic solo
+                lo ejecuta aquí mismo.
+              </p>
+            </div>
+
+            <div class="card install-card">
+              <span class="tag tag-neutral">rápido</span>
+              <h3>Imágenes</h3>
+              <p>Alt ausente, vacío, demasiado largo y SVGs sin nombre.</p>
+              <div class="btn-row">
+                <a class="btn btn-outline" data-bookmarklet="images" href="#"
+                  >📌 Marcadores</a
+                >
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  data-copy-bookmarklet="images"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p class="drag-hint" hidden data-drag-hint>
+                Arrastra este botón a tu barra de marcadores; un clic solo
+                lo ejecuta aquí mismo.
+              </p>
+            </div>
+
+            <div class="card install-card">
+              <span class="tag tag-neutral">rápido</span>
+              <h3>Contraste</h3>
+              <p>Ratio de color AA (4.5:1) y AAA (7:1) por elemento.</p>
+              <div class="btn-row">
+                <a class="btn btn-outline" data-bookmarklet="contrast" href="#"
+                  >📌 Marcadores</a
+                >
+                <button
+                  class="btn btn-outline"
+                  type="button"
+                  data-copy-bookmarklet="contrast"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p class="drag-hint" hidden data-drag-hint>
+                Arrastra este botón a tu barra de marcadores; un clic solo
+                lo ejecuta aquí mismo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="analyzers">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2>Qué revisa cada analizador</h2>
+              <p>
+                Los 4 de arriba también se ejecutan como parte del
+                bookmarklet completo, junto con estos otros 5.
+              </p>
+            </div>
+          </div>
+          <div class="analyzers-grid">
+            <div class="card analyzer-card">
+              <h3>📋 Headings</h3>
+              <span class="tag tag-error">falta &lt;h1&gt;</span>
+              <p>
+                H1 único, saltos de nivel (h1 → h3) y encabezados sin
+                texto.
+              </p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🔍 Axe-core</h3>
+              <span class="tag tag-error">botón sin nombre accesible</span>
+              <p>Motor de Deque: roles, propiedades ARIA y contraste.</p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🖼️ Imágenes</h3>
+              <span class="tag tag-error">img sin alt</span>
+              <p>Alt ausente/vacío/largo y SVGs sin título ni descripción.</p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🎚️ Contraste</h3>
+              <span class="tag tag-error">2.1:1 · falta 4.5:1</span>
+              <p>Cálculo de ratio WCAG contra el fondo real del elemento.</p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🏷️ ARIA</h3>
+              <span class="tag tag-error">role inválido</span>
+              <p>
+                Roles válidos y aria-labelledby/describedby que apuntan a
+                IDs reales.
+              </p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>📝 Formularios</h3>
+              <span class="tag tag-error">input sin label</span>
+              <p>Labels asociados, tipos válidos y campos requeridos.</p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🏗️ Landmarks</h3>
+              <span class="tag tag-warning">sin &lt;main&gt;</span>
+              <p>
+                Regiones main/nav/header/footer y secciones sin
+                encabezado.
+              </p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>⌨️ Teclado</h3>
+              <span class="tag tag-error">onclick sin foco</span>
+              <p>Tabindex, foco visible y elementos navegables por Tab.</p>
+            </div>
+            <div class="card analyzer-card">
+              <h3>🔗 Links</h3>
+              <span class="tag tag-warning">"click aquí"</span>
+              <p>
+                Texto genérico, enlaces sin destino real y pestañas nuevas
+                sin avisar.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="callouts">
+        <div class="wrap">
+          <div class="callouts-grid">
+            <a class="card callout-card" href="results-viewer.html" style="text-decoration: none; display: block;">
+              <h3 style="color: var(--ink)">📊 Visor de resultados</h3>
+              <p>
+                Pega el JSON exportado y navega los hallazgos en un
+                dashboard, sin volver a abrir la consola.
+              </p>
+            </a>
+            <a class="card callout-card" href="install-guide.html" style="text-decoration: none; display: block;">
+              <h3 style="color: var(--ink)">📖 Guía de uso</h3>
+              <p>
+                Instalación manual, cómo leer cada severidad y buenas
+                prácticas para complementar con pruebas manuales.
+              </p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="limits">
+        <div class="wrap">
+          <div class="card">
+            <strong>Antes de confiar solo en esto:</strong> un análisis
+            automatizado detecta alrededor de un 30% de los problemas de
+            accesibilidad. Complementa siempre con navegación por teclado,
+            un lector de pantalla real (NVDA, VoiceOver) y pruebas con
+            usuarios.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>A11Y Auditor — se ejecuta 100% en tu navegador, sin servidor.</span>
+        <span
+          >El analizador Axe-core usa la librería
+          <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer"
+            >axe-core</a
+          >
+          de Deque.</span
+        >
+      </div>
+    </footer>
+
+    <script src="bookmarklets.data.js"></script>
+    <script>
+      (function () {
+        var data = window.A11Y_BOOKMARKLETS || {};
+
+        document.querySelectorAll("[data-bookmarklet]").forEach(function (link) {
+          var key = link.getAttribute("data-bookmarklet");
+          var entry = data[key];
+          if (!entry) return;
+          link.href = entry.href;
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
+            var card = link.closest(".install-card");
+            var hint = card && card.querySelector("[data-drag-hint]");
+            if (hint) hint.hidden = false;
+          });
+        });
+
+        document
+          .querySelectorAll("[data-copy-bookmarklet]")
+          .forEach(function (button) {
+            var key = button.getAttribute("data-copy-bookmarklet");
+            button.addEventListener("click", function () {
+              var entry = data[key];
+              if (!entry) return;
+              var reset = button.textContent;
+              navigator.clipboard
+                .writeText(entry.href)
+                .then(function () {
+                  button.textContent = "✓ Copiado";
+                  setTimeout(function () {
+                    button.textContent = reset;
+                  }, 2000);
+                })
+                .catch(function () {
+                  window.prompt("Copia el código del bookmarklet:", entry.href);
+                });
+            });
+          });
+      })();
+    </script>
+  </body>
+</html>

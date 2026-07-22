@@ -1,0 +1,347 @@
+/*
+  Sistema de diseño de A11Y Auditor.
+  Motivo central: la propia herramienta funciona señalando problemas sobre
+  la página con una etiqueta y una línea guía (leader line). Ese lenguaje
+  visual -- "etiqueta de hallazgo" -- es la firma que se repite en la
+  página: en el mockup del hero, en las tarjetas de analizadores y en los
+  estados de resultado. Nada de tarjetas con icono + gradiente genérico.
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+:root {
+  --ink: #14171c;
+  --ink-soft: #4a4f59;
+  --paper: #f5f4f0;
+  --paper-raised: #ffffff;
+  --line: #dad7cf;
+  --line-strong: #b9b5aa;
+  --accent-flag: #b3311f;
+  --accent-flag-bg: #fbe8e4;
+  --accent-warn: #91530a;
+  --accent-warn-bg: #faf0dc;
+  --accent-pass: #206140;
+  --accent-pass-bg: #e5f3ea;
+  --accent-focus: #1d4ed1;
+  --accent-focus-bg: #e8edfc;
+
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 1px 2px rgba(20, 23, 28, 0.04), 0 8px 24px -12px rgba(20, 23, 28, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 0;
+}
+
+p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+}
+
+a {
+  color: var(--accent-focus);
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* -------- utilidades -------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  z-index: 1000;
+  transition: top 0.15s ease;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* -------- header de sitio -------- */
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-logo:focus-visible {
+  outline-offset: 4px;
+}
+
+.site-logo .mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  flex: none;
+}
+
+.site-nav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* -------- botones -------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-primary:hover {
+  background: #262b33;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.btn-outline:hover {
+  border-color: var(--ink);
+  background: var(--paper-raised);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* -------- footer -------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 64px;
+}
+
+.site-footer .wrap {
+  padding-top: 32px;
+  padding-bottom: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}
+
+/* -------- etiqueta de hallazgo (motivo de marca) -------- */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.tag-error {
+  background: var(--accent-flag-bg);
+  color: var(--accent-flag);
+}
+.tag-error::before {
+  background: var(--accent-flag);
+}
+
+.tag-warning {
+  background: var(--accent-warn-bg);
+  color: var(--accent-warn);
+}
+.tag-warning::before {
+  background: var(--accent-warn);
+}
+
+.tag-pass {
+  background: var(--accent-pass-bg);
+  color: var(--accent-pass);
+}
+.tag-pass::before {
+  background: var(--accent-pass);
+}
+
+.tag-neutral {
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+}
+.tag-neutral::before {
+  display: none;
+}
+
+/* -------- tarjetas -------- */
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}

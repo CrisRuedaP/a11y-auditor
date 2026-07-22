@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guía de uso — A11Y Auditor</title>
+    <meta
+      name="description"
+      content="Cómo instalar los bookmarklets de A11Y Auditor, qué revisa cada analizador y cómo interpretar los resultados."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .page-header {
+        padding: 48px 0 32px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .page-header h1 {
+        font-size: clamp(28px, 4vw, 38px);
+        margin-bottom: 10px;
+      }
+
+      main .wrap {
+        max-width: 820px;
+      }
+
+      .section {
+        padding: 36px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section h2 {
+        font-size: 22px;
+        margin-bottom: 16px;
+      }
+
+      .section h3 {
+        font-size: 16px;
+        margin: 20px 0 8px;
+      }
+
+      .section ul,
+      .section ol {
+        margin: 0 0 16px;
+        padding-left: 22px;
+        color: var(--ink-soft);
+      }
+
+      .section li {
+        margin-bottom: 8px;
+      }
+
+      .step {
+        display: flex;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step:last-child {
+        border-bottom: none;
+      }
+
+      .step-index {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .step p {
+        margin: 4px 0 0;
+      }
+
+      .code-block {
+        background: var(--ink);
+        color: #d7f2df;
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        overflow-x: auto;
+        margin: 12px 0;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        line-height: 1.6;
+      }
+
+      .tip {
+        background: var(--accent-focus-bg);
+        border-left: 3px solid var(--accent-focus);
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        margin: 16px 0;
+      }
+
+      .tip-title {
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .warning {
+        background: var(--accent-warn-bg);
+        border-left: 3px solid var(--accent-warn);
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        margin: 16px 0;
+      }
+
+      .warning-title {
+        font-weight: 600;
+        color: var(--accent-warn);
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+
+      .analyzer-guide {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        margin: 12px 0;
+        background: var(--paper-raised);
+      }
+
+      .analyzer-title {
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 6px;
+        font-size: 15px;
+      }
+
+      .analyzer-description {
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin-bottom: 8px;
+      }
+
+      .analyzer-checks {
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 14px;
+      }
+
+      .table th {
+        background: var(--paper);
+        font-weight: 600;
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 2px solid var(--line);
+      }
+
+      .table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        color: var(--ink-soft);
+      }
+
+      /* FAQ: <button> real con aria-expanded, no un div con onclick */
+      .faq-item {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        margin: 10px 0;
+        overflow: hidden;
+        background: var(--paper-raised);
+      }
+
+      .faq-question {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 14px 16px;
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ink);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .faq-question .chevron {
+        transition: transform 0.15s ease;
+        flex: none;
+      }
+
+      .faq-question[aria-expanded="true"] .chevron {
+        transform: rotate(180deg);
+      }
+
+      .faq-answer {
+        padding: 0 16px;
+        max-height: 0;
+        overflow: hidden;
+        color: var(--ink-soft);
+        font-size: 14px;
+        transition: max-height 0.2s ease;
+      }
+
+      .faq-answer[data-open] {
+        padding: 0 16px 16px;
+        max-height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-logo" href="index.html">
+          <span class="mark" aria-hidden="true">A11Y</span>
+          A11Y Auditor
+        </a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="index.html">Inicio</a>
+          <a href="install-guide.html" aria-current="page">Guía de uso</a>
+          <a href="results-viewer.html">Visor de resultados</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="page-header">
+        <div class="wrap">
+          <h1>Guía de uso</h1>
+          <p>Instalación, qué revisa cada analizador y cómo leer los resultados.</p>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <section class="section" id="instalacion">
+          <h2>Instalación</h2>
+
+          <div class="step">
+            <span class="step-index">1</span>
+            <div>
+              <strong>Ve a la página de instalación</strong>
+              <p>Abre <a href="index.html">index.html</a> en tu navegador.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-index">2</span>
+            <div>
+              <strong>Muestra tu barra de marcadores</strong>
+              <p>
+                Chrome/Edge: <kbd>Ctrl/Cmd + Shift + B</kbd>. Firefox: menú
+                ☰ → Marcadores → Barra de marcadores.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-index">3</span>
+            <div>
+              <strong>Arrastra el botón de instalación</strong>
+              <p>
+                Arrastra cualquiera de los botones "📌 Marcadores" a la
+                barra. Un clic normal solo lo ejecutaría sobre la propia
+                página de instalación.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-index">4</span>
+            <div>
+              <strong>Listo</strong>
+              <p>
+                Abre cualquier página y haz clic en el marcador para
+                ejecutar la auditoría.
+              </p>
+            </div>
+          </div>
+
+          <h3 id="instalacion-manual">Instalación manual</h3>
+          <p>
+            Si prefieres no arrastrar el enlace (por ejemplo, en un
+            gestor de contraseñas o perfil restringido), puedes crear el
+            marcador a mano:
+          </p>
+          <ol>
+            <li>En index.html, pulsa "Copiar código" en el bookmarklet que quieras.</li>
+            <li>Crea un marcador nuevo en tu navegador (clic derecho en la barra → "Añadir página").</li>
+            <li>Pega el código copiado en el campo URL del marcador.</li>
+            <li>Guarda. El marcador ya funciona igual que si lo hubieras arrastrado.</li>
+          </ol>
+
+          <div class="tip">
+            <div class="tip-title">Nota técnica</div>
+            <p style="margin: 0">
+              El código copiado empieza con <code>javascript:</code>
+              seguido del bookmarklet codificado con
+              <code>encodeURIComponent</code>. Es una única línea, así que
+              se puede pegar sin problema en el campo URL de un marcador.
+            </p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Cómo funciona</h2>
+
+          <h3>Bookmarklet principal</h3>
+          <p>Al hacer clic en el marcador "A11Y Auditor — Completo":</p>
+          <ul>
+            <li>Se abre un panel lateral sobre la página que estés viendo.</li>
+            <li>Eliges ejecutar todos los análisis o solo uno.</li>
+            <li>Los elementos problemáticos quedan resaltados en la página.</li>
+            <li>El resultado se copia automáticamente al portapapeles en JSON.</li>
+          </ul>
+
+          <h3>Bookmarklets individuales</h3>
+          <p>Los 4 marcadores rápidos son más ligeros y muestran un resumen flotante en vez de un panel completo:</p>
+          <ul>
+            <li><strong>Headings</strong> — solo analiza encabezados</li>
+            <li><strong>Axe-core</strong> — ejecuta la librería axe-core</li>
+            <li><strong>Imágenes</strong> — valida alt text</li>
+            <li><strong>Contraste</strong> — analiza ratios de color</li>
+          </ul>
+          <p>
+            ARIA, Formularios, Landmarks, Teclado y Links están disponibles
+            desde el menú del bookmarklet principal.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Guía de analizadores</h2>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">📋 Headings (encabezados)</div>
+            <div class="analyzer-description">Jerarquía h1–h6 de la página.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Un único &lt;h1&gt;</li>
+                <li>Sin saltos de nivel (h1 → h3)</li>
+                <li>Sin encabezados vacíos</li>
+              </ul>
+              Ayuda a quienes usan lectores de pantalla a navegar por
+              secciones en vez de leer todo linealmente.
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🔍 Axe-core</div>
+            <div class="analyzer-description">Motor de auditoría de Deque, estándar de la industria.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Roles y propiedades ARIA</li>
+                <li>Elementos semánticos correctos</li>
+                <li>Contraste mínimo</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🖼️ Imágenes</div>
+            <div class="analyzer-description">Texto alternativo y descripciones.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Todas las imágenes tienen atributo alt</li>
+                <li>Alt vacío solo si es realmente decorativa</li>
+                <li>SVGs con &lt;title&gt; o &lt;desc&gt;</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🎚️ Contraste</div>
+            <div class="analyzer-description">Ratio de color según la fórmula WCAG.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>4.5:1 para texto normal <span class="tag tag-neutral">AA</span></li>
+                <li>3:1 para texto grande <span class="tag tag-neutral">AA</span></li>
+                <li>7:1 para texto normal <span class="tag tag-neutral">AAA</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🏷️ ARIA</div>
+            <div class="analyzer-description">Atributos ARIA (Accessible Rich Internet Applications).</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Roles ARIA válidos</li>
+                <li>aria-labelledby / aria-describedby apuntan a IDs reales</li>
+                <li>Elementos interactivos con nombre accesible</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">📝 Formularios</div>
+            <div class="analyzer-description">Accesibilidad de inputs, selects y textareas.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Todos los campos tienen label asociado</li>
+                <li>Labels con atributo "for" correcto</li>
+                <li>Tipos de input válidos</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🏗️ Landmarks (semántica)</div>
+            <div class="analyzer-description">Regiones y etiquetas semánticas HTML.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Presencia de &lt;main&gt;, &lt;header&gt;, &lt;footer&gt;</li>
+                <li>&lt;section&gt; y &lt;article&gt; con encabezado propio</li>
+                <li>Uso razonable de &lt;div&gt; frente a etiquetas semánticas</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">⌨️ Teclado</div>
+            <div class="analyzer-description">Navegación sin ratón.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Elementos interactivos navegables por Tab</li>
+                <li>Foco visible</li>
+                <li>Sin tabindex positivo</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="analyzer-guide">
+            <div class="analyzer-title">🔗 Links</div>
+            <div class="analyzer-description">Texto de enlace, destino y nuevas pestañas.</div>
+            <div class="analyzer-checks">
+              <ul>
+                <li>Texto descriptivo (nada de "click aquí" o "leer más")</li>
+                <li>href real (ni vacío, ni "#", ni javascript:void(0))</li>
+                <li>target="_blank" avisado en el texto y con rel="noopener"</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Cómo interpretar los resultados</h2>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Etiqueta</th>
+                <th>Significado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-error">error</span></td>
+                <td>Problema crítico que impide la accesibilidad</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-warning">warning</span></td>
+                <td>Podría afectar la accesibilidad; conviene revisarlo</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-pass">pass</span></td>
+                <td>Cumple el requisito verificado</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>JSON exportado</h3>
+          <p>Al terminar, el resultado se copia al portapapeles:</p>
+          <div class="code-block">
+            {<br />
+            &nbsp;&nbsp;"metadata": { "timestamp": "...", "url": "https://ejemplo.com" },<br />
+            &nbsp;&nbsp;"summary": { "totalPassed": 45, "totalFailed": 3, "totalWarnings": 8 },<br />
+            &nbsp;&nbsp;"results": { "Headings": { "passed": 3, "failed": 1, "issues": [...] }, ... }<br />
+            }
+          </div>
+
+          <div class="tip">
+            <div class="tip-title">Usar con un LLM</div>
+            <p style="margin: 0">
+              Pega el JSON en Claude, ChatGPT u otro modelo y pide
+              recomendaciones concretas de corrección por archivo/componente.
+            </p>
+          </div>
+
+          <p>
+            Para una vista más visual, abre el
+            <a href="results-viewer.html">visor de resultados</a> y pega ahí
+            el mismo JSON.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>Buenas prácticas</h2>
+          <h3>Durante la auditoría</h3>
+          <ul>
+            <li>Prueba en varios navegadores (Chrome, Firefox, Safari, Edge)</li>
+            <li>Prueba en varios tamaños de pantalla</li>
+            <li>Navega solo con teclado (Tab, Shift+Tab, Enter, Escape)</li>
+            <li>Si puedes, prueba con un lector de pantalla real (NVDA, VoiceOver)</li>
+          </ul>
+          <h3>Después de la auditoría</h3>
+          <ul>
+            <li>Prioriza los errores críticos antes que las advertencias</li>
+            <li>Vuelve a auditar tras cada corrección</li>
+          </ul>
+
+          <div class="warning">
+            <div class="warning-title">Importante</div>
+            <p style="margin: 0">
+              Un análisis automatizado detecta aproximadamente un 30% de
+              los problemas de accesibilidad. Complementa siempre con
+              pruebas manuales.
+            </p>
+          </div>
+        </section>
+
+        <section class="section" style="border-bottom: none">
+          <h2>Preguntas frecuentes</h2>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Funciona en todos los navegadores?</span>
+              <span class="chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="faq-answer">
+              Sí, en Chrome, Firefox, Safari, Edge y navegadores basados en
+              Chromium modernos.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Los resultados se envían a algún servidor?</span>
+              <span class="chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="faq-answer">
+              No. Todo se ejecuta en tu navegador; axe-core se descarga de
+              su CDN oficial y los resultados solo se copian al
+              portapapeles.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Puedo usarlo en una página muy grande?</span>
+              <span class="chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="faq-answer">
+              Sí. En páginas con mucho DOM el análisis puede tardar unos
+              segundos más; es normal.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Reemplaza las pruebas manuales?</span>
+              <span class="chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="faq-answer">
+              No. Es un punto de partida rápido; sigue siendo necesario
+              probar con teclado y lectores de pantalla reales.
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>A11Y Auditor — se ejecuta 100% en tu navegador, sin servidor.</span>
+        <a href="https://www.w3.org/WAI/WCAG22/quickref/" target="_blank" rel="noreferrer"
+          >WCAG 2.2 Quick Reference</a
+        >
+      </div>
+    </footer>
+
+    <script>
+      document.querySelectorAll(".faq-question").forEach(function (button) {
+        var answer = button.nextElementSibling;
+        button.addEventListener("click", function () {
+          var expanded = button.getAttribute("aria-expanded") === "true";
+          button.setAttribute("aria-expanded", String(!expanded));
+          if (expanded) {
+            answer.removeAttribute("data-open");
+          } else {
+            answer.setAttribute("data-open", "");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
