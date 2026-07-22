@@ -94,22 +94,22 @@ class KeyboardAnalyzer extends Analyzer {
         }
       }
 
-      // Verificar focus visible
-      const style = this._getComputedStyle(element);
-      const outline = style.outline || style.outlineWidth;
-      const boxShadow = style.boxShadow;
-
-      if (
-        (outline === "none" || outline === "0px") &&
-        !boxShadow?.includes("rgb")
-      ) {
-        this.addIssue("info", "Sin indicador visual de focus", element, {
-          tag: element.tagName.toLowerCase(),
-        });
-      } else {
-        this.markPassed();
-      }
     });
+
+    if (interactiveElements.length > 0) {
+      // No podemos comprobar el indicador de foco automáticamente: el
+      // propio bookmarklet solo se dispara con un clic de mouse, y en
+      // cuanto el navegador registra un clic deja de aplicar
+      // :focus-visible a los foco()s programáticos siguientes (es una
+      // protección del navegador contra scripts que simulan teclado, no
+      // algo que se pueda evitar). Revisar manualmente con Tab.
+      this.addIssue(
+        "info",
+        "El indicador de foco (:focus-visible) no se puede comprobar desde un bookmarklet — navegá la página con Tab y revisalo a simple vista",
+        null,
+        { interactiveElements: interactiveElements.length },
+      );
+    }
 
     // Buscar modal traps (focus no puede escapar)
     const modals = this._querySelectorAll('[role="dialog"], dialog');

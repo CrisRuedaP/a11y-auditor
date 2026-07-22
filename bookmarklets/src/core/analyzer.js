@@ -156,6 +156,17 @@ class Analyzer {
   _getComputedStyle(element) {
     return window.getComputedStyle(element);
   }
+
+  /**
+   * Un elemento oculto por CSS (display:none o visibility:hidden) no es
+   * perceivable por nadie ahora mismo, así que no debería contar para
+   * chequeos que dependen de lo que la página muestra realmente.
+   * @protected
+   */
+  _isVisible(element) {
+    const style = this._getComputedStyle(element);
+    return style.display !== "none" && style.visibility !== "hidden";
+  }
 }
 
 export default Analyzer;

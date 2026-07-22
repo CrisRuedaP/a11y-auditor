@@ -14,7 +14,7 @@ class AriaAnalyzer extends Analyzer {
 
     const ariaElements = this._querySelectorAll(
       "[role], [aria-label], [aria-labelledby], [aria-describedby], [aria-hidden], [aria-live]",
-    );
+    ).filter((element) => this._isVisible(element));
 
     if (ariaElements.length === 0) {
       this.markPassed();
@@ -165,8 +165,13 @@ class AriaAnalyzer extends Analyzer {
         "textarea",
       ].includes(tagName);
 
+      // aria-hidden="true" saca al elemento del árbol de accesibilidad a
+      // propósito: pedirle un nombre accesible ahí no tiene sentido.
+      const isHiddenFromAT = element.getAttribute("aria-hidden") === "true";
+
       if (
         isInteractive &&
+        !isHiddenFromAT &&
         !ariaLabel &&
         !ariaLabelledBy &&
         !element.textContent.trim()

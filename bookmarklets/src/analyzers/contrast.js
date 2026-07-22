@@ -18,17 +18,24 @@ class ContrastAnalyzer extends Analyzer {
     );
 
     let checkedCount = 0;
+    let skippedCount = 0;
 
     textElements.forEach((element) => {
-      // Saltar elementos sin texto visible
-      if (!element.textContent.trim()) return;
+      // Solo evaluar elementos que renderizan texto directamente. Un <div>
+      // que solo envuelve a un <span> con su propio color no es quien
+      // pinta el texto: comparar SU color contra el fondo da un resultado
+      // que no corresponde a nada visible en la página.
+      if (!this._hasOwnVisibleText(element)) return;
 
       // Saltar elementos ocultos
       const style = this._getComputedStyle(element);
       if (style.display === "none" || style.visibility === "hidden") return;
 
       const colors = this._getColorInfo(element);
-      if (!colors) return;
+      if (!colors) {
+        skippedCount++;
+        return;
+      }
 
       checkedCount++;
 
@@ -56,11 +63,41 @@ class ContrastAnalyzer extends Analyzer {
       }
     });
 
-    if (checkedCount === 0) {
+    if (checkedCount === 0 && skippedCount === 0) {
+      // No había ningún elemento de texto que evaluar en la página.
       this.markPassed();
+    } else if (skippedCount > 0) {
+      this.addIssue(
+        "info",
+        `No se pudo determinar el fondo real de ${skippedCount} elemento(s) con imagen/gradiente de fondo — revisar el contraste ahí manualmente`,
+        null,
+        { skipped: skippedCount },
+      );
     }
 
     return this.getSummary();
+  }
+
+  /**
+   * Detecta si un elemento tiene un nodo de texto propio (hijo directo),
+   * en vez de texto que solo existe porque un descendiente lo aporta.
+   * @private
+   */
+  _hasOwnVisibleText(element) {
+    return Array.from(element.childNodes).some(
+      (node) => node.nodeType === 3 && node.textContent.trim().length > 0,
+    );
+  }
+
+  /**
+   * @private
+   */
+  _isTransparent(backgroundColor) {
+    return (
+      !backgroundColor ||
+      backgroundColor === "rgba(0, 0, 0, 0)" ||
+      backgroundColor === "transparent"
+    );
   }
 
   /**
@@ -71,25 +108,35 @@ class ContrastAnalyzer extends Analyzer {
     const style = this._getComputedStyle(element);
     const color = style.color;
     let backgroundColor = style.backgroundColor;
+    let sawBackgroundImage =
+      style.backgroundImage && style.backgroundImage !== "none";
 
-    // Si el background es transparent, buscar en padres
-    if (
-      backgroundColor === "rgba(0, 0, 0, 0)" ||
-      backgroundColor === "transparent"
-    ) {
-      let parent = element.parentElement;
-      while (parent) {
-        const parentStyle = this._getComputedStyle(parent);
-        const parentBg = parentStyle.backgroundColor;
-        if (parentBg !== "rgba(0, 0, 0, 0)" && parentBg !== "transparent") {
-          backgroundColor = parentBg;
-          break;
-        }
-        parent = parent.parentElement;
+    // Si el background es transparente, buscar en los padres
+    let parent = element.parentElement;
+    while (this._isTransparent(backgroundColor) && parent) {
+      const parentStyle = this._getComputedStyle(parent);
+      if (parentStyle.backgroundImage && parentStyle.backgroundImage !== "none") {
+        sawBackgroundImage = true;
       }
+      if (!this._isTransparent(parentStyle.backgroundColor)) {
+        backgroundColor = parentStyle.backgroundColor;
+      }
+      parent = parent.parentElement;
     }
 
-    if (!color || !backgroundColor) return null;
+    if (this._isTransparent(backgroundColor)) {
+      if (sawBackgroundImage) {
+        // El fondo real viene de una imagen o gradiente (background-image):
+        // no podemos calcularlo de forma confiable sin renderizar el
+        // elemento. Mejor no evaluar que asumir un color equivocado.
+        return null;
+      }
+      // Nadie definió background-color ni background-image en la cadena:
+      // es el lienzo blanco por defecto del navegador.
+      backgroundColor = "rgb(255, 255, 255)";
+    }
+
+    if (!color) return null;
 
     return {
       foreground: this._rgbToHex(color),

@@ -12,7 +12,9 @@ class FormsAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    const inputs = this._querySelectorAll("input, select, textarea");
+    const inputs = this._querySelectorAll("input, select, textarea").filter(
+      (input) => this._isVisible(input),
+    );
     const labels = this._querySelectorAll("label");
 
     if (inputs.length === 0) {
@@ -70,11 +72,11 @@ class FormsAnalyzer extends Analyzer {
 
       if (ariaLabel || ariaLabelledBy) {
         hasLabel = true;
-      } else if (id) {
-        const associatedLabel = document.querySelector(`label[for="${id}"]`);
-        if (associatedLabel) {
-          hasLabel = true;
-        }
+      } else if (id && document.querySelector(`label[for="${id}"]`)) {
+        hasLabel = true;
+      } else if (input.closest("label")) {
+        // Label implícito: <label>Nombre <input></label>, válido sin for/id
+        hasLabel = true;
       }
 
       // Algunos tipos no requieren label

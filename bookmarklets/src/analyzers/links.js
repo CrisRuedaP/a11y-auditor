@@ -32,7 +32,9 @@ class LinksAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    const links = this._querySelectorAll("a");
+    const links = this._querySelectorAll("a").filter((link) =>
+      this._isVisible(link),
+    );
 
     if (links.length === 0) {
       this.markPassed();

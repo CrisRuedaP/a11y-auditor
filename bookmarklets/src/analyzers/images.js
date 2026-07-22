@@ -13,8 +13,8 @@ class ImagesAnalyzer extends Analyzer {
     this.reset();
 
     // Encontrar todas las imágenes
-    const images = this._querySelectorAll("img");
-    const svgs = this._querySelectorAll("svg");
+    const images = this._querySelectorAll("img").filter((img) => this._isVisible(img));
+    const svgs = this._querySelectorAll("svg").filter((svg) => this._isVisible(svg));
     const backgroundImages = this._findBackgroundImages();
 
     const totalImages = images.length + svgs.length + backgroundImages.length;

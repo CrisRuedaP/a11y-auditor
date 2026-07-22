@@ -11,7 +11,9 @@ class HeadingsAnalyzer extends Analyzer {
 
   async run() {
     this.reset();
-    const headings = this._querySelectorAll("h1, h2, h3, h4, h5, h6");
+    const headings = this._querySelectorAll("h1, h2, h3, h4, h5, h6").filter(
+      (heading) => this._isVisible(heading),
+    );
 
     if (headings.length === 0) {
       this.addIssue(
