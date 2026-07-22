@@ -10,3 +10,6 @@ npm-debug.log*
 # Configuración local de Claude Code (skills de terceros, no del proyecto)
 .agents/
 skills-lock.json
+
+# Notas internas de trabajo con el agente
+AGENTS.md
