@@ -31,7 +31,8 @@
 
   --radius: 10px;
   --radius-sm: 6px;
-  --shadow-card: 0 1px 2px rgba(20, 23, 28, 0.04), 0 8px 24px -12px rgba(20, 23, 28, 0.18);
+  --shadow-card:
+    0 1px 2px rgba(20, 23, 28, 0.04), 0 8px 24px -12px rgba(20, 23, 28, 0.18);
 }
 
 * {
@@ -256,6 +257,11 @@ code,
 
 .btn-block {
   width: 100%;
+}
+
+.btn-drag::before {
+  content: "📌";
+  margin-right: 6px;
 }
 
 /* -------- footer -------- */
