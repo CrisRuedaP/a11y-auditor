@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture de auditoría — casos normales y casos borde</title>
+  </head>
+  <body>
+    <!-- ===== Headings ===== -->
+    <h1 id="h-main">Título principal</h1>
+    <h3 id="h-skip">Salto de nivel (h1 a h3)</h3>
+    <h1 id="h-hidden" style="display: none">
+      H1 oculto por CSS — no debería contar como un segundo H1 visible
+    </h1>
+
+    <!-- ===== Imágenes ===== -->
+    <img id="img-no-alt" src="x.png" />
+    <img id="img-good-alt" src="y.png" alt="Descripción real de la imagen" />
+    <img id="img-decorative" src="z.png" alt="" role="presentation" />
+    <a href="/" aria-label="Ir al inicio">
+      <img id="img-in-labelled-link" src="logo.png" alt="" />
+    </a>
+    <picture>
+      <source srcset="w.webp" type="image/webp" />
+      <img id="img-in-picture-no-alt" src="w.jpg" />
+    </picture>
+    <svg id="svg-no-desc" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" /></svg>
+    <svg id="svg-with-title" viewBox="0 0 10 10">
+      <title>Ícono de verificación</title>
+      <circle cx="5" cy="5" r="4" />
+    </svg>
+
+    <!-- ===== Contraste ===== -->
+    <div style="background: #1a1a1f; padding: 10px">
+      <div id="contrast-wrapper-good">
+        <span style="color: #f0f0f5">Texto legible envuelto en un div</span>
+      </div>
+      <p id="contrast-real-bad" style="color: #2a2a30">
+        Texto realmente poco legible sobre este fondo
+      </p>
+    </div>
+
+    <!-- ===== ARIA ===== -->
+    <button id="aria-hidden-btn" aria-hidden="true" tabindex="-1"></button>
+    <button id="aria-visible-unlabeled" aria-live="polite"></button>
+    <div id="aria-bad-role" role="not-a-real-role">Texto con rol inválido</div>
+
+    <!-- ===== Formularios ===== -->
+    <label id="form-implicit-label">
+      Nombre (label implícito)
+      <input id="form-implicit-input" type="text" />
+    </label>
+    <input id="form-input-no-label" type="text" />
+    <label for="form-explicit-input">Nombre (label explícito)</label>
+    <input id="form-explicit-input" type="text" />
+
+    <!-- ===== Teclado ===== -->
+    <div id="kbd-onclick-no-role" onclick="void 0">
+      Div clickeable sin rol ni tabindex
+    </div>
+    <button id="kbd-native-button" onclick="void 0">
+      Botón nativo con onclick
+    </button>
+    <style>
+      #kbd-good-focus-style:focus-visible {
+        outline: 3px solid #2563eb;
+      }
+      #kbd-bad-focus-style,
+      #kbd-bad-focus-style:focus {
+        outline: none;
+      }
+    </style>
+    <button id="kbd-good-focus-style">
+      Botón con :focus-visible real en CSS (sin outline en reposo)
+    </button>
+    <button id="kbd-bad-focus-style">
+      Botón que apaga el outline y no pone nada en su lugar
+    </button>
+
+    <!-- ===== Links ===== -->
+    <a id="link-generic" href="/promo">click aquí</a>
+    <a id="link-good" href="/precios">Ver precios y planes</a>
+    <a id="link-no-href">Sin destino</a>
+    <a id="link-blank-no-warning" href="https://ejemplo.com" target="_blank"
+      >Más detalles</a
+    >
+    <a
+      id="link-blank-with-warning"
+      href="https://ejemplo.com"
+      target="_blank"
+      rel="noopener"
+      >Más detalles (se abre en una pestaña nueva)</a
+    >
+  </body>
+</html>
