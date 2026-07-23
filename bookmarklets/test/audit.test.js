@@ -54,6 +54,17 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
       assert.ok(!lines.some((l) => l.includes("img-good-alt")));
     });
 
+    it("genera un selector válido para ids con caracteres especiales (React useId, etc)", async () => {
+      const analyzer = results.results["Imágenes"];
+      const issue = analyzer.issues.find((i) => i.message.includes("sin atributo alt") && i.selector?.includes("r-weird-id"));
+      assert.ok(issue, "debería reportar la imagen con id raro");
+      const foundInPage = await session.page.evaluate(
+        (selector) => !!document.querySelector(selector),
+        issue.selector,
+      );
+      assert.ok(foundInPage, `el selector "${issue.selector}" debería encontrar el elemento real`);
+    });
+
     it("detecta el SVG sin título/descripción", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(lines.some((l) => l.includes("svg-no-desc")));
@@ -62,6 +73,14 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
     it("NO marca el SVG que sí tiene <title>", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(!lines.some((l) => l.includes("svg-with-title")));
+    });
+
+    it("NO marca un ícono decorativo con aria-hidden (está bien oculto, no le hace falta descripción)", () => {
+      const lines = issueLines(results, "Imágenes");
+      assert.ok(
+        !lines.some((l) => l.includes("svg-decorative-hidden")),
+        `un SVG aria-hidden no debería necesitar descripción: ${JSON.stringify(lines)}`,
+      );
     });
   });
 
@@ -77,6 +96,13 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
     it("SÍ marca el texto realmente poco legible", () => {
       const lines = issueLines(results, "Contraste");
       assert.ok(lines.some((l) => l.includes("contrast-real-bad")));
+    });
+
+    it("etiqueta el hallazgo con el criterio WCAG real (1.4.3, nivel AA)", () => {
+      const issue = results.results["Contraste"].issues.find((i) =>
+        i.selector?.includes("contrast-real-bad"),
+      );
+      assert.deepEqual(issue.metadata.wcag, { criterion: "1.4.3", level: "AA" });
     });
   });
 
@@ -118,6 +144,14 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
       const lines = issueLines(results, "Formularios");
       assert.ok(!lines.some((l) => l.includes('"form-explicit-input"')));
     });
+
+    it('NO marca el <label> implícito como "sin atributo for"', () => {
+      const lines = issueLines(results, "Formularios");
+      assert.ok(
+        !lines.some((l) => l.includes("form-implicit-label")),
+        `un label que envuelve su input no necesita "for": ${JSON.stringify(lines)}`,
+      );
+    });
   });
 
   describe("Links", () => {
@@ -140,6 +174,16 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
       const lines = issueLines(results, "Links");
       assert.ok(lines.some((l) => l.includes("link-blank-no-warning")));
     });
+
+    it('marca "sin rel=noopener" como buena práctica, no como un criterio WCAG inventado', () => {
+      const issue = results.results["Links"].issues.find((i) =>
+        i.message.includes("rel"),
+      );
+      assert.deepEqual(issue.metadata.wcag, {
+        criterion: null,
+        level: "buena práctica",
+      });
+    });
   });
 
   describe("Teclado", () => {
@@ -148,14 +192,11 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
       assert.ok(lines.some((l) => l.includes("kbd-onclick-no-role")));
     });
 
-    it("no inventa un veredicto de foco visible por elemento (no se puede comprobar de forma confiable vía script)", () => {
+    it("no reporta nada sobre foco visible (no se puede comprobar de forma confiable vía script, y no tiene sentido reportar un 'no sé')", () => {
       const lines = issueLines(results, "Teclado");
       assert.ok(!lines.some((l) => l.includes("kbd-good-focus-style")));
       assert.ok(!lines.some((l) => l.includes("kbd-bad-focus-style")));
-      assert.ok(
-        lines.some((l) => l.includes("focus-visible")),
-        "debería avisar una sola vez que hay que revisarlo a mano",
-      );
+      assert.ok(!lines.some((l) => l.includes("focus-visible")));
     });
   });
 });

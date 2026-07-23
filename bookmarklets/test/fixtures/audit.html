@@ -14,6 +14,8 @@
 
     <!-- ===== Imágenes ===== -->
     <img id="img-no-alt" src="x.png" />
+    <!-- id con caracteres especiales, como los que genera React useId() -->
+    <img id=":r-weird-id:" src="weird.png" />
     <img id="img-good-alt" src="y.png" alt="Descripción real de la imagen" />
     <img id="img-decorative" src="z.png" alt="" role="presentation" />
     <a href="/" aria-label="Ir al inicio">
@@ -26,6 +28,9 @@
     <svg id="svg-no-desc" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" /></svg>
     <svg id="svg-with-title" viewBox="0 0 10 10">
       <title>Ícono de verificación</title>
+      <circle cx="5" cy="5" r="4" />
+    </svg>
+    <svg id="svg-decorative-hidden" aria-hidden="true" viewBox="0 0 10 10">
       <circle cx="5" cy="5" r="4" />
     </svg>
 
