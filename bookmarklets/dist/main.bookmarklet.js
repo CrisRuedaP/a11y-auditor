@@ -78,7 +78,7 @@ class Analyzer {
    * @private
    */
   _generateSelector(element) {
-    if (element.id) return `#${element.id}`;
+    if (element.id) return `#${CSS.escape(element.id)}`;
 
     let path = [];
     let current = element;
@@ -87,7 +87,7 @@ class Analyzer {
       let selector = current.tagName.toLowerCase();
 
       if (current.id) {
-        selector += `#${current.id}`;
+        selector += `#${CSS.escape(current.id)}`;
         path.unshift(selector);
         break;
       }
@@ -429,6 +429,18 @@ class AuditUI {
       .a11y-audit-issue-message {
         font-weight: 500;
         color: #1f2937;
+        margin-bottom: 4px;
+      }
+
+      .a11y-audit-issue-wcag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        color: #4b5563;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 999px;
+        padding: 1px 8px;
         margin-bottom: 4px;
       }
 
@@ -785,6 +797,13 @@ class AuditUI {
     messageEl.textContent = issue.message;
     issueEl.appendChild(messageEl);
 
+    if (issue.metadata?.wcag) {
+      const wcagEl = document.createElement("span");
+      wcagEl.className = "a11y-audit-issue-wcag";
+      wcagEl.textContent = this._describeWcag(issue.metadata.wcag);
+      issueEl.appendChild(wcagEl);
+    }
+
     if (issue.elementInfo) {
       const metaEl = document.createElement("div");
       metaEl.className = "a11y-audit-issue-metadata";
@@ -818,6 +837,16 @@ class AuditUI {
     }
 
     return issueEl;
+  }
+
+  /**
+   * "1.4.3 · Nivel AA" o "Buena práctica" cuando no hay un criterio WCAG
+   * estricto que aplique.
+   * @private
+   */
+  _describeWcag(wcag) {
+    if (!wcag.criterion) return "Buena práctica";
+    return `WCAG ${wcag.criterion} · Nivel ${wcag.level}`;
   }
 
   /**
@@ -983,9 +1012,33 @@ class AuditUI {
 }
 
 /**
+ * Constantes compartidas para etiquetar cada hallazgo con su criterio WCAG
+ * (2.1/2.2) y nivel de conformancia, o "buena práctica" cuando el chequeo
+ * es una convención razonable pero WCAG no lo exige puntualmente.
+ *
+ * Importado por todos los analizadores — vive en un solo lugar para que
+ * build.js pueda concatenarlo sin choques de nombres entre archivos.
+ */
+const BEST_PRACTICE = { criterion: null, level: "buena práctica" };
+
+const WCAG = {
+  NON_TEXT_CONTENT: { criterion: "1.1.1", level: "A" },
+  INFO_RELATIONSHIPS: { criterion: "1.3.1", level: "A" },
+  CONTRAST_MINIMUM: { criterion: "1.4.3", level: "AA" },
+  KEYBOARD: { criterion: "2.1.1", level: "A" },
+  BYPASS_BLOCKS: { criterion: "2.4.1", level: "A" },
+  FOCUS_ORDER: { criterion: "2.4.3", level: "A" },
+  LINK_PURPOSE: { criterion: "2.4.4", level: "A" },
+  CHANGE_ON_REQUEST: { criterion: "3.2.5", level: "AAA" },
+  LABELS_INSTRUCTIONS: { criterion: "3.3.2", level: "A" },
+  NAME_ROLE_VALUE: { criterion: "4.1.2", level: "A" },
+};
+
+/**
  * Analizador de Headings (h1-h6)
  * Valida jerarquía, detecta saltos de nivel, h1 duplicados, etc
  */
+
 
 class HeadingsAnalyzer extends Analyzer {
   constructor() {
@@ -1003,7 +1056,7 @@ class HeadingsAnalyzer extends Analyzer {
         "warning",
         "No se encontraron encabezados en la página",
         null,
-        { severity: "critical" },
+        { severity: "critical", wcag: WCAG.INFO_RELATIONSHIPS },
       );
       return this.getSummary();
     }
@@ -1019,13 +1072,14 @@ class HeadingsAnalyzer extends Analyzer {
     if (h1Count === 0) {
       this.addIssue("error", "No hay H1 en la página", null, {
         severity: "critical",
+        wcag: BEST_PRACTICE,
       });
     } else if (h1Count > 1) {
       this.addIssue(
         "warning",
         `Se encontraron ${h1Count} H1 (debe haber solo 1)`,
         null,
-        { count: h1Count },
+        { count: h1Count, wcag: BEST_PRACTICE },
       );
     } else {
       this.markPassed();
@@ -1042,14 +1096,14 @@ class HeadingsAnalyzer extends Analyzer {
           "warning",
           `El primer encabezado es H${level}, debería ser H1`,
           element,
-          { level, expectedLevel: 1 },
+          { level, expectedLevel: 1, wcag: BEST_PRACTICE },
         );
       } else if (diff > 1 && lastLevel !== 0) {
         this.addIssue(
           "warning",
           `Salto de jerarquía: de H${lastLevel} a H${level}`,
           element,
-          { from: lastLevel, to: level },
+          { from: lastLevel, to: level, wcag: WCAG.INFO_RELATIONSHIPS },
         );
       } else {
         this.markPassed();
@@ -1061,7 +1115,10 @@ class HeadingsAnalyzer extends Analyzer {
     // Verificar headings vacíos
     headingLevels.forEach(({ element, level, text }) => {
       if (!text) {
-        this.addIssue("error", `H${level} vacío sin texto`, element, { level });
+        this.addIssue("error", `H${level} vacío sin texto`, element, {
+          level,
+          wcag: WCAG.INFO_RELATIONSHIPS,
+        });
       }
     });
 
@@ -1073,6 +1130,7 @@ class HeadingsAnalyzer extends Analyzer {
  * Analizador Axe-Core
  * Ejecuta la librería axe-core para detectar problemas de accesibilidad
  */
+
 
 class AxeCoreAnalyzer extends Analyzer {
   constructor() {
@@ -1109,6 +1167,7 @@ class AxeCoreAnalyzer extends Analyzer {
 
       // Procesar violations
       results.violations?.forEach((violation) => {
+        const wcag = this._parseWcagTags(violation.tags);
         violation.nodes?.forEach((node) => {
           const element = this._safeQuerySelector(node.target?.[0]);
           this.addIssue(
@@ -1119,6 +1178,7 @@ class AxeCoreAnalyzer extends Analyzer {
               ruleId: violation.id,
               description: violation.description,
               impact: violation.impact,
+              wcag: wcag || BEST_PRACTICE,
             },
           );
         });
@@ -1147,6 +1207,32 @@ class AxeCoreAnalyzer extends Analyzer {
       );
       return this.getSummary();
     }
+  }
+
+  /**
+   * axe-core ya trae sus propias etiquetas WCAG en cada regla (ej.
+   * ["wcag2aa", "wcag143", ...] para contraste) — las leemos en vez de
+   * adivinar un criterio nosotros mismos.
+   * @private
+   */
+  _parseWcagTags(tags) {
+    if (!Array.isArray(tags)) return null;
+
+    const scTag = tags.find((tag) => /^wcag\d{3,5}$/.test(tag));
+    const levelTag = tags.find((tag) => /^wcag(2|21|22)?(aaa|aa|a)$/.test(tag));
+
+    if (!scTag && !levelTag) return null;
+
+    let criterion = null;
+    if (scTag) {
+      const digits = scTag.replace("wcag", "");
+      criterion = `${digits[0]}.${digits[1]}.${digits.slice(2)}`;
+    }
+
+    const levelMatch = levelTag?.match(/(aaa|aa|a)$/);
+    const level = levelMatch ? levelMatch[1].toUpperCase() : null;
+
+    return { criterion, level };
   }
 
   /**
@@ -1186,6 +1272,7 @@ class AxeCoreAnalyzer extends Analyzer {
  * Valida alt text, detecta imágenes decorativas, etc
  */
 
+
 class ImagesAnalyzer extends Analyzer {
   constructor() {
     super("Imágenes", "Análisis de imágenes y alt text");
@@ -1216,6 +1303,7 @@ class ImagesAnalyzer extends Analyzer {
       if (!alt && !ariaLabel && !ariaLabelledBy) {
         this.addIssue("error", "Imagen sin atributo alt", img, {
           src: img.src?.substring(0, 100),
+          wcag: WCAG.NON_TEXT_CONTENT,
         });
       } else if (alt === "") {
         // alt vacío es válido si es decorativa
@@ -1226,6 +1314,7 @@ class ImagesAnalyzer extends Analyzer {
             img,
             {
               src: img.src?.substring(0, 100),
+              wcag: WCAG.NON_TEXT_CONTENT,
             },
           );
         } else {
@@ -1235,6 +1324,7 @@ class ImagesAnalyzer extends Analyzer {
         this.addIssue("warning", "Alt text muy largo (> 125 caracteres)", img, {
           length: alt.length,
           alt: alt.substring(0, 50) + "...",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -1249,12 +1339,23 @@ class ImagesAnalyzer extends Analyzer {
       const ariaLabelledBy = svg.getAttribute("aria-labelledby");
       const role = svg.getAttribute("role");
 
-      if (!title && !desc && !ariaLabel && !ariaLabelledBy) {
-        this.addIssue("error", "SVG sin descripción accesible", svg, {
-          tag: "svg",
-        });
-      } else {
+      const hasAccessibleName = !!(title || desc || ariaLabel || ariaLabelledBy);
+      // Un ícono decorativo se oculta a propósito de los lectores de
+      // pantalla — eso es lo correcto, no le hace falta ninguna descripción.
+      const isMarkedDecorative =
+        svg.getAttribute("aria-hidden") === "true" ||
+        role === "presentation" ||
+        role === "none";
+
+      if (hasAccessibleName || isMarkedDecorative) {
         this.markPassed();
+      } else {
+        this.addIssue(
+          "warning",
+          'SVG sin aria-hidden ni descripción accesible — si es decorativo, agregá aria-hidden="true"; si transmite información, agregá <title> o aria-label',
+          svg,
+          { tag: "svg", wcag: WCAG.NON_TEXT_CONTENT },
+        );
       }
     });
 
@@ -1266,6 +1367,7 @@ class ImagesAnalyzer extends Analyzer {
       if (!ariaLabel && role !== "presentation" && role !== "none") {
         this.addIssue("warning", "Background image sin aria-label", element, {
           url: url.substring(0, 100),
+          wcag: WCAG.NON_TEXT_CONTENT,
         });
       }
     });
@@ -1299,6 +1401,7 @@ class ImagesAnalyzer extends Analyzer {
  * Analizador de Contraste
  * Valida relación de contraste según WCAG
  */
+
 
 class ContrastAnalyzer extends Analyzer {
   constructor() {
@@ -1353,7 +1456,8 @@ class ContrastAnalyzer extends Analyzer {
             required: wcagAA.required,
             foreground: colors.foreground,
             background: colors.background,
-            level: wcagAA.level,
+            textSize: wcagAA.level,
+            wcag: WCAG.CONTRAST_MINIMUM,
           },
         );
       }
@@ -1522,6 +1626,7 @@ class ContrastAnalyzer extends Analyzer {
  * Valida atributos ARIA, roles, propiedades, etc
  */
 
+
 class AriaAnalyzer extends Analyzer {
   constructor() {
     super("ARIA", "Análisis de atributos ARIA");
@@ -1620,6 +1725,7 @@ class AriaAnalyzer extends Analyzer {
       if (role && !validRoles.includes(role)) {
         this.addIssue("error", `Rol ARIA inválido: "${role}"`, element, {
           invalidRole: role,
+          wcag: WCAG.NAME_ROLE_VALUE,
         });
       } else if (role) {
         this.markPassed();
@@ -1642,6 +1748,7 @@ class AriaAnalyzer extends Analyzer {
             element,
             {
               aria_labelledby: ariaLabelledBy,
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         } else {
@@ -1666,6 +1773,7 @@ class AriaAnalyzer extends Analyzer {
             element,
             {
               aria_describedby: ariaDescribedBy,
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         } else {
@@ -1700,6 +1808,7 @@ class AriaAnalyzer extends Analyzer {
           element,
           {
             tag: tagName,
+            wcag: WCAG.NAME_ROLE_VALUE,
           },
         );
       }
@@ -1713,6 +1822,7 @@ class AriaAnalyzer extends Analyzer {
  * Analizador de Formularios
  * Valida labels, inputs, validación accesible, etc
  */
+
 
 class FormsAnalyzer extends Analyzer {
   constructor() {
@@ -1773,7 +1883,7 @@ class FormsAnalyzer extends Analyzer {
           "warning",
           `Tipo de input no estándar: "${type}"`,
           input,
-          { type },
+          { type, wcag: BEST_PRACTICE },
         );
       }
 
@@ -1804,6 +1914,7 @@ class FormsAnalyzer extends Analyzer {
           {
             type,
             id: id || null,
+            wcag: WCAG.LABELS_INSTRUCTIONS,
           },
         );
       } else {
@@ -1828,11 +1939,18 @@ class FormsAnalyzer extends Analyzer {
     labels.forEach((label) => {
       const forAttr = label.getAttribute("for");
       const text = label.textContent.trim();
+      const wrapsAControl = !!label.querySelector("input, select, textarea");
 
-      if (!forAttr) {
-        this.addIssue("warning", 'Label sin atributo "for"', label, {
-          text: text.substring(0, 50),
-        });
+      if (!forAttr && wrapsAControl) {
+        // Label implícito: <label>Nombre <input></label>, no necesita "for"
+        this.markPassed();
+      } else if (!forAttr) {
+        this.addIssue(
+          "warning",
+          'Label sin atributo "for" y sin ningún campo adentro',
+          label,
+          { text: text.substring(0, 50), wcag: WCAG.INFO_RELATIONSHIPS },
+        );
       } else {
         const input = document.getElementById(forAttr);
         if (!input) {
@@ -1842,6 +1960,7 @@ class FormsAnalyzer extends Analyzer {
             label,
             {
               for: forAttr,
+              wcag: WCAG.INFO_RELATIONSHIPS,
             },
           );
         } else {
@@ -1852,6 +1971,7 @@ class FormsAnalyzer extends Analyzer {
       if (!text) {
         this.addIssue("error", "Label vacío sin texto", label, {
           for: forAttr || null,
+          wcag: WCAG.LABELS_INSTRUCTIONS,
         });
       }
     });
@@ -1864,6 +1984,7 @@ class FormsAnalyzer extends Analyzer {
  * Analizador de Semántica HTML
  * Valida el uso correcto de etiquetas semánticas
  */
+
 
 class SemanticAnalyzer extends Analyzer {
   constructor() {
@@ -1895,6 +2016,7 @@ class SemanticAnalyzer extends Analyzer {
       this.addIssue("warning", "No se encontró etiqueta <main>", null, {
         divCount,
         severity: "medium",
+        wcag: WCAG.BYPASS_BLOCKS,
       });
       hasMainIssue = true;
     } else if (mains.length > 1) {
@@ -1904,6 +2026,7 @@ class SemanticAnalyzer extends Analyzer {
         null,
         {
           count: mains.length,
+          wcag: BEST_PRACTICE,
         },
       );
     } else {
@@ -1920,6 +2043,7 @@ class SemanticAnalyzer extends Analyzer {
         null,
         {
           severity: "low",
+          wcag: BEST_PRACTICE,
         },
       );
       hasNavIssue = true;
@@ -1932,6 +2056,7 @@ class SemanticAnalyzer extends Analyzer {
     if (headers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <header>", null, {
         severity: "low",
+        wcag: BEST_PRACTICE,
       });
     } else {
       this.markPassed();
@@ -1942,6 +2067,7 @@ class SemanticAnalyzer extends Analyzer {
     if (footers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <footer>", null, {
         severity: "low",
+        wcag: BEST_PRACTICE,
       });
     } else {
       this.markPassed();
@@ -1954,6 +2080,7 @@ class SemanticAnalyzer extends Analyzer {
       if (!heading) {
         this.addIssue("warning", "<section> sin encabezado", section, {
           tag: "section",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -1967,6 +2094,7 @@ class SemanticAnalyzer extends Analyzer {
       if (!heading) {
         this.addIssue("warning", "<article> sin encabezado", article, {
           tag: "article",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -1983,6 +2111,7 @@ class SemanticAnalyzer extends Analyzer {
           divCount,
           spanCount,
           severity: "suggestion",
+          wcag: BEST_PRACTICE,
         },
       );
     } else {
@@ -1997,6 +2126,7 @@ class SemanticAnalyzer extends Analyzer {
  * Analizador de Teclado/Navegación
  * Valida navegación por teclado, focus, tabindex, traps, etc
  */
+
 
 class KeyboardAnalyzer extends Analyzer {
   constructor() {
@@ -2040,6 +2170,7 @@ class KeyboardAnalyzer extends Analyzer {
             {
               tabindex,
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.KEYBOARD,
             },
           );
         }
@@ -2053,6 +2184,7 @@ class KeyboardAnalyzer extends Analyzer {
           element,
           {
             tabindex,
+            wcag: WCAG.FOCUS_ORDER,
           },
         );
       } else {
@@ -2071,6 +2203,7 @@ class KeyboardAnalyzer extends Analyzer {
             element,
             {
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         }
@@ -2083,6 +2216,7 @@ class KeyboardAnalyzer extends Analyzer {
             element,
             {
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.KEYBOARD,
             },
           );
         }
@@ -2090,20 +2224,9 @@ class KeyboardAnalyzer extends Analyzer {
 
     });
 
-    if (interactiveElements.length > 0) {
-      // No podemos comprobar el indicador de foco automáticamente: el
-      // propio bookmarklet solo se dispara con un clic de mouse, y en
-      // cuanto el navegador registra un clic deja de aplicar
-      // :focus-visible a los foco()s programáticos siguientes (es una
-      // protección del navegador contra scripts que simulan teclado, no
-      // algo que se pueda evitar). Revisar manualmente con Tab.
-      this.addIssue(
-        "info",
-        "El indicador de foco (:focus-visible) no se puede comprobar desde un bookmarklet — navegá la página con Tab y revisalo a simple vista",
-        null,
-        { interactiveElements: interactiveElements.length },
-      );
-    }
+    // Nota: el indicador de foco visible (:focus-visible) NO se puede
+    // comprobar desde acá — ver "Limitaciones" en la guía de uso. No tiene
+    // sentido reportar un "no sé" como si fuera un hallazgo de la auditoría.
 
     // Buscar modal traps (focus no puede escapar)
     const modals = this._querySelectorAll('[role="dialog"], dialog');
@@ -2119,6 +2242,7 @@ class KeyboardAnalyzer extends Analyzer {
           modal,
           {
             tag: modal.tagName.toLowerCase(),
+            wcag: WCAG.KEYBOARD,
           },
         );
       }
@@ -2132,6 +2256,7 @@ class KeyboardAnalyzer extends Analyzer {
  * Analizador de Links
  * Valida texto de enlace, destino real y avisos de nueva pestaña
  */
+
 
 const GENERIC_LINK_TEXTS = [
   "click aquí",
@@ -2178,7 +2303,9 @@ class LinksAnalyzer extends Analyzer {
 
       // Texto de enlace
       if (!accessibleName && !hasImgAlt) {
-        this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {});
+        this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {
+          wcag: WCAG.LINK_PURPOSE,
+        });
       } else if (
         !ariaLabel &&
         GENERIC_LINK_TEXTS.includes(text.toLowerCase())
@@ -2187,7 +2314,7 @@ class LinksAnalyzer extends Analyzer {
           "warning",
           `Texto de enlace genérico: "${text}" (no describe el destino)`,
           link,
-          { text },
+          { text, wcag: WCAG.LINK_PURPOSE },
         );
       } else {
         this.markPassed();
@@ -2200,14 +2327,14 @@ class LinksAnalyzer extends Analyzer {
           "warning",
           "Elemento <a> sin atributo href (no es navegable ni focuseable)",
           link,
-          {},
+          { wcag: WCAG.KEYBOARD },
         );
       } else if (href === "" || href === "#" || /^javascript:void\(0?\)$/.test(href)) {
         this.addIssue(
           "warning",
           "Enlace sin destino real (href vacío, '#' o javascript:void(0))",
           link,
-          { href },
+          { href, wcag: WCAG.LINK_PURPOSE },
         );
       } else {
         this.markPassed();
@@ -2224,7 +2351,7 @@ class LinksAnalyzer extends Analyzer {
             "warning",
             "Se abre en una pestaña nueva sin avisarlo en el texto o aria-label",
             link,
-            { target: "_blank" },
+            { target: "_blank", wcag: WCAG.CHANGE_ON_REQUEST },
           );
         } else {
           this.markPassed();
@@ -2236,7 +2363,7 @@ class LinksAnalyzer extends Analyzer {
             "warning",
             'target="_blank" sin rel="noopener" (riesgo de seguridad y rendimiento)',
             link,
-            { rel },
+            { rel, wcag: BEST_PRACTICE },
           );
         } else {
           this.markPassed();
