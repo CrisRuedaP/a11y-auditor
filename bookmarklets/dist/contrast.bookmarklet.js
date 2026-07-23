@@ -1,8 +1,8 @@
 /**
- * BOOKMARKLET INDIVIDUAL - CONTRAST ANALYZER
- * Valida ratios de contraste WCAG
+ * INDIVIDUAL BOOKMARKLET - CONTRAST ANALYZER
+ * Validates WCAG contrast ratios
  *
- * Uso: javascript:(async()=>{...})()
+ * Usage: javascript:(async()=>{...})()
  */
 
 (async function runContrastAudit() {
@@ -10,7 +10,7 @@
     if (window.a11yContrastRunning) return;
     window.a11yContrastRunning = true;
 
-    // Crear popup
+    // Create popup
     const popup = document.createElement("div");
     popup.className = "a11y-audit-popup";
     popup.style.cssText = `
@@ -37,7 +37,7 @@
 
     document.body.appendChild(popup);
 
-    // Utilidades
+    // Utilities
     function rgbToHex(rgb) {
       const match = rgb.match(/\d+/g);
       if (!match || match.length < 3) return null;
@@ -75,7 +75,7 @@
       return (lighter + 0.05) / (darker + 0.05);
     }
 
-    // Analizar elementos
+    // Analyze elements
     let contrastIssues = [];
     let checked = 0;
 
@@ -114,7 +114,7 @@
         }
       });
 
-    // Mostrar resultados
+    // Show results
     let html = `<strong>🎨 Análisis de Contraste</strong><hr style="margin: 8px 0;">`;
     html += `<div style="font-size: 12px; margin-bottom: 8px;">`;
     html += `<strong>${checked}</strong> elementos analizados<br>`;

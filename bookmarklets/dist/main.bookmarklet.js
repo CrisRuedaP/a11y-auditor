@@ -1,8 +1,8 @@
 (function () {
 "use strict";
 /**
- * Clase base para todos los analizadores de accesibilidad
- * Proporciona estructura común y métodos estándar
+ * Base class for all accessibility analyzers
+ * Provides shared structure and standard methods
  */
 class Analyzer {
   constructor(name, description) {
@@ -17,8 +17,8 @@ class Analyzer {
   }
 
   /**
-   * Ejecuta el análisis
-   * Debe ser sobrescrito por subclases
+   * Runs the analysis
+   * Must be overridden by subclasses
    */
   async run() {
     throw new Error(
@@ -27,7 +27,7 @@ class Analyzer {
   }
 
   /**
-   * Valida que los resultados tengan la estructura correcta
+   * Validates that the results have the correct structure
    */
   validate() {
     return (
@@ -39,11 +39,11 @@ class Analyzer {
   }
 
   /**
-   * Formatea un issue para los resultados
+   * Formats an issue for the results
    * @param {string} severity - 'error', 'warning', 'info'
-   * @param {string} message - Descripción del problema
-   * @param {HTMLElement} element - Elemento problemático (opcional)
-   * @param {object} metadata - Información adicional
+   * @param {string} message - Description of the problem
+   * @param {HTMLElement} element - Problematic element (optional)
+   * @param {object} metadata - Additional information
    */
   addIssue(severity, message, element = null, metadata = {}) {
     const issue = {
@@ -65,7 +65,7 @@ class Analyzer {
 
     this.results.issues.push(issue);
 
-    // Contar por severidad
+    // Count by severity
     if (severity === "error") {
       this.results.failed++;
     } else if (severity === "warning") {
@@ -74,7 +74,7 @@ class Analyzer {
   }
 
   /**
-   * Genera un selector CSS único para un elemento
+   * Generates a unique CSS selector for an element
    * @private
    */
   _generateSelector(element) {
@@ -109,7 +109,7 @@ class Analyzer {
   }
 
   /**
-   * Resetea los resultados
+   * Resets the results
    */
   reset() {
     this.results = {
@@ -121,7 +121,7 @@ class Analyzer {
   }
 
   /**
-   * Obtiene un resumen de los resultados
+   * Gets a summary of the results
    */
   getSummary() {
     return {
@@ -133,16 +133,16 @@ class Analyzer {
   }
 
   /**
-   * Marca un análisis como pasado
+   * Marks a check as passed
    */
   markPassed() {
     this.results.passed++;
   }
 
   /**
-   * Obtiene elementos de un tipo específico con un filtro.
-   * Excluye el propio panel del auditor: si no, cada analizador terminaría
-   * auditando su propia UI en vez de (solo) la página de la persona usuaria.
+   * Gets elements of a given type with a filter applied.
+   * Excludes the auditor's own panel: otherwise every analyzer would end up
+   * auditing its own UI instead of (only) the user's page.
    * @protected
    */
   _querySelectorAll(selector) {
@@ -152,7 +152,7 @@ class Analyzer {
   }
 
   /**
-   * Obtiene estilos computados de un elemento
+   * Gets an element's computed styles
    * @protected
    */
   _getComputedStyle(element) {
@@ -160,9 +160,9 @@ class Analyzer {
   }
 
   /**
-   * Un elemento oculto por CSS (display:none o visibility:hidden) no es
-   * perceivable por nadie ahora mismo, así que no debería contar para
-   * chequeos que dependen de lo que la página muestra realmente.
+   * An element hidden via CSS (display:none or visibility:hidden) isn't
+   * perceivable by anyone right now, so it shouldn't count for checks that
+   * depend on what the page actually shows.
    * @protected
    */
   _isVisible(element) {
@@ -172,8 +172,8 @@ class Analyzer {
 }
 
 /**
- * Módulo UI para el panel lateral (sidebar) de auditoría
- * Maneja la visualización de resultados y la interacción del usuario
+ * UI module for the audit sidebar panel
+ * Handles displaying results and user interaction
  */
 class AuditUI {
   constructor() {
@@ -189,7 +189,7 @@ class AuditUI {
   }
 
   /**
-   * Inicializa y abre el panel sidebar
+   * Initializes and opens the sidebar panel
    */
   open() {
     if (this.isOpen) return;
@@ -203,7 +203,7 @@ class AuditUI {
   }
 
   /**
-   * Cierra el panel sidebar
+   * Closes the sidebar panel
    */
   close() {
     if (!this.isOpen) return;
@@ -215,10 +215,10 @@ class AuditUI {
   }
 
   /**
-   * Corre el contenido de la página (igual que WAVE) para que no quede
-   * debajo del panel: en vez de superponerse, empuja el <html> con un
-   * margen del mismo tamaño que ocupa el panel. En el layout móvil (panel
-   * abajo, a todo el ancho) empuja hacia arriba en vez de hacia la derecha.
+   * Shifts the page content (same as WAVE) so it doesn't end up underneath
+   * the panel: instead of overlapping, it pushes the <html> element with a
+   * margin the same size as the panel. Under the mobile layout (panel at
+   * the bottom, full width) it pushes up instead of to the right.
    * @private
    */
   _shiftPage() {
@@ -242,7 +242,7 @@ class AuditUI {
   }
 
   /**
-   * Deshace el corrimiento de _shiftPage()
+   * Undoes the shift applied by _shiftPage()
    * @private
    */
   _unshiftPage() {
@@ -253,7 +253,7 @@ class AuditUI {
   }
 
   /**
-   * Alterna entre abrir y cerrar el panel
+   * Toggles the panel open/closed
    */
   toggle() {
     if (this.isOpen) {
@@ -264,9 +264,9 @@ class AuditUI {
   }
 
   /**
-   * Agrega resultados de un analizador al panel
-   * @param {string} analyzerName - Nombre del analizador
-   * @param {object} results - Resultados del análisis
+   * Adds an analyzer's results to the panel
+   * @param {string} analyzerName - Analyzer name
+   * @param {object} results - Analysis results
    */
   addResults(analyzerName, results) {
     this.results[analyzerName] = results;
@@ -274,16 +274,15 @@ class AuditUI {
   }
 
   /**
-   * Inyecta los estilos CSS necesarios
+   * Injects the required CSS styles
    * @private
    */
   _injectStyles() {
-    // Siempre se sobrescribe el contenido en vez de saltar la inyección
-    // cuando ya existe la etiqueta: si la página quedó con una ejecución
-    // previa del bookmarklet (código viejo) sin recargar, el CSS se
-    // queda desactualizado mientras el HTML sí se reconstruye con la
-    // estructura nueva, produciendo un desajuste (iconos sin tamaño,
-    // colores viejos).
+    // The tag's content is always overwritten instead of skipping injection
+    // when it already exists: if the page was left over from a previous run
+    // of the bookmarklet (old code) without a reload, the CSS would stay
+    // stale while the HTML does get rebuilt with the new structure,
+    // producing a mismatch (unsized icons, old colors).
     let style = document.getElementById("a11y-audit-styles");
     if (!style) {
       style = document.createElement("style");
@@ -291,7 +290,7 @@ class AuditUI {
       document.head.appendChild(style);
     }
     style.textContent = `
-      /* Panel Principal */
+      /* Main panel */
       .a11y-audit-sidebar {
         display: none;
         position: fixed;
@@ -401,7 +400,7 @@ class AuditUI {
         background: rgba(255, 255, 255, 0.25);
       }
 
-      /* Resumen */
+      /* Summary */
       .a11y-audit-summary {
         padding: 12px 16px;
         background: #f0f0f0;
@@ -470,7 +469,7 @@ class AuditUI {
         font-weight: 600;
       }
 
-      /* Contenido */
+      /* Content */
       .a11y-audit-content {
         flex: 1;
         overflow-y: auto;
@@ -565,8 +564,8 @@ class AuditUI {
         color: #1a1a1a;
       }
 
-      /* Resaltado "recién clickeado" en la página auditada, para distinguirlo
-         de otros elementos ya resaltados antes */
+      /* "Just clicked" highlight on the audited page, to tell it apart
+         from other elements already highlighted before */
       .a11y-audit-highlight-pulse {
         animation: a11yAuditPulse 1.6s ease-out;
       }
@@ -591,7 +590,7 @@ class AuditUI {
         }
       }
 
-      /* Etiqueta flotante sobre el elemento resaltado en la página */
+      /* Floating tag over the highlighted element on the page */
       .a11y-audit-floating-tag {
         position: fixed;
         z-index: 1000000;
@@ -694,7 +693,7 @@ class AuditUI {
         border-color: #333333;
       }
 
-      /* Highlight en elementos */
+      /* Element highlight */
       .a11y-audit-highlight {
         outline: 2px solid #a6331f !important;
         outline-offset: 2px !important;
@@ -718,15 +717,15 @@ class AuditUI {
   }
 
   /**
-   * Crea la estructura del panel sidebar
+   * Builds the sidebar panel's structure
    * @private
    */
   _createPanel() {
     if (this.container) return;
 
-    // Si el bookmarklet ya se corrió antes en esta misma pestaña (sin
-    // recargar), puede quedar un panel viejo en el DOM que esta nueva
-    // instancia de AuditUI no conoce: lo quitamos para no duplicar IDs.
+    // If the bookmarklet already ran before in this same tab (without a
+    // reload), an old panel may still be sitting in the DOM that this new
+    // AuditUI instance doesn't know about: remove it to avoid duplicate IDs.
     document.getElementById("a11y-audit-sidebar")?.remove();
 
     this.container = document.createElement("div");
@@ -801,7 +800,7 @@ class AuditUI {
   }
 
   /**
-   * Actualiza la interfaz con los resultados
+   * Refreshes the UI with the results
    * @private
    */
   _updateUI() {
@@ -819,10 +818,10 @@ class AuditUI {
     let totalWarnings = 0;
     let totalPassed = 0;
 
-    // Cada analizador termina en un momento distinto (axe-core en particular
-    // puede tardar bastante en páginas grandes), y cada uno dispara un
-    // re-render completo. Si no recordáramos qué pestaña eligió la persona
-    // usuaria, cada re-render la resetearía a la primera pestaña disponible.
+    // Each analyzer finishes at a different time (axe-core in particular
+    // can take a while on large pages), and each one triggers a full
+    // re-render. If we didn't remember which tab the user picked, every
+    // re-render would reset it back to the first available tab.
     const activeTabExists =
       this.activeTab && Object.prototype.hasOwnProperty.call(this.results, this.activeTab);
     if (!activeTabExists) {
@@ -876,7 +875,7 @@ class AuditUI {
   }
 
   /**
-   * Cambia a una pestaña específica
+   * Switches to a specific tab
    * @private
    */
   _switchTab(analyzerName) {
@@ -897,8 +896,8 @@ class AuditUI {
   }
 
   /**
-   * Construye la fila de un issue. Si tiene selector, es clickeable
-   * (mouse y teclado) para resaltar y hacer scroll hasta el elemento real.
+   * Builds an issue row. If it has a selector, it's clickable (mouse and
+   * keyboard) to highlight and scroll to the real element.
    * @private
    */
   _buildIssueElement(issue) {
@@ -953,8 +952,8 @@ class AuditUI {
   }
 
   /**
-   * "1.4.3 · Nivel AA" o "Buena práctica" cuando no hay un criterio WCAG
-   * estricto que aplique.
+   * "1.4.3 · Nivel AA" (or "Buena práctica" / best practice) when no strict
+   * WCAG criterion applies.
    * @private
    */
   _describeWcag(wcag) {
@@ -963,7 +962,7 @@ class AuditUI {
   }
 
   /**
-   * Arma una descripción legible del elemento (mejor que solo el tag)
+   * Builds a readable description of the element (better than just the tag)
    * @private
    */
   _describeElement(info) {
@@ -977,7 +976,7 @@ class AuditUI {
   }
 
   /**
-   * Busca el elemento real por su selector, hace scroll y lo resalta.
+   * Finds the real element by its selector, scrolls to it and highlights it.
    * @private
    */
   _jumpToIssue(issue, issueEl, hintEl) {
@@ -993,30 +992,29 @@ class AuditUI {
       return;
     }
 
-    // Un solo elemento resaltado a la vez: si dejáramos acumular los
-    // clics anteriores, después de un rato no se distingue cuál hallazgo
-    // es cuál.
+    // Only one highlighted element at a time: if we let previous clicks
+    // pile up, after a while it's impossible to tell which finding is which.
     this._clearHighlights();
     this.highlightElement(element);
     element.classList.add("a11y-audit-highlight-pulse");
     setTimeout(() => element.classList.remove("a11y-audit-highlight-pulse"), 1600);
     element.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    // El scroll suave tarda un instante; recién cuando termina sabemos
-    // dónde va a quedar el elemento en pantalla para poner la etiqueta.
+    // The smooth scroll takes a moment; only once it's done do we know
+    // where the element will land on screen to place the tag.
     setTimeout(() => this._showFloatingTag(element, issue), 350);
   }
 
   /**
-   * Etiqueta flotante sobre el elemento resaltado, con el mensaje real del
-   * hallazgo — el mismo lenguaje visual que usa la página de instalación.
+   * Floating tag over the highlighted element, with the finding's real
+   * message — the same visual language used on the install page.
    * @private
    */
   _showFloatingTag(element, issue) {
     this._removeFloatingTag();
 
     const rect = element.getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) return; // ya no está en pantalla
+    if (rect.width === 0 && rect.height === 0) return; // no longer on screen
 
     const tag = document.createElement("div");
     tag.className = `a11y-audit-floating-tag ${issue.severity}`;
@@ -1040,7 +1038,7 @@ class AuditUI {
   }
 
   /**
-   * Reemplaza temporalmente el texto de una pista y lo restaura
+   * Temporarily swaps a hint's text and restores it afterwards
    * @private
    */
   _flashHint(hintEl, text) {
@@ -1053,7 +1051,7 @@ class AuditUI {
   }
 
   /**
-   * Resalta un elemento en la página
+   * Highlights an element on the page
    * @private
    */
   highlightElement(element) {
@@ -1063,7 +1061,7 @@ class AuditUI {
   }
 
   /**
-   * Limpia todos los resaltados
+   * Clears all highlights
    * @private
    */
   _clearHighlights() {
@@ -1075,20 +1073,20 @@ class AuditUI {
   }
 
   /**
-   * Copia los resultados al portapapeles en formato JSON
+   * Copies the results to the clipboard as JSON
    * @private
    */
   _copyResultsToClipboard() {
-    // Si hay un Auditor conectado, usa el JSON completo (metadata + summary
-    // + resultados) — es el mismo formato que espera el visor de
-    // resultados. Sin Auditor, cae al mapa interno como antes.
+    // If an Auditor is connected, use the full JSON (metadata + summary +
+    // results) — the same format the results viewer expects. Without an
+    // Auditor, fall back to the internal map like before.
     const payload =
       typeof this.getFullResults === "function"
         ? this.getFullResults()
         : this.results;
     const json = JSON.stringify(payload, null, 2);
     navigator.clipboard.writeText(json).then(() => {
-      // Feedback visual
+      // Visual feedback
       const button = this.container?.querySelector("#a11y-copy-json");
       const originalText = button?.textContent;
       button.textContent = "✓ Copiado!";
@@ -1096,14 +1094,14 @@ class AuditUI {
         button.textContent = originalText;
       }, 2000);
 
-      // También loguear en consola
+      // Also log to the console
       console.log("📋 Resultados de auditoría copiados al portapapeles");
       console.log(JSON.parse(json));
     });
   }
 
   /**
-   * Escapa caracteres HTML
+   * Escapes HTML characters
    * @private
    */
   _escapeHtml(text) {
@@ -1113,7 +1111,7 @@ class AuditUI {
   }
 
   /**
-   * Destruye el panel y limpia
+   * Destroys the panel and cleans up
    */
   destroy() {
     this._clearHighlights();
@@ -1125,12 +1123,12 @@ class AuditUI {
 }
 
 /**
- * Constantes compartidas para etiquetar cada hallazgo con su criterio WCAG
- * (2.1/2.2) y nivel de conformancia, o "buena práctica" cuando el chequeo
- * es una convención razonable pero WCAG no lo exige puntualmente.
+ * Shared constants for tagging each finding with its WCAG criterion
+ * (2.1/2.2) and conformance level, or "buena práctica" (best practice) when
+ * the check is a reasonable convention but WCAG doesn't strictly require it.
  *
- * Importado por todos los analizadores — vive en un solo lugar para que
- * build.js pueda concatenarlo sin choques de nombres entre archivos.
+ * Imported by every analyzer — lives in a single place so build.js can
+ * concatenate it without name clashes across files.
  */
 const BEST_PRACTICE = { criterion: null, level: "buena práctica" };
 
@@ -1148,8 +1146,8 @@ const WCAG = {
 };
 
 /**
- * Analizador de Headings (h1-h6)
- * Valida jerarquía, detecta saltos de nivel, h1 duplicados, etc
+ * Headings analyzer (h1-h6)
+ * Validates hierarchy, detects level jumps, duplicate h1s, etc
  */
 
 
@@ -1180,7 +1178,7 @@ class HeadingsAnalyzer extends Analyzer {
       text: h.textContent.trim().substring(0, 60),
     }));
 
-    // Verificar H1 único
+    // Check for a single H1
     const h1Count = headingLevels.filter((h) => h.level === 1).length;
     if (h1Count === 0) {
       this.addIssue("error", "No hay H1 en la página", null, {
@@ -1198,7 +1196,7 @@ class HeadingsAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar saltos de nivel
+    // Check for level jumps
     let lastLevel = 0;
     for (let i = 0; i < headingLevels.length; i++) {
       const { element, level, text } = headingLevels[i];
@@ -1225,7 +1223,7 @@ class HeadingsAnalyzer extends Analyzer {
       lastLevel = level;
     }
 
-    // Verificar headings vacíos
+    // Check for empty headings
     headingLevels.forEach(({ element, level, text }) => {
       if (!text) {
         this.addIssue("error", `H${level} vacío sin texto`, element, {
@@ -1240,8 +1238,8 @@ class HeadingsAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador Axe-Core
- * Ejecuta la librería axe-core para detectar problemas de accesibilidad
+ * Axe-Core analyzer
+ * Runs the axe-core library to detect accessibility issues
  */
 
 
@@ -1253,7 +1251,7 @@ class AxeCoreAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Inyectar axe-core si no está cargado
+    // Inject axe-core if it isn't loaded yet
     if (!window.axe) {
       await this._loadAxeCore();
     }
@@ -1266,8 +1264,8 @@ class AxeCoreAnalyzer extends Analyzer {
     }
 
     try {
-      // Excluir el propio panel del auditor: si no, axe-core también analiza
-      // el sidebar que acabamos de inyectar y contamina los resultados.
+      // Exclude the auditor's own panel: otherwise axe-core also analyzes
+      // the sidebar we just injected and contaminates the results.
       const context = document.getElementById("a11y-audit-sidebar")
         ? { exclude: [["#a11y-audit-sidebar"]] }
         : document;
@@ -1278,7 +1276,7 @@ class AxeCoreAnalyzer extends Analyzer {
         });
       });
 
-      // Procesar violations
+      // Process violations
       results.violations?.forEach((violation) => {
         const wcag = this._parseWcagTags(violation.tags);
         violation.nodes?.forEach((node) => {
@@ -1297,14 +1295,14 @@ class AxeCoreAnalyzer extends Analyzer {
         });
       });
 
-      // Contar passes
+      // Count passes
       results.passes?.forEach((pass) => {
         pass.nodes?.forEach(() => {
           this.markPassed();
         });
       });
 
-      // Agregar metadata
+      // Add metadata
       this.results.inapplicable = results.inapplicable?.length || 0;
       this.results.timestamp = new Date().toISOString();
 
@@ -1323,9 +1321,9 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * axe-core ya trae sus propias etiquetas WCAG en cada regla (ej.
-   * ["wcag2aa", "wcag143", ...] para contraste) — las leemos en vez de
-   * adivinar un criterio nosotros mismos.
+   * axe-core already ships its own WCAG tags on every rule (e.g.
+   * ["wcag2aa", "wcag143", ...] for contrast) — we read those instead of
+   * guessing a criterion ourselves.
    * @private
    */
   _parseWcagTags(tags) {
@@ -1349,9 +1347,9 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * axe-core a veces devuelve selectores compuestos (arrays, para elementos
-   * dentro de iframes/shadow DOM) o selectores que document.querySelector
-   * no puede resolver. Nunca debe tirar abajo el resto del análisis.
+   * axe-core sometimes returns composite selectors (arrays, for elements
+   * inside iframes/shadow DOM) or selectors that document.querySelector
+   * can't resolve. This should never take down the rest of the analysis.
    * @private
    */
   _safeQuerySelector(target) {
@@ -1365,7 +1363,7 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * Carga axe-core desde CDN
+   * Loads axe-core from a CDN
    * @private
    */
   _loadAxeCore() {
@@ -1374,15 +1372,15 @@ class AxeCoreAnalyzer extends Analyzer {
       script.src =
         "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.2/axe.min.js";
       script.onload = () => resolve();
-      script.onerror = () => resolve(); // Resolver aunque falle
+      script.onerror = () => resolve(); // Resolve even if it fails
       document.head.appendChild(script);
     });
   }
 }
 
 /**
- * Analizador de Imágenes
- * Valida alt text, detecta imágenes decorativas, etc
+ * Images analyzer
+ * Validates alt text, detects decorative images, etc
  */
 
 
@@ -1394,7 +1392,7 @@ class ImagesAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Encontrar todas las imágenes
+    // Find all images
     const images = this._querySelectorAll("img").filter((img) => this._isVisible(img));
     const svgs = this._querySelectorAll("svg").filter((svg) => this._isVisible(svg));
     const backgroundImages = this._findBackgroundImages();
@@ -1406,7 +1404,7 @@ class ImagesAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar IMG tags
+    // Analyze IMG tags
     images.forEach((img) => {
       const alt = img.getAttribute("alt");
       const ariaLabel = img.getAttribute("aria-label");
@@ -1419,7 +1417,7 @@ class ImagesAnalyzer extends Analyzer {
           wcag: WCAG.NON_TEXT_CONTENT,
         });
       } else if (alt === "") {
-        // alt vacío es válido si es decorativa
+        // an empty alt is valid if the image is decorative
         if (role !== "presentation" && role !== "none") {
           this.addIssue(
             "warning",
@@ -1444,7 +1442,7 @@ class ImagesAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar SVGs
+    // Analyze SVGs
     svgs.forEach((svg) => {
       const title = svg.querySelector("title");
       const desc = svg.querySelector("desc");
@@ -1453,8 +1451,8 @@ class ImagesAnalyzer extends Analyzer {
       const role = svg.getAttribute("role");
 
       const hasAccessibleName = !!(title || desc || ariaLabel || ariaLabelledBy);
-      // Un ícono decorativo se oculta a propósito de los lectores de
-      // pantalla — eso es lo correcto, no le hace falta ninguna descripción.
+      // A decorative icon is deliberately hidden from screen readers — that
+      // is correct, it doesn't need any description at all.
       const isMarkedDecorative =
         svg.getAttribute("aria-hidden") === "true" ||
         role === "presentation" ||
@@ -1472,7 +1470,7 @@ class ImagesAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar background images
+    // Analyze background images
     backgroundImages.forEach(({ element, url }) => {
       const ariaLabel = element.getAttribute("aria-label");
       const role = element.getAttribute("role");
@@ -1489,7 +1487,7 @@ class ImagesAnalyzer extends Analyzer {
   }
 
   /**
-   * Encuentra elementos con background-image
+   * Finds elements with a background-image
    * @private
    */
   _findBackgroundImages() {
@@ -1511,8 +1509,8 @@ class ImagesAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de Contraste
- * Valida relación de contraste según WCAG
+ * Contrast analyzer
+ * Validates contrast ratio per WCAG
  */
 
 
@@ -1524,7 +1522,7 @@ class ContrastAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Obtener todos los elementos con texto
+    // Get all elements with text
     const textElements = this._querySelectorAll(
       "p, span, a, h1, h2, h3, h4, h5, h6, button, label, li, td, th, div",
     );
@@ -1533,13 +1531,13 @@ class ContrastAnalyzer extends Analyzer {
     let skippedCount = 0;
 
     textElements.forEach((element) => {
-      // Solo evaluar elementos que renderizan texto directamente. Un <div>
-      // que solo envuelve a un <span> con su propio color no es quien
-      // pinta el texto: comparar SU color contra el fondo da un resultado
-      // que no corresponde a nada visible en la página.
+      // Only evaluate elements that render text directly. A <div> that
+      // just wraps a <span> with its own color isn't the one painting the
+      // text: comparing ITS color against the background gives a result
+      // that doesn't correspond to anything visible on the page.
       if (!this._hasOwnVisibleText(element)) return;
 
-      // Saltar elementos ocultos
+      // Skip hidden elements
       const style = this._getComputedStyle(element);
       if (style.display === "none" || style.visibility === "hidden") return;
 
@@ -1577,7 +1575,7 @@ class ContrastAnalyzer extends Analyzer {
     });
 
     if (checkedCount === 0 && skippedCount === 0) {
-      // No había ningún elemento de texto que evaluar en la página.
+      // There was no text element on the page to evaluate.
       this.markPassed();
     } else if (skippedCount > 0) {
       this.addIssue(
@@ -1592,8 +1590,8 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Detecta si un elemento tiene un nodo de texto propio (hijo directo),
-   * en vez de texto que solo existe porque un descendiente lo aporta.
+   * Detects whether an element has its own text node (a direct child),
+   * instead of text that only exists because a descendant provides it.
    * @private
    */
   _hasOwnVisibleText(element) {
@@ -1614,7 +1612,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Obtiene información de colores de un elemento
+   * Gets color information for an element
    * @private
    */
   _getColorInfo(element) {
@@ -1624,7 +1622,7 @@ class ContrastAnalyzer extends Analyzer {
     let sawBackgroundImage =
       style.backgroundImage && style.backgroundImage !== "none";
 
-    // Si el background es transparente, buscar en los padres
+    // If the background is transparent, look up through the ancestors
     let parent = element.parentElement;
     while (this._isTransparent(backgroundColor) && parent) {
       const parentStyle = this._getComputedStyle(parent);
@@ -1639,13 +1637,13 @@ class ContrastAnalyzer extends Analyzer {
 
     if (this._isTransparent(backgroundColor)) {
       if (sawBackgroundImage) {
-        // El fondo real viene de una imagen o gradiente (background-image):
-        // no podemos calcularlo de forma confiable sin renderizar el
-        // elemento. Mejor no evaluar que asumir un color equivocado.
+        // The real background comes from an image or gradient
+        // (background-image): we can't reliably calculate it without
+        // rendering the element. Better to skip than assume a wrong color.
         return null;
       }
-      // Nadie definió background-color ni background-image en la cadena:
-      // es el lienzo blanco por defecto del navegador.
+      // Nobody set a background-color or background-image anywhere in the
+      // chain: it's the browser's default white canvas.
       backgroundColor = "rgb(255, 255, 255)";
     }
 
@@ -1658,7 +1656,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Convierte RGB a Hex
+   * Converts RGB to Hex
    * @private
    */
   _rgbToHex(rgb) {
@@ -1679,7 +1677,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Calcula la relación de contraste WCAG
+   * Calculates the WCAG contrast ratio
    * @private
    */
   _calculateContrastRatio(foreground, background) {
@@ -1695,7 +1693,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Calcula la luminancia relativa de un color
+   * Calculates a color's relative luminance
    * @private
    */
   _getLuminance(hex) {
@@ -1713,7 +1711,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Verifica si cumple WCAG AA (4.5:1 normal, 3:1 large)
+   * Checks whether it meets WCAG AA (4.5:1 normal, 3:1 large)
    * @private
    */
   _isWCAGAA(ratio, element) {
@@ -1721,7 +1719,7 @@ class ContrastAnalyzer extends Analyzer {
     const fontSize = parseInt(style.fontSize);
     const fontWeight = style.fontWeight;
 
-    // Large text: 18pt (24px) o 14pt (18.66px) bold
+    // Large text: 18pt (24px) or 14pt (18.66px) bold
     const isLargeText =
       fontSize >= 24 ||
       (fontSize >= 18 &&
@@ -1735,8 +1733,8 @@ class ContrastAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de ARIA
- * Valida atributos ARIA, roles, propiedades, etc
+ * ARIA analyzer
+ * Validates ARIA attributes, roles, properties, etc
  */
 
 
@@ -1834,7 +1832,7 @@ class AriaAnalyzer extends Analyzer {
       const ariaLabelledBy = element.getAttribute("aria-labelledby");
       const ariaDescribedBy = element.getAttribute("aria-describedby");
 
-      // Validar role
+      // Validate role
       if (role && !validRoles.includes(role)) {
         this.addIssue("error", `Rol ARIA inválido: "${role}"`, element, {
           invalidRole: role,
@@ -1844,7 +1842,7 @@ class AriaAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Validar aria-labelledby
+      // Validate aria-labelledby
       if (ariaLabelledBy) {
         const ids = ariaLabelledBy.split(" ");
         let allExist = true;
@@ -1869,7 +1867,7 @@ class AriaAnalyzer extends Analyzer {
         }
       }
 
-      // Validar aria-describedby
+      // Validate aria-describedby
       if (ariaDescribedBy) {
         const ids = ariaDescribedBy.split(" ");
         let allExist = true;
@@ -1894,7 +1892,7 @@ class AriaAnalyzer extends Analyzer {
         }
       }
 
-      // Validar que elementos interactivos tengan accesibilidad
+      // Validate that interactive elements have an accessible name
       const tagName = element.tagName.toLowerCase();
       const isInteractive = [
         "button",
@@ -1904,8 +1902,8 @@ class AriaAnalyzer extends Analyzer {
         "textarea",
       ].includes(tagName);
 
-      // aria-hidden="true" saca al elemento del árbol de accesibilidad a
-      // propósito: pedirle un nombre accesible ahí no tiene sentido.
+      // aria-hidden="true" deliberately removes the element from the
+      // accessibility tree: requiring an accessible name there makes no sense.
       const isHiddenFromAT = element.getAttribute("aria-hidden") === "true";
 
       if (
@@ -1932,8 +1930,8 @@ class AriaAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de Formularios
- * Valida labels, inputs, validación accesible, etc
+ * Forms analyzer
+ * Validates labels, inputs, accessible validation, etc
  */
 
 
@@ -1955,7 +1953,7 @@ class FormsAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar inputs
+    // Analyze inputs
     inputs.forEach((input) => {
       const id = input.getAttribute("id");
       const name = input.getAttribute("name");
@@ -1966,7 +1964,7 @@ class FormsAnalyzer extends Analyzer {
         input.getAttribute("required") || input.getAttribute("aria-required");
       const disabled = input.disabled;
 
-      // Validar tipo
+      // Validate type
       const validTypes = [
         "text",
         "password",
@@ -2000,7 +1998,7 @@ class FormsAnalyzer extends Analyzer {
         );
       }
 
-      // Validar etiqueta
+      // Validate label
       let hasLabel = false;
 
       if (ariaLabel || ariaLabelledBy) {
@@ -2008,11 +2006,11 @@ class FormsAnalyzer extends Analyzer {
       } else if (id && document.querySelector(`label[for="${id}"]`)) {
         hasLabel = true;
       } else if (input.closest("label")) {
-        // Label implícito: <label>Nombre <input></label>, válido sin for/id
+        // Implicit label: <label>Name <input></label>, valid without for/id
         hasLabel = true;
       }
 
-      // Algunos tipos no requieren label
+      // Some types don't require a label
       if (
         !hasLabel &&
         type !== "hidden" &&
@@ -2034,12 +2032,12 @@ class FormsAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Validar atributos requeridos
+      // Validate required attributes
       if (required) {
         this.markPassed();
       }
 
-      // Validar que input disabled tenga indicación visual
+      // Validate that a disabled input has a visual indication
       if (disabled) {
         const style = this._getComputedStyle(input);
         if (style.opacity !== "1") {
@@ -2048,14 +2046,14 @@ class FormsAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar labels
+    // Analyze labels
     labels.forEach((label) => {
       const forAttr = label.getAttribute("for");
       const text = label.textContent.trim();
       const wrapsAControl = !!label.querySelector("input, select, textarea");
 
       if (!forAttr && wrapsAControl) {
-        // Label implícito: <label>Nombre <input></label>, no necesita "for"
+        // Implicit label: <label>Name <input></label>, doesn't need "for"
         this.markPassed();
       } else if (!forAttr) {
         this.addIssue(
@@ -2094,8 +2092,8 @@ class FormsAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de Semántica HTML
- * Valida el uso correcto de etiquetas semánticas
+ * HTML Semantics analyzer
+ * Validates correct use of semantic tags
  */
 
 
@@ -2123,7 +2121,7 @@ class SemanticAnalyzer extends Analyzer {
     let hasNavIssue = false;
     let mainCount = 0;
 
-    // Verificar main
+    // Check main
     const mains = this._querySelectorAll("main");
     if (mains.length === 0 && divCount > 10) {
       this.addIssue("warning", "No se encontró etiqueta <main>", null, {
@@ -2147,7 +2145,7 @@ class SemanticAnalyzer extends Analyzer {
       mainCount++;
     }
 
-    // Verificar nav
+    // Check nav
     const navs = this._querySelectorAll("nav");
     if (navs.length === 0 && this._querySelectorAll("ul, ol").length > 0) {
       this.addIssue(
@@ -2164,7 +2162,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar header
+    // Check header
     const headers = this._querySelectorAll("header");
     if (headers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <header>", null, {
@@ -2175,7 +2173,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar footer
+    // Check footer
     const footers = this._querySelectorAll("footer");
     if (footers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <footer>", null, {
@@ -2186,7 +2184,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar sections
+    // Check sections
     const sections = this._querySelectorAll("section");
     sections.forEach((section) => {
       const heading = section.querySelector("h1, h2, h3, h4, h5, h6");
@@ -2200,7 +2198,7 @@ class SemanticAnalyzer extends Analyzer {
       }
     });
 
-    // Verificar articles
+    // Check articles
     const articles = this._querySelectorAll("article");
     articles.forEach((article) => {
       const heading = article.querySelector("h1, h2, h3, h4, h5, h6");
@@ -2214,7 +2212,7 @@ class SemanticAnalyzer extends Analyzer {
       }
     });
 
-    // Advertencia si hay muchos divs
+    // Warn if there are too many divs
     if (divCount > 50 && divCount > spanCount * 2) {
       this.addIssue(
         "info",
@@ -2236,8 +2234,8 @@ class SemanticAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de Teclado/Navegación
- * Valida navegación por teclado, focus, tabindex, traps, etc
+ * Keyboard/Navigation analyzer
+ * Validates keyboard navigation, focus, tabindex, traps, etc
  */
 
 
@@ -2258,14 +2256,14 @@ class KeyboardAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar elementos interactivos
+    // Analyze interactive elements
     interactiveElements.forEach((element) => {
       const tabindex = element.getAttribute("tabindex");
       const disabled = element.disabled;
       const role = element.getAttribute("role");
       const hasClick = element.hasAttribute("onclick");
 
-      // Verificar tabindex negativo en elementos que deberían ser accesibles
+      // Check for negative tabindex on elements that should be accessible
       if (tabindex && parseInt(tabindex) < 0) {
         const isNaturallyFocusable = [
           "button",
@@ -2289,7 +2287,7 @@ class KeyboardAnalyzer extends Analyzer {
         }
       }
 
-      // Verificar tabindex > 0 (evitar)
+      // Check for tabindex > 0 (should be avoided)
       if (tabindex && parseInt(tabindex) > 0) {
         this.addIssue(
           "warning",
@@ -2304,7 +2302,7 @@ class KeyboardAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Verificar divs/spans con click handlers
+      // Check for divs/spans with click handlers
       if (
         hasClick &&
         !["button", "a"].includes(element.tagName.toLowerCase())
@@ -2321,7 +2319,7 @@ class KeyboardAnalyzer extends Analyzer {
           );
         }
 
-        // Verificar que sea navegable por teclado
+        // Check that it's keyboard-navigable
         if (tabindex === null || tabindex === undefined) {
           this.addIssue(
             "error",
@@ -2337,11 +2335,11 @@ class KeyboardAnalyzer extends Analyzer {
 
     });
 
-    // Nota: el indicador de foco visible (:focus-visible) NO se puede
-    // comprobar desde acá — ver "Limitaciones" en la guía de uso. No tiene
-    // sentido reportar un "no sé" como si fuera un hallazgo de la auditoría.
+    // Note: the visible focus indicator (:focus-visible) CANNOT be
+    // checked from here — see "Limitations" in the usage guide. Reporting a
+    // "don't know" as if it were an audit finding wouldn't make sense.
 
-    // Buscar modal traps (focus no puede escapar)
+    // Look for modal traps (focus can't escape)
     const modals = this._querySelectorAll('[role="dialog"], dialog');
     modals.forEach((modal) => {
       const focusableElements = modal.querySelectorAll(
@@ -2366,8 +2364,8 @@ class KeyboardAnalyzer extends Analyzer {
 }
 
 /**
- * Analizador de Links
- * Valida texto de enlace, destino real y avisos de nueva pestaña
+ * Links analyzer
+ * Validates link text, the real destination, and new-tab warnings
  */
 
 
@@ -2414,7 +2412,7 @@ class LinksAnalyzer extends Analyzer {
       const hasImgAlt = !!link.querySelector("img[alt]:not([alt=''])");
       const accessibleName = ariaLabel || text;
 
-      // Texto de enlace
+      // Link text
       if (!accessibleName && !hasImgAlt) {
         this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {
           wcag: WCAG.LINK_PURPOSE,
@@ -2433,7 +2431,7 @@ class LinksAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Destino real
+      // Real destination
       const href = link.getAttribute("href");
       if (href === null) {
         this.addIssue(
@@ -2453,7 +2451,7 @@ class LinksAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Nueva pestaña sin aviso
+      // New tab without a warning
       if (link.getAttribute("target") === "_blank") {
         const warnsUser = NEW_TAB_WARNING_PATTERN.test(
           `${ariaLabel || ""} ${text}`,
@@ -2489,8 +2487,8 @@ class LinksAnalyzer extends Analyzer {
 }
 
 /**
- * Motor principal de auditoría
- * Orquesta la ejecución de todos los analizadores y compila resultados
+ * Main audit engine
+ * Orchestrates running all the analyzers and compiles the results
  */
 
 
@@ -2518,16 +2516,15 @@ class Auditor {
     this.results = {};
     this.isRunning = false;
 
-    // Le da al panel una forma de pedir el JSON completo (con metadata y
-    // summary), no solo el mapa interno de analizadores que usa para
-    // pintar las pestañas.
+    // Gives the panel a way to request the full JSON (with metadata and
+    // summary), not just the internal analyzer map it uses to render tabs.
     if (this.ui) {
       this.ui.getFullResults = () => this.getResults();
     }
   }
 
   /**
-   * Ejecuta todos los analizadores
+   * Runs all the analyzers
    */
   async runAll() {
     if (this.isRunning) return;
@@ -2537,7 +2534,7 @@ class Auditor {
 
     this.ui?.open();
 
-    // Ejecutar todos los analizadores
+    // Run every analyzer
     const promises = this.analyzers.map((analyzer) =>
       this._runAnalyzer(analyzer),
     );
@@ -2549,7 +2546,7 @@ class Auditor {
   }
 
   /**
-   * Ejecuta un analizador específico
+   * Runs a specific analyzer
    */
   async runAnalyzer(analyzerName) {
     const analyzer = this.analyzers.find((a) => a.name === analyzerName);
@@ -2566,7 +2563,7 @@ class Auditor {
   }
 
   /**
-   * Ejecuta un analizador y maneja errores
+   * Runs an analyzer and handles errors
    * @private
    */
   async _runAnalyzer(analyzer) {
@@ -2596,7 +2593,7 @@ class Auditor {
   }
 
   /**
-   * Obtiene los resultados compilados
+   * Gets the compiled results
    */
   getResults(analyzerName = null) {
     if (analyzerName) {
@@ -2619,7 +2616,7 @@ class Auditor {
   }
 
   /**
-   * Genera un resumen de todos los resultados
+   * Generates a summary of all the results
    * @private
    */
   _generateSummary() {
@@ -2649,7 +2646,7 @@ class Auditor {
   }
 
   /**
-   * Calcula la severidad general
+   * Calculates overall severity
    * @private
    */
   _calculateSeverity(errors, warnings) {
@@ -2660,14 +2657,14 @@ class Auditor {
   }
 
   /**
-   * Obtiene el nombre de todos los analizadores
+   * Gets the names of all the analyzers
    */
   getAnalyzerNames() {
     return this.analyzers.map((a) => a.name);
   }
 
   /**
-   * Limpia todos los resultados
+   * Clears all results
    */
   reset() {
     this.results = {};
@@ -2676,11 +2673,11 @@ class Auditor {
 }
 
 /**
- * Utilidades para manejo de JSON y portapapeles
+ * Utilities for handling JSON and the clipboard
  */
 class JsonUtils {
   /**
-   * Serializa resultados a JSON
+   * Serializes results to JSON
    */
   static stringify(results, pretty = true) {
     try {
@@ -2692,7 +2689,7 @@ class JsonUtils {
   }
 
   /**
-   * Copia JSON al portapapeles
+   * Copies JSON to the clipboard
    */
   static async copyToClipboard(results) {
     try {
@@ -2708,7 +2705,7 @@ class JsonUtils {
     } catch (error) {
       console.error("Error copiando al portapapeles:", error);
 
-      // Fallback si clipboard API no funciona
+      // Fallback in case the clipboard API doesn't work
       try {
         const textArea = document.createElement("textarea");
         textArea.value = this.stringify(results, true);
@@ -2727,7 +2724,7 @@ class JsonUtils {
   }
 
   /**
-   * Loguea resultados en consola de forma legible
+   * Logs results to the console in a readable way
    */
   static logResults(results) {
     console.group(
@@ -2760,7 +2757,7 @@ class JsonUtils {
     console.log("Severidad: %c%s", "font-weight: bold;", summary.severity);
     console.groupEnd();
 
-    // Resultados por analizador
+    // Results per analyzer
     console.group(
       "%c📋 Resultados por Analizador",
       "color: #06b6d4; font-weight: bold;",
@@ -2804,7 +2801,7 @@ class JsonUtils {
   }
 
   /**
-   * Exporta resultados a CSV
+   * Exports results to CSV
    */
   static exportToCsv(results) {
     const rows = [];
@@ -2834,7 +2831,7 @@ class JsonUtils {
   }
 
   /**
-   * Descarga resultados como archivo JSON
+   * Downloads results as a JSON file
    */
   static downloadJson(results, filename = "a11y-audit.json") {
     const json = this.stringify(results, true);
@@ -2850,7 +2847,7 @@ class JsonUtils {
   }
 
   /**
-   * Descarga resultados como archivo CSV
+   * Downloads results as a CSV file
    */
   static downloadCsv(results, filename = "a11y-audit.csv") {
     const csv = this.exportToCsv(results);
@@ -2867,17 +2864,17 @@ class JsonUtils {
 }
 
 /**
- * BOOKMARKLET PRINCIPAL - A11Y AUDITOR
+ * MAIN BOOKMARKLET - A11Y AUDITOR
  *
- * Este archivo es la lógica de orquestación del bookmarklet principal.
- * `build.js` lo concatena junto con todas las clases de src/core y
- * src/analyzers dentro de un único IIFE para generar el bookmarklet final
- * (ver bookmarklets/dist/ tras ejecutar `npm run build`).
+ * This file is the orchestration logic for the main bookmarklet.
+ * `build.js` concatenates it together with all the classes from src/core
+ * and src/analyzers into a single IIFE to generate the final bookmarklet
+ * (see bookmarklets/dist/ after running `npm run build`).
  */
 
 (async function initAuditBookmarklet() {
   try {
-    // Evitar ejecutarse múltiples veces
+    // Avoid running multiple times
     if (window.a11yAuditRunning) {
       console.warn("Auditoría ya en ejecución");
       return;
@@ -2885,16 +2882,16 @@ class JsonUtils {
 
     window.a11yAuditRunning = true;
 
-    // Crear UI
+    // Create UI
     const ui = new AuditUI();
 
-    // Crear auditor
+    // Create auditor
     const auditor = new Auditor(ui);
 
-    // Abrir panel
+    // Open panel
     ui.open();
 
-    // Crear menú de opciones
+    // Create options menu
     const contentContainer = ui.container.querySelector(".a11y-audit-content");
     const analyzerIcons = {
       Headings:
@@ -2948,10 +2945,10 @@ class JsonUtils {
     `;
 
     // Event listeners
-    // Se buscan dentro de contentContainer, no en document: el bookmarklet
-    // se inyecta en páginas ajenas que pueden tener sus propios elementos
-    // con id="run-all" o clase "analyzer-btn", y una búsqueda global podría
-    // engancharse al elemento equivocado del sitio en vez de al del panel.
+    // Looked up inside contentContainer, not document: the bookmarklet is
+    // injected into third-party pages that may have their own elements with
+    // id="run-all" or class "analyzer-btn", and a global lookup could latch
+    // onto the wrong element from the site instead of the panel's own.
     contentContainer
       .querySelector("#run-all")
       .addEventListener("click", async () => {
