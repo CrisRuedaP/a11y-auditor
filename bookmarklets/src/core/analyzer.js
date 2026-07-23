@@ -76,7 +76,7 @@ class Analyzer {
    * @private
    */
   _generateSelector(element) {
-    if (element.id) return `#${element.id}`;
+    if (element.id) return `#${CSS.escape(element.id)}`;
 
     let path = [];
     let current = element;
@@ -85,7 +85,7 @@ class Analyzer {
       let selector = current.tagName.toLowerCase();
 
       if (current.id) {
-        selector += `#${current.id}`;
+        selector += `#${CSS.escape(current.id)}`;
         path.unshift(selector);
         break;
       }
