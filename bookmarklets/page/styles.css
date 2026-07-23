@@ -1,38 +1,56 @@
 /*
   Sistema de diseño de A11Y Auditor.
-  Motivo central: la propia herramienta funciona señalando problemas sobre
-  la página con una etiqueta y una línea guía (leader line). Ese lenguaje
-  visual -- "etiqueta de hallazgo" -- es la firma que se repite en la
-  página: en el mockup del hero, en las tarjetas de analizadores y en los
-  estados de resultado. Nada de tarjetas con icono + gradiente genérico.
+  Paleta: mayormente escala de grises (negro/blanco/gris), con un solo
+  acento de color -- rojo -- reservado para lo crítico, igual que un botón
+  de "eliminar". Warning/pass usan un acento propio (semántico, no de
+  marca) porque una herramienta de auditoría necesita distinguir 3
+  severidades sin depender solo del color, y estas se acompañan siempre
+  de texto/ícono.
+
+  Tipografía: Space Grotesk para títulos (geométrica, legible incluso en
+  textos cortos -- se descartó Bricolage Grotesque por sus formas menos
+  accesibles), Source Serif 4 para texto de lectura, y Archivo Narrow
+  condensada para navegación, botones y etiquetas de UI. IBM Plex Mono
+  para selectores/código.
+
+  Tamaños de texto: 1rem (16px) como piso para cualquier texto de lectura;
+  0.875rem (14px) es el mínimo permitido, reservado solo para tags/badges
+  cortos. Todo en rem para respetar el zoom/tamaño de fuente del navegador.
+
+  Motivo central de marca: la propia herramienta funciona señalando
+  problemas sobre la página con una etiqueta -- ese lenguaje visual se
+  repite en el hero, en las tarjetas de analizadores y en los resultados.
 */
 
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:wght@400;500;600&family=Archivo+Narrow:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
 :root {
-  --ink: #14171c;
-  --ink-soft: #4a4f59;
-  --paper: #f5f4f0;
+  --ink: #1a1a1a;
+  --ink-soft: #6b6866;
+  --ink-faint: #797676;
+  --paper: #f0f0f0;
   --paper-raised: #ffffff;
-  --line: #dad7cf;
-  --line-strong: #b9b5aa;
-  --accent-flag: #b3311f;
-  --accent-flag-bg: #fbe8e4;
-  --accent-warn: #91530a;
-  --accent-warn-bg: #faf0dc;
-  --accent-pass: #206140;
-  --accent-pass-bg: #e5f3ea;
-  --accent-focus: #1d4ed1;
-  --accent-focus-bg: #e8edfc;
+  --line: #e1dedd;
+  --line-strong: #c7c3c2;
+  --accent-flag: #a6331f;
+  --accent-flag-bg: #f5e1de;
+  --accent-warn: #7a5206;
+  --accent-warn-bg: #f2e9d8;
+  --accent-pass: #2e6b4c;
+  --accent-pass-bg: #e3efe7;
+  --accent-focus: #1a1a1a;
+  --accent-focus-bg: #e6e6e6;
 
   --font-display: "Space Grotesk", "Segoe UI", sans-serif;
-  --font-body: "Inter", "Segoe UI", sans-serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --font-label: "Archivo Narrow", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", "Courier New", monospace;
 
-  --radius: 10px;
-  --radius-sm: 6px;
+  --radius: 1.125rem;
+  --radius-sm: 0.5rem;
+  --radius-btn: 0.625rem;
   --shadow-card:
-    0 1px 2px rgba(20, 23, 28, 0.04), 0 8px 24px -12px rgba(20, 23, 28, 0.18);
+    0 1px 2px rgba(26, 26, 26, 0.04), 0 12px 32px -16px rgba(26, 26, 26, 0.16);
 }
 
 * {
@@ -59,6 +77,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
+  font-size: 1rem;
   background: var(--paper);
   color: var(--ink);
   line-height: 1.6;
@@ -70,19 +89,30 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 600;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
 }
 
+h1 em,
+h2 em,
+h3 em {
+  font-style: italic;
+  font-weight: 700;
+}
+
 p {
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
   color: var(--ink-soft);
+  font-size: 1rem;
 }
 
 a {
-  color: var(--accent-focus);
+  color: var(--ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 code,
@@ -95,7 +125,7 @@ code,
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-focus);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -116,51 +146,53 @@ code,
 
 .skip-link {
   position: absolute;
-  left: 12px;
-  top: -60px;
+  left: 0.75rem;
+  top: -3.75rem;
   background: var(--ink);
   color: var(--paper);
-  padding: 10px 16px;
+  padding: 0.625rem 1rem;
   border-radius: var(--radius-sm);
   z-index: 1000;
   transition: top 0.15s ease;
+  font-family: var(--font-label);
+  font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
 }
 
 .skip-link:focus {
-  top: 12px;
+  top: 0.75rem;
 }
 
 .wrap {
-  max-width: 1080px;
+  max-width: 67.5rem;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 1.5rem;
 }
 
 /* -------- header de sitio -------- */
 
 .site-header {
   border-bottom: 1px solid var(--line);
-  background: var(--paper-raised);
+  background: var(--paper);
 }
 
 .site-header .wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding-top: 16px;
-  padding-bottom: 16px;
+  gap: 1rem;
+  padding-top: 1.125rem;
+  padding-bottom: 1.125rem;
 }
 
 .site-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 1.125rem;
   color: var(--ink);
   text-decoration: none;
 }
@@ -170,43 +202,45 @@ code,
 }
 
 .site-logo .mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: var(--radius-sm);
   background: var(--ink);
   color: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 500;
   flex: none;
 }
 
 .site-nav {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
   flex-wrap: wrap;
+  font-family: var(--font-label);
 }
 
 .site-nav a {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--ink-soft);
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 0.5rem 0.875rem;
   border-radius: var(--radius-sm);
 }
 
 .site-nav a:hover {
   color: var(--ink);
-  background: var(--paper);
+  background: var(--paper-raised);
 }
 
 .site-nav a[aria-current="page"] {
   color: var(--ink);
-  background: var(--paper);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-card);
 }
 
 /* -------- botones -------- */
@@ -215,13 +249,14 @@ code,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0.75rem 1.375rem;
+  border-radius: var(--radius-btn);
   border: 1px solid transparent;
-  font-family: var(--font-body);
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -241,7 +276,7 @@ code,
 }
 
 .btn-primary:hover {
-  background: #262b33;
+  background: #333;
 }
 
 .btn-outline {
@@ -259,27 +294,88 @@ code,
   width: 100%;
 }
 
-.btn-drag::before {
-  content: "📌";
-  margin-right: 6px;
+/* Botón que solo lleva ícono (ej. "copiar código"): el nombre accesible
+   viene del aria-label en el HTML, nunca solo del ícono. */
+.btn-icon {
+  padding: 0.625rem;
+  flex: none;
+}
+
+.btn-icon .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* -------- iconos de línea -------- */
+
+.icon {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-tile {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--ink);
+  flex: none;
+}
+
+/* -------- eyebrow / rótulos numerados -------- */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  padding: 0.375rem 0.875rem;
+  border-radius: 999px;
+}
+
+.eyebrow-label {
+  font-family: var(--font-label);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.625rem;
 }
 
 /* -------- footer -------- */
 
 .site-footer {
   border-top: 1px solid var(--line);
-  margin-top: 64px;
+  margin-top: 4rem;
 }
 
 .site-footer .wrap {
-  padding-top: 32px;
-  padding-bottom: 32px;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
+  gap: 0.75rem;
+  font-family: var(--font-label);
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 
@@ -292,11 +388,12 @@ code,
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  align-self: flex-start;
+  gap: 0.375rem;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 500;
-  padding: 4px 10px;
+  padding: 0.25rem 0.625rem;
   border-radius: 999px;
   line-height: 1.4;
   white-space: nowrap;
@@ -304,8 +401,8 @@ code,
 
 .tag::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 0.375rem;
+  height: 0.375rem;
   border-radius: 50%;
   flex: none;
 }

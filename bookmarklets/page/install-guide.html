@@ -11,13 +11,17 @@
     <link rel="stylesheet" href="styles.css" />
     <style>
       .page-header {
-        padding: 48px 0 32px;
-        border-bottom: 1px solid var(--line);
+        padding: 48px 0 36px;
       }
 
       .page-header h1 {
-        font-size: clamp(28px, 4vw, 38px);
-        margin-bottom: 10px;
+        font-size: clamp(1.875rem, 4.5vw, 2.625rem);
+        margin: 14px 0 10px;
+      }
+
+      .page-header p {
+        max-width: 60ch;
+        font-size: 1rem;
       }
 
       main .wrap {
@@ -26,16 +30,16 @@
 
       .section {
         padding: 36px 0;
-        border-bottom: 1px solid var(--line);
+        border-top: 1px solid var(--line);
       }
 
       .section h2 {
-        font-size: 22px;
+        font-size: 1.5rem;
         margin-bottom: 16px;
       }
 
       .section h3 {
-        font-size: 16px;
+        font-size: 1.125rem;
         margin: 20px 0 8px;
       }
 
@@ -63,8 +67,8 @@
 
       .step-index {
         flex: none;
-        width: 28px;
-        height: 28px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         background: var(--ink);
         color: var(--paper);
@@ -72,7 +76,7 @@
         align-items: center;
         justify-content: center;
         font-family: var(--font-mono);
-        font-size: 12px;
+        font-size: 0.875rem;
         font-weight: 500;
       }
 
@@ -88,7 +92,7 @@
         overflow-x: auto;
         margin: 12px 0;
         font-family: var(--font-mono);
-        font-size: 12.5px;
+        font-size: 1rem;
         line-height: 1.6;
       }
 
@@ -98,13 +102,19 @@
         padding: 14px 16px;
         border-radius: var(--radius-sm);
         margin: 16px 0;
+        color: var(--ink);
+      }
+
+      .tip p,
+      .tip code {
+        color: var(--ink);
       }
 
       .tip-title {
         font-weight: 600;
         color: var(--ink);
         margin-bottom: 4px;
-        font-size: 14px;
+        font-size: 0.875rem;
       }
 
       .warning {
@@ -119,32 +129,40 @@
         font-weight: 600;
         color: var(--accent-warn);
         margin-bottom: 4px;
-        font-size: 14px;
+        font-size: 0.875rem;
       }
 
       .analyzer-guide {
         border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        padding: 16px;
+        border-radius: var(--radius);
+        padding: 18px;
         margin: 12px 0;
         background: var(--paper-raised);
+        box-shadow: var(--shadow-card);
+        display: flex;
+        gap: 14px;
+      }
+
+      .analyzer-guide .icon-tile {
+        margin-top: 2px;
       }
 
       .analyzer-title {
-        font-weight: 600;
+        font-weight: 700;
+        font-family: var(--font-display);
         color: var(--ink);
-        margin-bottom: 6px;
-        font-size: 15px;
+        margin-bottom: 4px;
+        font-size: 1rem;
       }
 
       .analyzer-description {
-        font-size: 13px;
+        font-size: 1rem;
         color: var(--ink-soft);
         margin-bottom: 8px;
       }
 
       .analyzer-checks {
-        font-size: 13px;
+        font-size: 1rem;
         color: var(--ink-soft);
       }
 
@@ -152,7 +170,7 @@
         width: 100%;
         border-collapse: collapse;
         margin: 16px 0;
-        font-size: 14px;
+        font-size: 1rem;
       }
 
       .table th {
@@ -161,6 +179,7 @@
         padding: 10px 12px;
         text-align: left;
         border-bottom: 2px solid var(--line);
+        border-radius: 8px 8px 0 0;
       }
 
       .table td {
@@ -186,7 +205,7 @@
         padding: 14px 16px;
         font-family: var(--font-body);
         font-weight: 600;
-        font-size: 14px;
+        font-size: 1rem;
         color: var(--ink);
         cursor: pointer;
         display: flex;
@@ -209,7 +228,7 @@
         max-height: 0;
         overflow: hidden;
         color: var(--ink-soft);
-        font-size: 14px;
+        font-size: 1rem;
         transition: max-height 0.2s ease;
       }
 
@@ -239,14 +258,20 @@
     <main id="main">
       <div class="page-header">
         <div class="wrap">
-          <h1>Guía de uso</h1>
-          <p>Instalación, qué revisa cada analizador y cómo leer los resultados.</p>
+          <span class="eyebrow-label">Documentación</span>
+          <h1>Guía de uso <em>técnica</em></h1>
+          <p>
+            Instalación, qué revisa cada analizador y cómo leer los
+            resultados — sin licencias ni cuentas, todo corre en tu
+            navegador.
+          </p>
         </div>
       </div>
 
       <div class="wrap">
         <section class="section" id="instalacion">
-          <h2>Instalación</h2>
+          <span class="eyebrow-label">01 · Instalación</span>
+          <h2>Pasos para comenzar</h2>
 
           <div class="step">
             <span class="step-index">1</span>
@@ -270,7 +295,7 @@
             <div>
               <strong>Arrastra el botón de instalación</strong>
               <p>
-                Arrastra cualquiera de los botones "📌 Marcadores" a la
+                Arrastra cualquiera de los botones "📌 A11Y Auditor" a la
                 barra. Un clic normal solo lo ejecutaría sobre la propia
                 página de instalación.
               </p>
@@ -312,14 +337,15 @@
         </section>
 
         <section class="section">
-          <h2>Cómo funciona</h2>
+          <span class="eyebrow-label">02 · Cómo funciona</span>
+          <h2>Panel completo y marcadores rápidos</h2>
 
           <h3>Bookmarklet principal</h3>
           <p>Al hacer clic en el marcador "A11Y Auditor — Completo":</p>
           <ul>
             <li>Se abre un panel lateral sobre la página que estés viendo.</li>
             <li>Eliges ejecutar todos los análisis o solo uno.</li>
-            <li>Los elementos problemáticos quedan resaltados en la página.</li>
+            <li>Cada hallazgo es clickeable: te lleva y resalta el elemento real en la página.</li>
             <li>El resultado se copia automáticamente al portapapeles en JSON.</li>
           </ul>
 
@@ -338,133 +364,218 @@
         </section>
 
         <section class="section">
-          <h2>Guía de analizadores</h2>
+          <span class="eyebrow-label">03 · Guía de analizadores</span>
+          <h2>Dimensiones de diagnóstico</h2>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">📋 Headings (encabezados)</div>
-            <div class="analyzer-description">Jerarquía h1–h6 de la página.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Un único &lt;h1&gt;</li>
-                <li>Sin saltos de nivel (h1 → h3)</li>
-                <li>Sin encabezados vacíos</li>
-              </ul>
-              Ayuda a quienes usan lectores de pantalla a navegar por
-              secciones en vez de leer todo linealmente.
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <line x1="6" y1="4" x2="6" y2="18" />
+                <line x1="16" y1="4" x2="16" y2="18" />
+                <line x1="6" y1="11" x2="16" y2="11" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Headings (encabezados)</div>
+              <div class="analyzer-description">Jerarquía h1–h6 de la página.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Un único &lt;h1&gt;</li>
+                  <li>Sin saltos de nivel (h1 → h3)</li>
+                  <li>Sin encabezados vacíos ni ocultos por CSS</li>
+                </ul>
+                Ayuda a quienes usan lectores de pantalla a navegar por
+                secciones en vez de leer todo linealmente.
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🔍 Axe-core</div>
-            <div class="analyzer-description">Motor de auditoría de Deque, estándar de la industria.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Roles y propiedades ARIA</li>
-                <li>Elementos semánticos correctos</li>
-                <li>Contraste mínimo</li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <circle cx="12" cy="12" r="8" />
+                <polyline points="8.5 12 11 14.5 16 9" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Axe-core</div>
+              <div class="analyzer-description">Motor de auditoría de Deque, estándar de la industria.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Roles y propiedades ARIA</li>
+                  <li>Elementos semánticos correctos</li>
+                  <li>Contraste mínimo</li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🖼️ Imágenes</div>
-            <div class="analyzer-description">Texto alternativo y descripciones.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Todas las imágenes tienen atributo alt</li>
-                <li>Alt vacío solo si es realmente decorativa</li>
-                <li>
-                  SVGs: si son decorativos, marcados con
-                  <code>aria-hidden="true"</code>; si no, con
-                  &lt;title&gt;/&lt;desc&gt; o aria-label
-                </li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <rect x="3" y="4" width="18" height="14" rx="2" />
+                <circle cx="8.5" cy="9.5" r="1.4" />
+                <polyline points="21 15 15 9 4.5 18" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Imágenes</div>
+              <div class="analyzer-description">Texto alternativo y descripciones.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Todas las imágenes tienen atributo alt</li>
+                  <li>Alt vacío solo si es realmente decorativa</li>
+                  <li>
+                    SVGs: si son decorativos, marcados con
+                    <code>aria-hidden="true"</code>; si no, con
+                    &lt;title&gt;/&lt;desc&gt; o aria-label
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🎚️ Contraste</div>
-            <div class="analyzer-description">Ratio de color según la fórmula WCAG.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>4.5:1 para texto normal <span class="tag tag-neutral">AA</span></li>
-                <li>3:1 para texto grande <span class="tag tag-neutral">AA</span></li>
-                <li>7:1 para texto normal <span class="tag tag-neutral">AAA</span></li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <circle cx="12" cy="12" r="8" />
+                <path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Contraste</div>
+              <div class="analyzer-description">Ratio de color según la fórmula WCAG.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>4.5:1 para texto normal <span class="tag tag-neutral">AA</span></li>
+                  <li>3:1 para texto grande <span class="tag tag-neutral">AA</span></li>
+                  <li>7:1 para texto normal <span class="tag tag-neutral">AAA</span></li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🏷️ ARIA</div>
-            <div class="analyzer-description">Atributos ARIA (Accessible Rich Internet Applications).</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Roles ARIA válidos</li>
-                <li>aria-labelledby / aria-describedby apuntan a IDs reales</li>
-                <li>Elementos interactivos con nombre accesible</li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <path d="M3 11V5a2 2 0 0 1 2-2h6l10 10-8 8L3 11z" />
+                <circle cx="7.5" cy="7.5" r="1.2" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">ARIA</div>
+              <div class="analyzer-description">Atributos ARIA (Accessible Rich Internet Applications).</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Roles ARIA válidos</li>
+                  <li>aria-labelledby / aria-describedby apuntan a IDs reales</li>
+                  <li>Elementos interactivos con nombre accesible (salvo los aria-hidden)</li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">📝 Formularios</div>
-            <div class="analyzer-description">Accesibilidad de inputs, selects y textareas.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Todos los campos tienen label asociado</li>
-                <li>Labels con atributo "for" correcto</li>
-                <li>Tipos de input válidos</li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <rect x="5" y="3" width="14" height="18" rx="2" />
+                <line x1="8" y1="8" x2="16" y2="8" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+                <line x1="8" y1="16" x2="12" y2="16" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Formularios</div>
+              <div class="analyzer-description">Accesibilidad de inputs, selects y textareas.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Todos los campos tienen label asociado (explícito o implícito)</li>
+                  <li>Labels con atributo "for" correcto, o que envuelven su campo</li>
+                  <li>Tipos de input válidos</li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🏗️ Landmarks (semántica)</div>
-            <div class="analyzer-description">Regiones y etiquetas semánticas HTML.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Presencia de &lt;main&gt;, &lt;header&gt;, &lt;footer&gt;</li>
-                <li>&lt;section&gt; y &lt;article&gt; con encabezado propio</li>
-                <li>Uso razonable de &lt;div&gt; frente a etiquetas semánticas</li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <rect x="3" y="4" width="18" height="4" rx="1" />
+                <rect x="3" y="10" width="7" height="10" rx="1" />
+                <rect x="12" y="10" width="9" height="10" rx="1" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Landmarks (semántica)</div>
+              <div class="analyzer-description">Regiones y etiquetas semánticas HTML.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Presencia de &lt;main&gt;, &lt;header&gt;, &lt;footer&gt;</li>
+                  <li>&lt;section&gt; y &lt;article&gt; con encabezado propio</li>
+                  <li>Uso razonable de &lt;div&gt; frente a etiquetas semánticas</li>
+                </ul>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">⌨️ Teclado</div>
-            <div class="analyzer-description">Navegación sin ratón.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Elementos interactivos navegables por Tab</li>
-                <li>Sin tabindex positivo</li>
-                <li>onclick en elementos no nativos, sin rol ni tabindex</li>
-                <li>Modales/diálogos sin ningún elemento focuseable</li>
-              </ul>
-              <p style="margin-top: 8px; font-size: 12px">
-                <strong>No revisa</strong> el indicador de foco visible
-                (<code>:focus-visible</code>): en cuanto el navegador
-                registra el clic que dispara el propio bookmarklet, deja de
-                aplicarlo a cualquier <code>focus()</code> hecho por script
-                — es una protección real del navegador, no algo evitable.
-                Navegá la página con Tab y revisalo a simple vista.
-              </p>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <rect x="5" y="9" width="2" height="2" fill="currentColor" stroke="none" />
+                <rect x="9" y="9" width="2" height="2" fill="currentColor" stroke="none" />
+                <rect x="13" y="9" width="2" height="2" fill="currentColor" stroke="none" />
+                <rect x="17" y="9" width="2" height="2" fill="currentColor" stroke="none" />
+                <rect x="7" y="13" width="10" height="2" fill="currentColor" stroke="none" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Teclado</div>
+              <div class="analyzer-description">Navegación sin ratón.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Elementos interactivos navegables por Tab</li>
+                  <li>Sin tabindex positivo</li>
+                  <li>onclick en elementos no nativos, sin rol ni tabindex</li>
+                  <li>Modales/diálogos sin ningún elemento focuseable</li>
+                </ul>
+                <p style="margin-top: 8px; font-size: 1rem">
+                  <strong>No revisa</strong> el indicador de foco visible
+                  (<code>:focus-visible</code>): en cuanto el navegador
+                  registra el clic que dispara el propio bookmarklet, deja
+                  de aplicarlo a cualquier <code>focus()</code> hecho por
+                  script — es una protección real del navegador, no algo
+                  evitable. Navega la página con Tab y revísalo a simple
+                  vista.
+                </p>
+              </div>
             </div>
           </div>
 
           <div class="analyzer-guide">
-            <div class="analyzer-title">🔗 Links</div>
-            <div class="analyzer-description">Texto de enlace, destino y nuevas pestañas.</div>
-            <div class="analyzer-checks">
-              <ul>
-                <li>Texto descriptivo (nada de "click aquí" o "leer más")</li>
-                <li>href real (ni vacío, ni "#", ni javascript:void(0))</li>
-                <li>target="_blank" avisado en el texto y con rel="noopener"</li>
-              </ul>
+            <div class="icon-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="icon">
+                <path d="M9 15l6-6" />
+                <path d="M8 12l-2.5 2.5a3 3 0 0 0 4 4L12 16" />
+                <path d="M16 12l2.5-2.5a3 3 0 0 0-4-4L12 8" />
+              </svg>
+            </div>
+            <div>
+              <div class="analyzer-title">Links</div>
+              <div class="analyzer-description">Texto de enlace, destino y nuevas pestañas.</div>
+              <div class="analyzer-checks">
+                <ul>
+                  <li>Texto descriptivo (nada de "click aquí" o "leer más")</li>
+                  <li>href real (ni vacío, ni "#", ni javascript:void(0))</li>
+                  <li>target="_blank" avisado en el texto y con rel="noopener"</li>
+                </ul>
+              </div>
             </div>
           </div>
         </section>
 
         <section class="section">
+          <span class="eyebrow-label">04 · Exportación de datos</span>
           <h2>Cómo interpretar los resultados</h2>
 
           <table class="table">
@@ -500,7 +611,7 @@
             criterio que no corresponde.
           </p>
 
-          <h3>JSON exportado</h3>
+          <h3>JSON estructurado</h3>
           <p>Al terminar, el resultado se copia al portapapeles:</p>
           <div class="code-block">
             {<br />
@@ -521,12 +632,13 @@
           <p>
             Para una vista más visual, abre el
             <a href="results-viewer.html">visor de resultados</a> y pega ahí
-            el mismo JSON.
+            el mismo JSON (también puedes descargarlo como CSV).
           </p>
         </section>
 
         <section class="section">
-          <h2>Buenas prácticas</h2>
+          <span class="eyebrow-label">05 · Buenas prácticas</span>
+          <h2>Antes y después de auditar</h2>
           <h3>Durante la auditoría</h3>
           <ul>
             <li>Prueba en varios navegadores (Chrome, Firefox, Safari, Edge)</li>
@@ -550,8 +662,9 @@
           </div>
         </section>
 
-        <section class="section" style="border-bottom: none">
-          <h2>Preguntas frecuentes</h2>
+        <section class="section">
+          <span class="eyebrow-label">Preguntas frecuentes</span>
+          <h2>Dudas comunes</h2>
 
           <div class="faq-item">
             <button class="faq-question" aria-expanded="false">

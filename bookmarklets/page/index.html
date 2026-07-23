@@ -12,259 +12,151 @@
     <style>
       /* ---- hero ---- */
       .hero {
-        padding: 64px 0 56px;
+        padding: 56px 0 40px;
       }
 
       .hero .wrap {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
-        gap: 48px;
-        align-items: center;
-      }
-
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--ink-soft);
-        border: 1px solid var(--line);
-        background: var(--paper-raised);
-        padding: 6px 12px;
-        border-radius: 999px;
-        margin-bottom: 20px;
+        max-width: 760px;
       }
 
       .hero h1 {
-        font-size: clamp(32px, 4.4vw, 46px);
-        letter-spacing: -0.01em;
-        margin-bottom: 20px;
+        font-size: clamp(2.125rem, 5vw, 3.25rem);
+        margin: 20px 0 22px;
       }
 
       .hero .lede {
-        font-size: 17px;
-        max-width: 46ch;
+        font-size: 1.0625rem;
+        max-width: 52ch;
         margin-bottom: 28px;
       }
 
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
+      /* ---- mockup de 3 paneles (instalación / ejecución / reporte) ---- */
+      .demo-card {
+        padding: 28px;
       }
 
-      /* ---- mockup de inspección (elemento de firma) ---- */
-      .mock-browser {
-        background: var(--paper-raised);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        box-shadow: var(--shadow-card);
-        overflow: visible;
-        position: relative;
+      .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
       }
 
-      .mock-browser-bar {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .mock-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--line-strong);
-      }
-
-      .mock-url {
-        margin-left: 10px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--ink-soft);
+      .demo-panel {
         background: var(--paper);
-        border-radius: 999px;
-        padding: 3px 10px;
-      }
-
-      .mock-page {
-        padding: 22px 20px 26px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        padding-top: 34px;
+        min-height: 10rem;
         display: flex;
         flex-direction: column;
-        gap: 14px;
-      }
-
-      .mock-nav {
-        display: flex;
         align-items: center;
-        justify-content: space-between;
-      }
-
-      .mock-logo-block {
-        width: 64px;
-        height: 10px;
-        border-radius: 3px;
-        background: var(--line-strong);
-      }
-
-      .mock-link {
-        font-size: 12px;
-        color: var(--ink-soft);
-        text-decoration: underline;
+        justify-content: center;
         position: relative;
+        overflow: hidden;
       }
 
-      .mock-img {
-        height: 84px;
-        border-radius: 8px;
+      .demo-panel-label {
+        position: absolute;
+        top: 10px;
+        left: 14px;
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        letter-spacing: 0.06em;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+      }
+
+      .demo-install {
+        border: 1.5px dashed var(--line-strong);
+        border-radius: var(--radius-btn);
+        padding: 6px;
+      }
+
+      .demo-install .btn {
+        font-size: 0.875rem;
+        min-height: auto;
+        padding: 8px 16px;
+        pointer-events: none;
+      }
+
+      .demo-run {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .demo-run-img {
+        height: 46px;
+        border-radius: 6px;
         background: repeating-linear-gradient(
           135deg,
-          var(--paper) 0 8px,
-          #ebe9e3 8px 16px
+          var(--paper-raised) 0 6px,
+          #ece1dc 6px 12px
         );
+        border: 2px solid var(--accent-flag);
         position: relative;
       }
 
-      .mock-title {
-        font-family: var(--font-display);
-        font-size: 17px;
-        color: var(--ink);
+      .demo-run .tag {
+        align-self: flex-start;
       }
 
-      .mock-lowcontrast {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin: 0;
-      }
-
-      .mock-lowcontrast .mock-line {
-        height: 9px;
+      .demo-run-line {
+        height: 6px;
         border-radius: 3px;
-        background: #e4e1d8;
+        background: var(--line);
+        width: 70%;
       }
 
-      .mock-lowcontrast .mock-line:first-child {
-        width: 85%;
-      }
-
-      .mock-lowcontrast .mock-line:last-child {
-        width: 55%;
-      }
-
-      .mock-btn {
-        align-self: flex-start;
-        font-size: 12px;
-        font-weight: 600;
+      .demo-report {
+        width: 100%;
         background: var(--ink);
-        color: var(--paper);
-        padding: 7px 14px;
-        border-radius: 6px;
-        position: relative;
-      }
-
-      .finding-tag.inline {
-        position: static;
-        display: inline-flex;
-        align-self: flex-start;
-        margin-top: -2px;
-      }
-
-      .flagged {
-        outline: 2px solid var(--accent-flag);
-        outline-offset: 3px;
-      }
-
-      .flagged.warn {
-        outline-color: var(--accent-warn);
-      }
-
-      .flagged.ok {
-        outline: 2px solid var(--accent-pass);
-      }
-
-      .finding-tag {
-        position: absolute;
-        white-space: nowrap;
+        border-radius: 8px;
+        padding: 12px 14px;
         font-family: var(--font-mono);
-        font-size: 10.5px;
-        font-weight: 500;
-        padding: 3px 8px;
-        border-radius: 999px;
-        z-index: 2;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: #d7f2df;
       }
 
-      .finding-tag.error {
-        background: var(--accent-flag);
-        color: #fff;
+      .demo-report .k {
+        color: #9fb4ff;
       }
-      .finding-tag.warning {
-        background: var(--accent-warn);
-        color: #fff;
-      }
-      .finding-tag.pass {
-        background: var(--accent-pass);
-        color: #fff;
+      .demo-report .s {
+        color: #ffd08a;
       }
 
-      .mock-link .finding-tag {
-        top: -26px;
-        right: -8px;
-      }
-      .mock-img .finding-tag {
-        top: -12px;
-        left: 10px;
-      }
-      .mock-btn .finding-tag {
-        top: -12px;
-        right: -10px;
-      }
-
-      @media (max-width: 860px) {
-        .hero .wrap {
+      @media (max-width: 720px) {
+        .demo-grid {
           grid-template-columns: 1fr;
         }
-        .mock-browser {
-          max-width: 460px;
-        }
       }
 
-      @media (max-width: 560px) {
-        .mock-browser {
-          display: none;
-        }
-      }
-
-      /* ---- pasos de instalación ---- */
+      /* ---- pasos con icono ---- */
       .steps {
-        padding: 40px 0;
-        border-top: 1px solid var(--line);
+        padding: 44px 0;
       }
 
       .steps-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
+        gap: 28px;
         margin-top: 28px;
       }
 
-      .step-card .step-number {
-        font-family: var(--font-mono);
-        font-size: 13px;
-        color: var(--accent-focus);
-        margin-bottom: 8px;
-        display: block;
+      .step-card .icon-tile {
+        margin-bottom: 14px;
       }
 
       .step-card h3 {
-        font-size: 16px;
+        font-size: 1.0625rem;
         margin-bottom: 6px;
       }
 
       .step-card p {
-        font-size: 14px;
+        font-size: 1rem;
         margin-bottom: 0;
       }
 
@@ -277,25 +169,21 @@
       /* ---- instalación ---- */
       .install {
         padding: 40px 0;
-        border-top: 1px solid var(--line);
       }
 
       .section-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 16px;
-        flex-wrap: wrap;
         margin-bottom: 24px;
+        max-width: 60ch;
       }
 
       .section-head h2 {
-        font-size: 26px;
+        font-size: 1.75rem;
+        margin-bottom: 8px;
       }
 
       .section-head p {
-        margin: 6px 0 0;
-        font-size: 14px;
+        font-size: 1rem;
+        margin: 0;
       }
 
       .install-grid {
@@ -305,7 +193,7 @@
       }
 
       .install-card {
-        padding: 20px;
+        padding: 22px;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -317,11 +205,11 @@
       }
 
       .install-card h3 {
-        font-size: 16px;
+        font-size: 1.0625rem;
       }
 
       .install-card p {
-        font-size: 13px;
+        font-size: 1rem;
         margin-bottom: 4px;
         flex: 1;
       }
@@ -329,11 +217,18 @@
       .install-card .btn-row {
         display: flex;
         gap: 8px;
-        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .install-card .btn-row a.btn {
+        flex: 1;
+        min-width: 0;
+        padding: 0.625rem 1rem;
+        line-height: 1.25;
       }
 
       .drag-hint {
-        font-size: 12px;
+        font-size: 0.875rem;
         color: var(--accent-focus);
         background: var(--accent-focus-bg);
         border-radius: var(--radius-sm);
@@ -349,33 +244,50 @@
       /* ---- analizadores ---- */
       .analyzers {
         padding: 40px 0;
-        border-top: 1px solid var(--line);
       }
 
       .analyzers-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 16px;
       }
 
       .analyzer-card {
-        padding: 20px;
+        padding: 22px;
+      }
+
+      .analyzer-card .icon-tile {
+        margin-bottom: 14px;
       }
 
       .analyzer-card h3 {
-        font-size: 15px;
+        font-size: 1.0625rem;
+        margin-bottom: 10px;
+      }
+
+      .analyzer-card .tag {
         margin-bottom: 10px;
       }
 
       .analyzer-card p {
-        font-size: 13px;
-        margin-bottom: 12px;
+        font-size: 1rem;
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 860px) {
+        .analyzers-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 560px) {
+        .analyzers-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       /* ---- callouts secundarios ---- */
       .callouts {
         padding: 40px 0;
-        border-top: 1px solid var(--line);
       }
 
       .callouts-grid {
@@ -385,27 +297,38 @@
       }
 
       .callout-card {
-        padding: 24px;
+        padding: 26px;
+        display: block;
+        text-decoration: none;
+      }
+
+      .callout-card .icon-tile {
+        margin-bottom: 14px;
       }
 
       .callout-card h3 {
-        font-size: 17px;
+        font-size: 1.125rem;
         margin-bottom: 8px;
+        color: var(--ink);
       }
 
       .callout-card p {
-        font-size: 14px;
+        font-size: 1rem;
+        margin-bottom: 0;
       }
 
       /* ---- nota de límites ---- */
       .limits {
-        padding: 32px 0 56px;
+        padding: 24px 0 56px;
       }
 
       .limits .card {
         padding: 20px 24px;
-        font-size: 13px;
+        font-size: 1rem;
         color: var(--ink-soft);
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
       }
 
       .limits strong {
@@ -433,49 +356,72 @@
     <main id="main">
       <section class="hero">
         <div class="wrap">
-          <div>
-            <span class="eyebrow">WCAG 2.1 · WCAG 2.2 · 100% en tu navegador</span>
-            <h1>Audita la accesibilidad de cualquier página sin salir del navegador</h1>
-            <p class="lede">
-              Un clic y el auditor señala, sobre la propia página, qué falla
-              y por qué: alt ausente, contraste insuficiente, formularios sin
-              label, jerarquía de encabezados rota. Sin build, sin cuenta,
-              sin enviar nada a un servidor.
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="#instalar">Instalar el auditor</a>
-              <a class="btn btn-outline" href="install-guide.html">Ver cómo funciona</a>
-            </div>
+          <span class="eyebrow"
+            >WCAG 2.1 · WCAG 2.2 · 100% en tu navegador</span
+          >
+          <h1>
+            Audita la accesibilidad de cualquier página <em>sin salir</em> del
+            navegador
+          </h1>
+          <p class="lede">
+            Un clic y el auditor señala, sobre la propia página, qué falla y por
+            qué: alt ausente, contraste insuficiente, formularios sin label,
+            jerarquía de encabezados rota. Sin build, sin cuenta, sin enviar
+            nada a un servidor.
+          </p>
+          <div
+            class="hero-actions"
+            style="display: flex; gap: 12px; flex-wrap: wrap"
+          >
+            <a class="btn btn-primary" href="#instalar"
+              >Instalar el auditor →</a
+            >
+            <a class="btn btn-outline" href="install-guide.html"
+              >Ver cómo funciona</a
+            >
           </div>
+        </div>
+      </section>
 
-          <div class="mock-browser" aria-hidden="true">
-            <div class="mock-browser-bar">
-              <span class="mock-dot"></span>
-              <span class="mock-dot"></span>
-              <span class="mock-dot"></span>
-              <span class="mock-url">tusitio.com</span>
-            </div>
-            <div class="mock-page">
-              <div class="mock-nav">
-                <span class="mock-logo-block"></span>
-                <span class="mock-link flagged warn"
-                  >click aquí
-                  <span class="finding-tag warning">texto de enlace genérico</span>
-                </span>
+      <section>
+        <div class="wrap">
+          <div class="card demo-card">
+            <div class="demo-grid">
+              <div class="demo-panel">
+                <span class="demo-panel-label">01 · Instalación</span>
+                <div class="demo-install">
+                  <span class="btn btn-primary" aria-hidden="true"
+                    >A11Y Auditor</span
+                  >
+                </div>
               </div>
-              <div class="mock-img flagged">
-                <span class="finding-tag error">img sin alt</span>
+              <div class="demo-panel">
+                <span class="demo-panel-label">02 · Ejecución</span>
+                <div class="demo-run">
+                  <div class="demo-run-img">
+                    <span
+                      class="tag tag-error"
+                      style="position: absolute; top: -10px; left: 8px"
+                      >falta alt</span
+                    >
+                  </div>
+                  <div class="demo-run-line"></div>
+                  <div class="demo-run-line" style="width: 45%"></div>
+                </div>
               </div>
-              <p class="mock-title">Bienvenido a nuestro sitio</p>
-              <div class="mock-lowcontrast">
-                <span class="mock-line"></span>
-                <span class="mock-line"></span>
+              <div class="demo-panel">
+                <span class="demo-panel-label">03 · Reporte</span>
+                <div class="demo-report" aria-hidden="true">
+                  {<br />
+                  &nbsp;&nbsp;<span class="k">"errors"</span>:
+                  <span class="s">3</span>,<br />
+                  &nbsp;&nbsp;<span class="k">"warnings"</span>:
+                  <span class="s">8</span>,<br />
+                  &nbsp;&nbsp;<span class="k">"passed"</span>:
+                  <span class="s">45</span><br />
+                  }
+                </div>
               </div>
-              <span class="finding-tag error inline">2.1:1 · falta 4.5:1</span>
-              <span class="mock-btn flagged ok"
-                >Enviar
-                <span class="finding-tag pass">label accesible ✓</span>
-              </span>
             </div>
           </div>
         </div>
@@ -483,30 +429,57 @@
 
       <section class="steps">
         <div class="wrap">
-          <h2>Tres pasos, sin dependencias que instalar</h2>
+          <div class="section-head">
+            <h2>Tres pasos, sin dependencias que instalar</h2>
+          </div>
           <div class="steps-grid">
             <div class="step-card">
-              <span class="step-number">01</span>
-              <h3>Arrastra el marcador</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <circle cx="12" cy="12" r="7" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="1.4"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <line x1="12" y1="2" x2="12" y2="5" />
+                  <line x1="12" y1="19" x2="12" y2="22" />
+                  <line x1="2" y1="12" x2="5" y2="12" />
+                  <line x1="19" y1="12" x2="22" y2="12" />
+                </svg>
+              </div>
+              <h3>Escoge tu herramienta</h3>
               <p>
-                Arrastra el botón de instalación a tu barra de marcadores.
-                No hace falta hacer clic ni descargar nada.
+                El auditor completo con los 9 analizadores, o uno rápido y
+                liviano si solo necesitas revisar un aspecto puntual.
               </p>
             </div>
             <div class="step-card">
-              <span class="step-number">02</span>
-              <h3>Abre la página a revisar</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <polyline points="8 6 3 12 8 18" />
+                  <polyline points="16 6 21 12 16 18" />
+                </svg>
+              </div>
+              <h3>Inyecta el código</h3>
               <p>
-                Funciona en cualquier sitio, incluido el tuyo en desarrollo
-                local o detrás de un login.
+                Un clic en el marcador corre el análisis directo en la página
+                que tienes abierta. Nada se instala, nada sale de tu navegador.
               </p>
             </div>
             <div class="step-card">
-              <span class="step-number">03</span>
-              <h3>Haz clic en el marcador</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <circle cx="10" cy="10" r="6.5" />
+                  <line x1="15" y1="15" x2="21" y2="21" />
+                </svg>
+              </div>
+              <h3>Revisa y soluciona</h3>
               <p>
-                Se abre un panel con los hallazgos y el JSON queda copiado
-                en el portapapeles, listo para compartir o pegar en un LLM.
+                Haz clic en cualquier hallazgo para verlo resaltado en la página
+                real, y copia el JSON para pedirle correcciones a un LLM.
               </p>
             </div>
           </div>
@@ -516,17 +489,15 @@
       <section class="install" id="instalar">
         <div class="wrap">
           <div class="section-head">
-            <div>
-              <h2>Instala tu bookmarklet</h2>
-              <p>
-                Arrastra cualquiera de estos botones a tu barra de
-                marcadores. Si prefieres instalarlo a mano, usa "Copiar
-                código" y sigue la
-                <a href="install-guide.html#instalacion-manual"
-                  >instalación manual</a
-                >.
-              </p>
-            </div>
+            <span class="eyebrow-label">Instalación</span>
+            <h2>Instala tu bookmarklet</h2>
+            <p>
+              Arrastra cualquiera de estos botones a tu barra de marcadores. Si
+              prefieres instalarlo a mano, usa "Copiar código" y sigue la
+              <a href="install-guide.html#instalacion-manual"
+                >instalación manual</a
+              >.
+            </p>
           </div>
 
           <div class="install-grid">
@@ -535,28 +506,33 @@
               <h3>A11Y Auditor — Completo</h3>
               <p>
                 Abre un panel lateral con los 9 analizadores (encabezados,
-                axe-core, imágenes, contraste, ARIA, formularios,
-                landmarks, teclado y links) y exporta el resultado en JSON.
+                axe-core, imágenes, contraste, ARIA, formularios, landmarks,
+                teclado y links) y exporta el resultado en JSON.
               </p>
               <div class="btn-row">
                 <a
-                  class="btn btn-primary btn-drag"
+                  class="btn btn-primary"
                   data-bookmarklet="main"
                   title="A11Y Auditor"
                   href="#"
                   >A11Y Auditor</a
                 >
                 <button
-                  class="btn btn-outline"
+                  class="btn btn-outline btn-icon"
                   type="button"
                   data-copy-bookmarklet="main"
+                  aria-label="Copiar código del bookmarklet completo"
+                  title="Copiar código"
                 >
-                  Copiar código
+                  <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                  </svg>
                 </button>
               </div>
               <p class="drag-hint" hidden data-drag-hint>
-                Arrastra este botón a tu barra de marcadores; un clic solo
-                lo ejecuta aquí mismo.
+                Arrastra este botón a tu barra de marcadores; un clic solo lo
+                ejecuta aquí mismo.
               </p>
             </div>
 
@@ -566,23 +542,28 @@
               <p>Jerarquía h1–h6, niveles saltados y encabezados vacíos.</p>
               <div class="btn-row">
                 <a
-                  class="btn btn-outline btn-drag"
+                  class="btn btn-outline"
                   data-bookmarklet="headings"
                   title="A11Y Auditor · Headings"
                   href="#"
                   >A11Y Auditor · Headings</a
                 >
                 <button
-                  class="btn btn-outline"
+                  class="btn btn-outline btn-icon"
                   type="button"
                   data-copy-bookmarklet="headings"
+                  aria-label="Copiar código del bookmarklet de Headings"
+                  title="Copiar código"
                 >
-                  Copiar
+                  <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                  </svg>
                 </button>
               </div>
               <p class="drag-hint" hidden data-drag-hint>
-                Arrastra este botón a tu barra de marcadores; un clic solo
-                lo ejecuta aquí mismo.
+                Arrastra este botón a tu barra de marcadores; un clic solo lo
+                ejecuta aquí mismo.
               </p>
             </div>
 
@@ -592,23 +573,28 @@
               <p>Auditoría WCAG 2.1 completa con el motor de Deque.</p>
               <div class="btn-row">
                 <a
-                  class="btn btn-outline btn-drag"
+                  class="btn btn-outline"
                   data-bookmarklet="axe"
                   title="A11Y Auditor · Axe-core"
                   href="#"
                   >A11Y Auditor · Axe-core</a
                 >
                 <button
-                  class="btn btn-outline"
+                  class="btn btn-outline btn-icon"
                   type="button"
                   data-copy-bookmarklet="axe"
+                  aria-label="Copiar código del bookmarklet de Axe-core"
+                  title="Copiar código"
                 >
-                  Copiar
+                  <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                  </svg>
                 </button>
               </div>
               <p class="drag-hint" hidden data-drag-hint>
-                Arrastra este botón a tu barra de marcadores; un clic solo
-                lo ejecuta aquí mismo.
+                Arrastra este botón a tu barra de marcadores; un clic solo lo
+                ejecuta aquí mismo.
               </p>
             </div>
 
@@ -618,23 +604,28 @@
               <p>Alt ausente, vacío, demasiado largo y SVGs sin nombre.</p>
               <div class="btn-row">
                 <a
-                  class="btn btn-outline btn-drag"
+                  class="btn btn-outline"
                   data-bookmarklet="images"
                   title="A11Y Auditor · Imágenes"
                   href="#"
                   >A11Y Auditor · Imágenes</a
                 >
                 <button
-                  class="btn btn-outline"
+                  class="btn btn-outline btn-icon"
                   type="button"
                   data-copy-bookmarklet="images"
+                  aria-label="Copiar código del bookmarklet de Imágenes"
+                  title="Copiar código"
                 >
-                  Copiar
+                  <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                  </svg>
                 </button>
               </div>
               <p class="drag-hint" hidden data-drag-hint>
-                Arrastra este botón a tu barra de marcadores; un clic solo
-                lo ejecuta aquí mismo.
+                Arrastra este botón a tu barra de marcadores; un clic solo lo
+                ejecuta aquí mismo.
               </p>
             </div>
 
@@ -644,23 +635,28 @@
               <p>Ratio de color AA (4.5:1) y AAA (7:1) por elemento.</p>
               <div class="btn-row">
                 <a
-                  class="btn btn-outline btn-drag"
+                  class="btn btn-outline"
                   data-bookmarklet="contrast"
                   title="A11Y Auditor · Contraste"
                   href="#"
                   >A11Y Auditor · Contraste</a
                 >
                 <button
-                  class="btn btn-outline"
+                  class="btn btn-outline btn-icon"
                   type="button"
                   data-copy-bookmarklet="contrast"
+                  aria-label="Copiar código del bookmarklet de Contraste"
+                  title="Copiar código"
                 >
-                  Copiar
+                  <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" />
+                    <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                  </svg>
                 </button>
               </div>
               <p class="drag-hint" hidden data-drag-hint>
-                Arrastra este botón a tu barra de marcadores; un clic solo
-                lo ejecuta aquí mismo.
+                Arrastra este botón a tu barra de marcadores; un clic solo lo
+                ejecuta aquí mismo.
               </p>
             </div>
           </div>
@@ -670,70 +666,171 @@
       <section class="analyzers">
         <div class="wrap">
           <div class="section-head">
-            <div>
-              <h2>Qué revisa cada analizador</h2>
-              <p>
-                Los 4 de arriba también se ejecutan como parte del
-                bookmarklet completo, junto con estos otros 5.
-              </p>
-            </div>
+            <span class="eyebrow-label">Analizadores</span>
+            <h2>Qué revisa cada analizador</h2>
+            <p>
+              Los 4 de arriba también se ejecutan como parte del bookmarklet
+              completo, junto con estos otros 5.
+            </p>
           </div>
           <div class="analyzers-grid">
             <div class="card analyzer-card">
-              <h3>📋 Headings</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <line x1="6" y1="4" x2="6" y2="18" />
+                  <line x1="16" y1="4" x2="16" y2="18" />
+                  <line x1="6" y1="11" x2="16" y2="11" />
+                </svg>
+              </div>
+              <h3>Headings</h3>
               <span class="tag tag-error">falta &lt;h1&gt;</span>
               <p>
-                H1 único, saltos de nivel (h1 → h3) y encabezados sin
-                texto.
+                H1 único, saltos de nivel (h1 → h3) y encabezados sin texto.
               </p>
             </div>
             <div class="card analyzer-card">
-              <h3>🔍 Axe-core</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <circle cx="12" cy="12" r="8" />
+                  <polyline points="8.5 12 11 14.5 16 9" />
+                </svg>
+              </div>
+              <h3>Axe-core</h3>
               <span class="tag tag-error">botón sin nombre accesible</span>
               <p>Motor de Deque: roles, propiedades ARIA y contraste.</p>
             </div>
             <div class="card analyzer-card">
-              <h3>🖼️ Imágenes</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <rect x="3" y="4" width="18" height="14" rx="2" />
+                  <circle cx="8.5" cy="9.5" r="1.4" />
+                  <polyline points="21 15 15 9 4.5 18" />
+                </svg>
+              </div>
+              <h3>Imágenes</h3>
               <span class="tag tag-error">img sin alt</span>
               <p>Alt ausente/vacío/largo y SVGs sin título ni descripción.</p>
             </div>
             <div class="card analyzer-card">
-              <h3>🎚️ Contraste</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <circle cx="12" cy="12" r="8" />
+                  <path
+                    d="M12 4a8 8 0 0 1 0 16z"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                </svg>
+              </div>
+              <h3>Contraste</h3>
               <span class="tag tag-error">2.1:1 · falta 4.5:1</span>
               <p>Cálculo de ratio WCAG contra el fondo real del elemento.</p>
             </div>
             <div class="card analyzer-card">
-              <h3>🏷️ ARIA</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <path d="M3 11V5a2 2 0 0 1 2-2h6l10 10-8 8L3 11z" />
+                  <circle cx="7.5" cy="7.5" r="1.2" />
+                </svg>
+              </div>
+              <h3>ARIA</h3>
               <span class="tag tag-error">role inválido</span>
               <p>
-                Roles válidos y aria-labelledby/describedby que apuntan a
-                IDs reales.
+                Roles válidos y aria-labelledby/describedby que apuntan a IDs
+                reales.
               </p>
             </div>
             <div class="card analyzer-card">
-              <h3>📝 Formularios</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <rect x="5" y="3" width="14" height="18" rx="2" />
+                  <line x1="8" y1="8" x2="16" y2="8" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                  <line x1="8" y1="16" x2="12" y2="16" />
+                </svg>
+              </div>
+              <h3>Formularios</h3>
               <span class="tag tag-error">input sin label</span>
-              <p>Labels asociados, tipos válidos y campos requeridos.</p>
-            </div>
-            <div class="card analyzer-card">
-              <h3>🏗️ Landmarks</h3>
-              <span class="tag tag-warning">sin &lt;main&gt;</span>
               <p>
-                Regiones main/nav/header/footer y secciones sin
-                encabezado.
+                Labels asociados (incluidos implícitos), tipos válidos y campos
+                requeridos.
               </p>
             </div>
             <div class="card analyzer-card">
-              <h3>⌨️ Teclado</h3>
-              <span class="tag tag-error">onclick sin foco</span>
-              <p>Tabindex, foco visible y elementos navegables por Tab.</p>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <rect x="3" y="4" width="18" height="4" rx="1" />
+                  <rect x="3" y="10" width="7" height="10" rx="1" />
+                  <rect x="12" y="10" width="9" height="10" rx="1" />
+                </svg>
+              </div>
+              <h3>Landmarks</h3>
+              <span class="tag tag-warning">sin &lt;main&gt;</span>
+              <p>Regiones main/nav/header/footer y secciones sin encabezado.</p>
             </div>
             <div class="card analyzer-card">
-              <h3>🔗 Links</h3>
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <rect x="2" y="6" width="20" height="12" rx="2" />
+                  <rect
+                    x="5"
+                    y="9"
+                    width="2"
+                    height="2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="9"
+                    y="9"
+                    width="2"
+                    height="2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="13"
+                    y="9"
+                    width="2"
+                    height="2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="17"
+                    y="9"
+                    width="2"
+                    height="2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="7"
+                    y="13"
+                    width="10"
+                    height="2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                </svg>
+              </div>
+              <h3>Teclado</h3>
+              <span class="tag tag-error">onclick sin foco</span>
+              <p>Tabindex, onclick sin rol y modales sin foco atrapado.</p>
+            </div>
+            <div class="card analyzer-card">
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <path d="M9 15l6-6" />
+                  <path d="M8 12l-2.5 2.5a3 3 0 0 0 4 4L12 16" />
+                  <path d="M16 12l2.5-2.5a3 3 0 0 0-4-4L12 8" />
+                </svg>
+              </div>
+              <h3>Links</h3>
               <span class="tag tag-warning">"click aquí"</span>
               <p>
-                Texto genérico, enlaces sin destino real y pestañas nuevas
-                sin avisar.
+                Texto genérico, enlaces sin destino real y pestañas nuevas sin
+                avisar.
               </p>
             </div>
           </div>
@@ -743,18 +840,53 @@
       <section class="callouts">
         <div class="wrap">
           <div class="callouts-grid">
-            <a class="card callout-card" href="results-viewer.html" style="text-decoration: none; display: block;">
-              <h3 style="color: var(--ink)">📊 Visor de resultados</h3>
+            <a class="card callout-card" href="results-viewer.html">
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <line x1="4" y1="20" x2="20" y2="20" />
+                  <rect
+                    x="6"
+                    y="12"
+                    width="3"
+                    height="8"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="11"
+                    y="7"
+                    width="3"
+                    height="13"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                  <rect
+                    x="16"
+                    y="15"
+                    width="3"
+                    height="5"
+                    fill="currentColor"
+                    stroke="none"
+                  />
+                </svg>
+              </div>
+              <h3>Visor de resultados</h3>
               <p>
-                Pega el JSON exportado y navega los hallazgos en un
-                dashboard, sin volver a abrir la consola.
+                Pega el JSON exportado y navega los hallazgos en un dashboard,
+                sin volver a abrir la consola.
               </p>
             </a>
-            <a class="card callout-card" href="install-guide.html" style="text-decoration: none; display: block;">
-              <h3 style="color: var(--ink)">📖 Guía de uso</h3>
+            <a class="card callout-card" href="install-guide.html">
+              <div class="icon-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="icon">
+                  <path d="M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 0-2 2z" />
+                  <path d="M20 5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h3>Guía de uso</h3>
               <p>
-                Instalación manual, cómo leer cada severidad y buenas
-                prácticas para complementar con pruebas manuales.
+                Instalación manual, cómo leer cada severidad y buenas prácticas
+                para complementar con pruebas manuales.
               </p>
             </a>
           </div>
@@ -764,11 +896,13 @@
       <section class="limits">
         <div class="wrap">
           <div class="card">
-            <strong>Antes de confiar solo en esto:</strong> un análisis
-            automatizado detecta alrededor de un 30% de los problemas de
-            accesibilidad. Complementa siempre con navegación por teclado,
-            un lector de pantalla real (NVDA, VoiceOver) y pruebas con
-            usuarios.
+            <strong>Antes de confiar solo en esto:</strong>
+            <span>
+              un análisis automatizado detecta alrededor de un 30% de los
+              problemas de accesibilidad. Complementa siempre con navegación por
+              teclado, un lector de pantalla real (NVDA, VoiceOver) y pruebas
+              con usuarios.
+            </span>
           </div>
         </div>
       </section>
@@ -776,10 +910,15 @@
 
     <footer class="site-footer">
       <div class="wrap">
-        <span>A11Y Auditor — se ejecuta 100% en tu navegador, sin servidor.</span>
+        <span
+          >A11Y Auditor — se ejecuta 100% en tu navegador, sin servidor.</span
+        >
         <span
           >El analizador Axe-core usa la librería
-          <a href="https://github.com/dequelabs/axe-core" target="_blank" rel="noreferrer"
+          <a
+            href="https://github.com/dequelabs/axe-core"
+            target="_blank"
+            rel="noreferrer"
             >axe-core</a
           >
           de Deque.</span
@@ -792,18 +931,20 @@
       (function () {
         var data = window.A11Y_BOOKMARKLETS || {};
 
-        document.querySelectorAll("[data-bookmarklet]").forEach(function (link) {
-          var key = link.getAttribute("data-bookmarklet");
-          var entry = data[key];
-          if (!entry) return;
-          link.href = entry.href;
-          link.addEventListener("click", function (event) {
-            event.preventDefault();
-            var card = link.closest(".install-card");
-            var hint = card && card.querySelector("[data-drag-hint]");
-            if (hint) hint.hidden = false;
+        document
+          .querySelectorAll("[data-bookmarklet]")
+          .forEach(function (link) {
+            var key = link.getAttribute("data-bookmarklet");
+            var entry = data[key];
+            if (!entry) return;
+            link.href = entry.href;
+            link.addEventListener("click", function (event) {
+              event.preventDefault();
+              var card = link.closest(".install-card");
+              var hint = card && card.querySelector("[data-drag-hint]");
+              if (hint) hint.hidden = false;
+            });
           });
-        });
 
         document
           .querySelectorAll("[data-copy-bookmarklet]")
