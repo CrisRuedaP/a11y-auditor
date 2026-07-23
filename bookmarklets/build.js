@@ -23,6 +23,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 
 const SRC = path.join(__dirname, "src");
 const DIST = path.join(__dirname, "dist");
@@ -32,11 +33,16 @@ function readSrc(relativePath) {
   return fs.readFileSync(path.join(SRC, relativePath), "utf8");
 }
 
-/** Quita `import ... ;` y `export default X;` — siempre líneas completas en estos archivos. */
+/**
+ * Quita sintaxis de módulos ES: `import ...;`, `export default X;` (líneas
+ * completas), y el prefijo `export ` de exports nombrados (`export const`,
+ * `export function`, `export class`) sin tocar el resto de la declaración.
+ */
 function stripModuleSyntax(source) {
   return source
     .replace(/^\s*import .*;\s*$/gm, "")
-    .replace(/^\s*export default \w+;\s*$/gm, "");
+    .replace(/^\s*export default \w+;\s*$/gm, "")
+    .replace(/^export (?=const |class |function )/gm, "");
 }
 
 function wrapIife(body) {
@@ -48,7 +54,7 @@ function toBookmarkletHref(code) {
 }
 
 // --- Bookmarklet principal: todas las clases + el menú de main.js ---
-const CORE_FILES = ["core/analyzer.js", "core/ui.js"];
+const CORE_FILES = ["core/analyzer.js", "core/ui.js", "core/wcag.js"];
 const ANALYZER_FILES = [
   "analyzers/headings.js",
   "analyzers/axeCore.js",
@@ -85,12 +91,29 @@ function buildIndividualBundle(relativePath) {
   return readSrc(relativePath).trim();
 }
 
+/**
+ * build.js concatena varios archivos en un mismo scope (sin módulos), así
+ * que un choque de nombres entre analizadores (dos `const` iguales) o una
+ * línea de export mal quitada solo se nota como un SyntaxError al
+ * ejecutarlo en el navegador. Lo validamos acá mismo, en cada build, para
+ * no descubrirlo recién al probar el bookmarklet a mano.
+ */
+function assertValidSyntax(code, label) {
+  try {
+    new vm.Script(code);
+  } catch (error) {
+    console.error(`✗ ${label} tiene un error de sintaxis:\n`);
+    throw error;
+  }
+}
+
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
 
   const bookmarklets = {};
 
   const mainCode = buildMainBundle();
+  assertValidSyntax(mainCode, "main.bookmarklet.js");
   fs.writeFileSync(path.join(DIST, "main.bookmarklet.js"), mainCode);
   bookmarklets.main = {
     name: "A11Y Auditor Principal",
@@ -99,6 +122,7 @@ function main() {
 
   for (const [key, relativePath] of Object.entries(INDIVIDUAL_BOOKMARKLETS)) {
     const code = buildIndividualBundle(relativePath);
+    assertValidSyntax(code, `${key}.bookmarklet.js`);
     fs.writeFileSync(path.join(DIST, `${key}.bookmarklet.js`), code);
     bookmarklets[key] = {
       name: key,
