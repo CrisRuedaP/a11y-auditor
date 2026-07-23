@@ -123,7 +123,10 @@ bugs reales (falsos positivos) antes de que llegaran a producción:
           "message": "No hay H1 en la página",
           "selector": null,
           "elementInfo": null,
-          "metadata": { "severity": "critical" }
+          "metadata": {
+            "severity": "critical",
+            "wcag": { "criterion": null, "level": "buena práctica" }
+          }
         }
       ]
     }
@@ -133,6 +136,19 @@ bugs reales (falsos positivos) antes de que llegaran a producción:
 
 Severidades: `error` (bloquea accesibilidad), `warning` (revisar), `info`
 (sugerencia opcional).
+
+`metadata.wcag` indica el criterio y nivel de conformancia de cada
+hallazgo (`{ "criterion": "1.4.3", "level": "AA" }`), o
+`{ "criterion": null, "level": "buena práctica" }` cuando el chequeo es
+una convención razonable pero no algo que WCAG exija puntualmente. Las
+constantes viven en un solo lugar, [`src/core/wcag.js`](src/core/wcag.js),
+e importadas por cada analizador — evitá declarar una constante `wcag`
+local en un analizador nuevo, porque `build.js` concatena todos los
+archivos en el mismo scope y un nombre repetido rompe el bookmarklet
+generado (ver "Tests" arriba: es exactamente el tipo de bug que
+`npm test` existe para atrapar). Para Axe-Core, el criterio sale de las
+etiquetas reales que ya trae cada regla de axe-core, no de una
+suposición nuestra.
 
 ## Añadir un analizador
 
