@@ -3,6 +3,7 @@
  * Valida labels, inputs, validación accesible, etc
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
 
 class FormsAnalyzer extends Analyzer {
   constructor() {
@@ -63,7 +64,7 @@ class FormsAnalyzer extends Analyzer {
           "warning",
           `Tipo de input no estándar: "${type}"`,
           input,
-          { type },
+          { type, wcag: BEST_PRACTICE },
         );
       }
 
@@ -94,6 +95,7 @@ class FormsAnalyzer extends Analyzer {
           {
             type,
             id: id || null,
+            wcag: WCAG.LABELS_INSTRUCTIONS,
           },
         );
       } else {
@@ -118,11 +120,18 @@ class FormsAnalyzer extends Analyzer {
     labels.forEach((label) => {
       const forAttr = label.getAttribute("for");
       const text = label.textContent.trim();
+      const wrapsAControl = !!label.querySelector("input, select, textarea");
 
-      if (!forAttr) {
-        this.addIssue("warning", 'Label sin atributo "for"', label, {
-          text: text.substring(0, 50),
-        });
+      if (!forAttr && wrapsAControl) {
+        // Label implícito: <label>Nombre <input></label>, no necesita "for"
+        this.markPassed();
+      } else if (!forAttr) {
+        this.addIssue(
+          "warning",
+          'Label sin atributo "for" y sin ningún campo adentro',
+          label,
+          { text: text.substring(0, 50), wcag: WCAG.INFO_RELATIONSHIPS },
+        );
       } else {
         const input = document.getElementById(forAttr);
         if (!input) {
@@ -132,6 +141,7 @@ class FormsAnalyzer extends Analyzer {
             label,
             {
               for: forAttr,
+              wcag: WCAG.INFO_RELATIONSHIPS,
             },
           );
         } else {
@@ -142,6 +152,7 @@ class FormsAnalyzer extends Analyzer {
       if (!text) {
         this.addIssue("error", "Label vacío sin texto", label, {
           for: forAttr || null,
+          wcag: WCAG.LABELS_INSTRUCTIONS,
         });
       }
     });
