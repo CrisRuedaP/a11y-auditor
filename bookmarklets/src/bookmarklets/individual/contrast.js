@@ -18,7 +18,7 @@
       bottom: 20px;
       right: 20px;
       background: white;
-      border: 2px solid #2563eb;
+      border: 2px solid #1a1a1a;
       border-radius: 8px;
       padding: 16px;
       max-width: 400px;
