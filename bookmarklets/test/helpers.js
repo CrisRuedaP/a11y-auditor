@@ -45,7 +45,10 @@ async function openAuditedPage(fixtureFile) {
   await page.goto(`${baseUrl}/${fixtureFile}`);
   await page.evaluate(readBookmarklet("main"));
   await page.waitForTimeout(200);
-  await page.click("#run-all");
+  // Acotado al panel del propio bookmarklet: la fixture de colisión de IDs
+  // trae su propio #run-all ajeno, y un selector sin acotar clickearía ese
+  // en vez del botón real del panel.
+  await page.click("#a11y-audit-sidebar #run-all");
   await page.waitForFunction(
     () => window.a11yAuditResults && window.a11yAuditResults.summary.analyzersRun === 9,
     { timeout: 20000 },

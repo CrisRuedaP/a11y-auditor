@@ -200,3 +200,17 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
     });
   });
 });
+
+describe("Colisión de IDs con el sitio auditado", () => {
+  let session;
+
+  after(async () => {
+    await session?.close();
+  });
+
+  it('el clic en "Ejecutar Todos" funciona aunque el sitio ya tenga su propio #run-all/.analyzer-btn', async () => {
+    session = await openAuditedPage("id-collision.html");
+    const results = await session.results();
+    assert.equal(results.summary.analyzersRun, 9);
+  });
+});
