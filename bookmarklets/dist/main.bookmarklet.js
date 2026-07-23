@@ -233,10 +233,18 @@ class AuditUI {
    * @private
    */
   _injectStyles() {
-    if (document.getElementById("a11y-audit-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "a11y-audit-styles";
+    // Siempre se sobrescribe el contenido en vez de saltar la inyección
+    // cuando ya existe la etiqueta: si la página quedó con una ejecución
+    // previa del bookmarklet (código viejo) sin recargar, el CSS se
+    // queda desactualizado mientras el HTML sí se reconstruye con la
+    // estructura nueva, produciendo un desajuste (iconos sin tamaño,
+    // colores viejos).
+    let style = document.getElementById("a11y-audit-styles");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "a11y-audit-styles";
+      document.head.appendChild(style);
+    }
     style.textContent = `
       /* Panel Principal */
       .a11y-audit-sidebar {
@@ -246,13 +254,24 @@ class AuditUI {
         top: 0;
         width: 400px;
         height: 100vh;
-        background: #fff;
-        border-left: 3px solid #2563eb;
+        background: #ffffff;
+        border-left: 3px solid #1a1a1a;
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
         z-index: 999999;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         flex-direction: column;
         overflow: hidden;
+      }
+
+      .a11y-audit-sidebar .icon {
+        width: 1em;
+        height: 1em;
+        flex: none;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
       .a11y-audit-sidebar.a11y-audit-open {
@@ -280,9 +299,9 @@ class AuditUI {
       /* Header */
       .a11y-audit-header {
         padding: 16px;
-        border-bottom: 1px solid #e5e7eb;
-        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-        color: white;
+        border-bottom: 1px solid #e1dedd;
+        background: #1a1a1a;
+        color: #f0f0f0;
       }
 
       .a11y-audit-title {
@@ -291,16 +310,32 @@ class AuditUI {
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+      }
+
+      .a11y-audit-mark {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: #f0f0f0;
+        color: #1a1a1a;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
       }
 
       .a11y-audit-close {
         position: absolute;
         top: 12px;
         right: 12px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         border: none;
-        color: white;
+        color: #f0f0f0;
         width: 32px;
         height: 32px;
         border-radius: 4px;
@@ -312,15 +347,20 @@ class AuditUI {
         transition: background 0.2s;
       }
 
+      .a11y-audit-close .icon {
+        width: 16px;
+        height: 16px;
+      }
+
       .a11y-audit-close:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.25);
       }
 
       /* Resumen */
       .a11y-audit-summary {
         padding: 12px 16px;
-        background: #f3f4f6;
-        border-bottom: 1px solid #e5e7eb;
+        background: #f0f0f0;
+        border-bottom: 1px solid #e1dedd;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 8px;
@@ -334,33 +374,33 @@ class AuditUI {
       .a11y-audit-stat-value {
         font-size: 18px;
         font-weight: 600;
-        color: #1f2937;
+        color: #1a1a1a;
       }
 
       .a11y-audit-stat-label {
-        color: #6b7280;
+        color: #6b6866;
         font-size: 14px;
         margin-top: 2px;
       }
 
       .a11y-audit-stat.errors .a11y-audit-stat-value {
-        color: #dc2626;
+        color: #a6331f;
       }
 
       .a11y-audit-stat.warnings .a11y-audit-stat-value {
-        color: #f59e0b;
+        color: #7a5206;
       }
 
       .a11y-audit-stat.passed .a11y-audit-stat-value {
-        color: #16a34a;
+        color: #2e6b4c;
       }
 
       /* Tabs */
       .a11y-audit-tabs {
         display: flex;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e1dedd;
         overflow-x: auto;
-        background: #f9fafb;
+        background: #f0f0f0;
       }
 
       .a11y-audit-tab {
@@ -369,19 +409,19 @@ class AuditUI {
         background: none;
         cursor: pointer;
         font-size: 16px;
-        color: #6b7280;
+        color: #6b6866;
         white-space: nowrap;
         transition: all 0.2s;
         border-bottom: 2px solid transparent;
       }
 
       .a11y-audit-tab:hover {
-        color: #2563eb;
+        color: #1a1a1a;
       }
 
       .a11y-audit-tab.active {
-        color: #2563eb;
-        border-bottom-color: #2563eb;
+        color: #1a1a1a;
+        border-bottom-color: #1a1a1a;
         font-weight: 600;
       }
 
@@ -406,29 +446,29 @@ class AuditUI {
         padding: 10px;
         margin-bottom: 8px;
         border-left: 4px solid;
-        background: #f9fafb;
+        background: #f0f0f0;
         border-radius: 4px;
         font-size: 16px;
       }
 
       .a11y-audit-issue.error {
-        border-color: #dc2626;
-        background: #fee2e2;
+        border-color: #a6331f;
+        background: #f5e1de;
       }
 
       .a11y-audit-issue.warning {
-        border-color: #f59e0b;
-        background: #fef3c7;
+        border-color: #7a5206;
+        background: #f2e9d8;
       }
 
       .a11y-audit-issue.info {
-        border-color: #3b82f6;
-        background: #dbeafe;
+        border-color: #1a1a1a;
+        background: #e6e6e6;
       }
 
       .a11y-audit-issue-message {
         font-weight: 500;
-        color: #1f2937;
+        color: #1a1a1a;
         margin-bottom: 4px;
       }
 
@@ -436,7 +476,7 @@ class AuditUI {
         display: inline-block;
         font-size: 14px;
         font-weight: 600;
-        color: #4b5563;
+        color: #6b6866;
         background: rgba(255, 255, 255, 0.6);
         border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 999px;
@@ -445,7 +485,7 @@ class AuditUI {
       }
 
       .a11y-audit-issue-selector {
-        color: #6b7280;
+        color: #6b6866;
         font-family: 'Courier New', monospace;
         font-size: 14px;
         word-break: break-all;
@@ -456,7 +496,7 @@ class AuditUI {
         margin-top: 6px;
         padding-top: 6px;
         border-top: 1px solid rgba(0, 0, 0, 0.1);
-        color: #6b7280;
+        color: #6b6866;
         font-size: 14px;
       }
 
@@ -469,7 +509,7 @@ class AuditUI {
       }
 
       .a11y-audit-issue[role="button"]:focus-visible {
-        outline: 2px solid #2563eb;
+        outline: 2px solid #1a1a1a;
         outline-offset: 2px;
       }
 
@@ -477,7 +517,7 @@ class AuditUI {
         margin-top: 6px;
         font-size: 14px;
         font-weight: 600;
-        color: #2563eb;
+        color: #1a1a1a;
       }
 
       /* Resaltado "recién clickeado" en la página auditada, para distinguirlo
@@ -489,11 +529,11 @@ class AuditUI {
       @keyframes a11yAuditPulse {
         0%,
         100% {
-          outline-color: #dc2626;
+          outline-color: #a6331f;
           outline-width: 2px;
         }
         50% {
-          outline-color: #fbbf24;
+          outline-color: #7a5206;
           outline-width: 4px;
         }
       }
@@ -502,7 +542,7 @@ class AuditUI {
         .a11y-audit-highlight-pulse {
           animation: none;
           outline-width: 4px !important;
-          outline-color: #fbbf24 !important;
+          outline-color: #7a5206 !important;
         }
       }
 
@@ -526,15 +566,15 @@ class AuditUI {
       }
 
       .a11y-audit-floating-tag.error {
-        background: #dc2626;
+        background: #a6331f;
       }
 
       .a11y-audit-floating-tag.warning {
-        background: #f59e0b;
+        background: #7a5206;
       }
 
       .a11y-audit-floating-tag.info {
-        background: #3b82f6;
+        background: #1a1a1a;
       }
 
       @keyframes a11yAuditFadeIn {
@@ -558,20 +598,20 @@ class AuditUI {
       .a11y-audit-empty {
         padding: 24px 16px;
         text-align: center;
-        color: #9ca3af;
+        color: #797676;
       }
 
       .a11y-audit-loading {
         padding: 24px 16px;
         text-align: center;
-        color: #6b7280;
+        color: #6b6866;
       }
 
       /* Footer */
       .a11y-audit-footer {
         padding: 12px 16px;
-        border-top: 1px solid #e5e7eb;
-        background: #f9fafb;
+        border-top: 1px solid #e1dedd;
+        background: #f0f0f0;
         display: flex;
         gap: 8px;
         font-size: 16px;
@@ -579,9 +619,13 @@ class AuditUI {
 
       .a11y-audit-button {
         flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
         padding: 8px 12px;
-        border: 1px solid #d1d5db;
-        background: white;
+        border: 1px solid #c7c3c2;
+        background: #ffffff;
         border-radius: 4px;
         cursor: pointer;
         font-size: 16px;
@@ -590,26 +634,26 @@ class AuditUI {
       }
 
       .a11y-audit-button:hover {
-        background: #f3f4f6;
-        border-color: #9ca3af;
+        background: #f0f0f0;
+        border-color: #1a1a1a;
       }
 
       .a11y-audit-button.primary {
-        background: #2563eb;
-        color: white;
-        border-color: #2563eb;
+        background: #1a1a1a;
+        color: #f0f0f0;
+        border-color: #1a1a1a;
       }
 
       .a11y-audit-button.primary:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+        background: #333333;
+        border-color: #333333;
       }
 
       /* Highlight en elementos */
       .a11y-audit-highlight {
-        outline: 2px solid #dc2626 !important;
+        outline: 2px solid #a6331f !important;
         outline-offset: 2px !important;
-        background-color: rgba(220, 38, 38, 0.1) !important;
+        background-color: rgba(166, 51, 31, 0.1) !important;
       }
 
       /* Responsive */
@@ -617,7 +661,7 @@ class AuditUI {
         .a11y-audit-sidebar {
           width: 100%;
           border-left: none;
-          border-bottom: 3px solid #2563eb;
+          border-bottom: 3px solid #1a1a1a;
           height: 50vh;
         }
 
@@ -626,8 +670,6 @@ class AuditUI {
         }
       }
     `;
-
-    document.head.appendChild(style);
   }
 
   /**
@@ -637,6 +679,11 @@ class AuditUI {
   _createPanel() {
     if (this.container) return;
 
+    // Si el bookmarklet ya se corrió antes en esta misma pestaña (sin
+    // recargar), puede quedar un panel viejo en el DOM que esta nueva
+    // instancia de AuditUI no conoce: lo quitamos para no duplicar IDs.
+    document.getElementById("a11y-audit-sidebar")?.remove();
+
     this.container = document.createElement("div");
     this.container.id = "a11y-audit-sidebar";
     this.container.className = "a11y-audit-sidebar";
@@ -644,9 +691,15 @@ class AuditUI {
     this.container.innerHTML = `
       <div class="a11y-audit-header">
         <h2 class="a11y-audit-title">
-          ♿ Auditoría de Accesibilidad
+          <span class="a11y-audit-mark" aria-hidden="true">A11Y</span>
+          Auditoría de Accesibilidad
         </h2>
-        <button class="a11y-audit-close" aria-label="Cerrar panel">✕</button>
+        <button class="a11y-audit-close" aria-label="Cerrar panel">
+          <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        </button>
       </div>
 
       <div class="a11y-audit-summary">
@@ -668,8 +721,23 @@ class AuditUI {
       <div class="a11y-audit-content"></div>
 
       <div class="a11y-audit-footer">
-        <button class="a11y-audit-button primary" id="a11y-copy-json">Copiar JSON</button>
-        <button class="a11y-audit-button" id="a11y-clear-highlights">Limpiar</button>
+        <button class="a11y-audit-button primary" id="a11y-copy-json">
+          <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+            <rect x="9" y="9" width="10" height="10" rx="2" />
+            <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+          </svg>
+          Copiar JSON
+        </button>
+        <button class="a11y-audit-button" id="a11y-clear-highlights">
+          <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+            <path d="M4 7h16" />
+            <path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+            <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+          Limpiar
+        </button>
       </div>
     `;
 
@@ -2783,43 +2851,74 @@ class JsonUtils {
 
     // Crear menú de opciones
     const contentContainer = ui.container.querySelector(".a11y-audit-content");
+    const analyzerIcons = {
+      Headings:
+        '<line x1="6" y1="4" x2="6" y2="18" /><line x1="16" y1="4" x2="16" y2="18" /><line x1="6" y1="11" x2="16" y2="11" />',
+      "Axe-Core":
+        '<circle cx="12" cy="12" r="8" /><polyline points="8.5 12 11 14.5 16 9" />',
+      Imágenes:
+        '<rect x="3" y="4" width="18" height="14" rx="2" /><circle cx="8.5" cy="9.5" r="1.4" /><polyline points="21 15 15 9 4.5 18" />',
+      Contraste:
+        '<circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none" />',
+      ARIA: '<path d="M3 11V5a2 2 0 0 1 2-2h6l10 10-8 8L3 11z" /><circle cx="7.5" cy="7.5" r="1.2" />',
+      Formularios:
+        '<rect x="5" y="3" width="14" height="18" rx="2" /><line x1="8" y1="8" x2="16" y2="8" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="8" y1="16" x2="12" y2="16" />',
+      Semántica:
+        '<rect x="3" y="4" width="18" height="4" rx="1" /><rect x="3" y="10" width="7" height="10" rx="1" /><rect x="12" y="10" width="9" height="10" rx="1" />',
+      Teclado:
+        '<rect x="2" y="6" width="20" height="12" rx="2" /><rect x="5" y="9" width="2" height="2" fill="currentColor" stroke="none" /><rect x="9" y="9" width="2" height="2" fill="currentColor" stroke="none" /><rect x="13" y="9" width="2" height="2" fill="currentColor" stroke="none" /><rect x="17" y="9" width="2" height="2" fill="currentColor" stroke="none" /><rect x="7" y="13" width="10" height="2" fill="currentColor" stroke="none" />',
+      Links:
+        '<path d="M9 15l6-6" /><path d="M8 12l-2.5 2.5a3 3 0 0 0 4 4L12 16" /><path d="M16 12l2.5-2.5a3 3 0 0 0-4-4L12 8" />',
+    };
+    const analyzerBtn = (name) => `
+      <button class="analyzer-btn" data-analyzer="${name}" style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #ffffff; border: 1px solid #c7c3c2; border-radius: 4px; cursor: pointer; font-size: 16px; color: #1a1a1a; text-align: left;">
+        <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">${analyzerIcons[name]}</svg>
+        ${name}
+      </button>
+    `;
     contentContainer.innerHTML = `
       <div style="padding: 16px;">
         <div style="margin-bottom: 16px;">
-          <button id="run-all" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-bottom: 8px;">
+          <button id="run-all" style="width: 100%; padding: 12px; background: #1a1a1a; color: #f0f0f0; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 16px; margin-bottom: 8px;">
             ▶ Ejecutar Todos
           </button>
         </div>
 
-        <div style="font-size: 12px; color: #6b7280; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 14px; color: #6b6866; margin-bottom: 16px; text-align: center;">
           O selecciona un análisis específico:
         </div>
 
         <div id="analyzer-buttons" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
-          <button class="analyzer-btn" data-analyzer="Headings" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">📋 Headings</button>
-          <button class="analyzer-btn" data-analyzer="Axe-Core" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🔍 Axe-Core</button>
-          <button class="analyzer-btn" data-analyzer="Imágenes" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🖼️ Imágenes</button>
-          <button class="analyzer-btn" data-analyzer="Contraste" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🎨 Contraste</button>
-          <button class="analyzer-btn" data-analyzer="ARIA" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🏷️ ARIA</button>
-          <button class="analyzer-btn" data-analyzer="Formularios" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">📝 Formularios</button>
-          <button class="analyzer-btn" data-analyzer="Semántica" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🏗️ Semántica</button>
-          <button class="analyzer-btn" data-analyzer="Teclado" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">⌨️ Teclado</button>
-          <button class="analyzer-btn" data-analyzer="Links" style="padding: 8px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">🔗 Links</button>
+          ${analyzerBtn("Headings")}
+          ${analyzerBtn("Axe-Core")}
+          ${analyzerBtn("Imágenes")}
+          ${analyzerBtn("Contraste")}
+          ${analyzerBtn("ARIA")}
+          ${analyzerBtn("Formularios")}
+          ${analyzerBtn("Semántica")}
+          ${analyzerBtn("Teclado")}
+          ${analyzerBtn("Links")}
         </div>
       </div>
     `;
 
     // Event listeners
-    document.getElementById("run-all").addEventListener("click", async () => {
-      contentContainer.innerHTML =
-        '<div class="a11y-audit-loading">Ejecutando auditoría completa...</div>';
-      const results = await auditor.runAll();
-      window.a11yAuditResults = results;
-      JsonUtils.logResults(results);
-      JsonUtils.copyToClipboard(results);
-    });
+    // Se buscan dentro de contentContainer, no en document: el bookmarklet
+    // se inyecta en páginas ajenas que pueden tener sus propios elementos
+    // con id="run-all" o clase "analyzer-btn", y una búsqueda global podría
+    // engancharse al elemento equivocado del sitio en vez de al del panel.
+    contentContainer
+      .querySelector("#run-all")
+      .addEventListener("click", async () => {
+        contentContainer.innerHTML =
+          '<div class="a11y-audit-loading">Ejecutando auditoría completa...</div>';
+        const results = await auditor.runAll();
+        window.a11yAuditResults = results;
+        JsonUtils.logResults(results);
+        JsonUtils.copyToClipboard(results);
+      });
 
-    document.querySelectorAll(".analyzer-btn").forEach((btn) => {
+    contentContainer.querySelectorAll(".analyzer-btn").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const analyzerName = btn.dataset.analyzer;
         contentContainer.innerHTML = `<div class="a11y-audit-loading">Ejecutando ${analyzerName}...</div>`;
@@ -2832,8 +2931,8 @@ class JsonUtils {
     });
 
     console.log(
-      "%c♿ A11Y AUDITOR INICIADO",
-      "color: #2563eb; font-weight: bold; font-size: 16px;",
+      "%cA11Y AUDITOR INICIADO",
+      "color: #1a1a1a; font-weight: bold; font-size: 16px;",
     );
     console.log("Panel abierto. Selecciona un análisis para comenzar.");
   } catch (error) {
