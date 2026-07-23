@@ -3,6 +3,7 @@
  * Valida alt text, detecta imágenes decorativas, etc
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
 
 class ImagesAnalyzer extends Analyzer {
   constructor() {
@@ -34,6 +35,7 @@ class ImagesAnalyzer extends Analyzer {
       if (!alt && !ariaLabel && !ariaLabelledBy) {
         this.addIssue("error", "Imagen sin atributo alt", img, {
           src: img.src?.substring(0, 100),
+          wcag: WCAG.NON_TEXT_CONTENT,
         });
       } else if (alt === "") {
         // alt vacío es válido si es decorativa
@@ -44,6 +46,7 @@ class ImagesAnalyzer extends Analyzer {
             img,
             {
               src: img.src?.substring(0, 100),
+              wcag: WCAG.NON_TEXT_CONTENT,
             },
           );
         } else {
@@ -53,6 +56,7 @@ class ImagesAnalyzer extends Analyzer {
         this.addIssue("warning", "Alt text muy largo (> 125 caracteres)", img, {
           length: alt.length,
           alt: alt.substring(0, 50) + "...",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -67,12 +71,23 @@ class ImagesAnalyzer extends Analyzer {
       const ariaLabelledBy = svg.getAttribute("aria-labelledby");
       const role = svg.getAttribute("role");
 
-      if (!title && !desc && !ariaLabel && !ariaLabelledBy) {
-        this.addIssue("error", "SVG sin descripción accesible", svg, {
-          tag: "svg",
-        });
-      } else {
+      const hasAccessibleName = !!(title || desc || ariaLabel || ariaLabelledBy);
+      // Un ícono decorativo se oculta a propósito de los lectores de
+      // pantalla — eso es lo correcto, no le hace falta ninguna descripción.
+      const isMarkedDecorative =
+        svg.getAttribute("aria-hidden") === "true" ||
+        role === "presentation" ||
+        role === "none";
+
+      if (hasAccessibleName || isMarkedDecorative) {
         this.markPassed();
+      } else {
+        this.addIssue(
+          "warning",
+          'SVG sin aria-hidden ni descripción accesible — si es decorativo, agregá aria-hidden="true"; si transmite información, agregá <title> o aria-label',
+          svg,
+          { tag: "svg", wcag: WCAG.NON_TEXT_CONTENT },
+        );
       }
     });
 
@@ -84,6 +99,7 @@ class ImagesAnalyzer extends Analyzer {
       if (!ariaLabel && role !== "presentation" && role !== "none") {
         this.addIssue("warning", "Background image sin aria-label", element, {
           url: url.substring(0, 100),
+          wcag: WCAG.NON_TEXT_CONTENT,
         });
       }
     });
