@@ -1,5 +1,7 @@
 (function () {
 "use strict";
+const A11Y_AUDITOR_VERSION = "1.0.0";
+
 /**
  * Base class for all accessibility analyzers
  * Provides shared structure and standard methods
@@ -693,6 +695,53 @@ class AuditUI {
         border-color: #333333;
       }
 
+      /* Update notice */
+      .a11y-audit-update-notice {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #f0f0f0;
+        border-bottom: 1px solid #e1dedd;
+        font-size: 14px;
+        color: #1a1a1a;
+      }
+
+      .a11y-audit-update-notice span {
+        flex: 1;
+      }
+
+      .a11y-audit-update-notice a {
+        color: #1a1a1a;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .a11y-audit-update-dismiss {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: none;
+        color: #6b6866;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .a11y-audit-update-dismiss:hover {
+        background: #e1dedd;
+        color: #1a1a1a;
+      }
+
+      .a11y-audit-update-dismiss .icon {
+        width: 14px;
+        height: 14px;
+      }
+
       /* Element highlight */
       .a11y-audit-highlight {
         outline: 2px solid #a6331f !important;
@@ -739,6 +788,17 @@ class AuditUI {
           Auditoría de Accesibilidad
         </h2>
         <button class="a11y-audit-close" aria-label="Cerrar panel">
+          <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="a11y-audit-update-notice" id="a11y-update-notice" hidden>
+        <span data-update-message></span>
+        <a href="https://github.com/CrisRuedaP/a11y-auditor" target="_blank" rel="noopener">Ver más</a>
+        <button class="a11y-audit-update-dismiss" aria-label="Cerrar aviso de actualización">
           <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -797,6 +857,26 @@ class AuditUI {
     this.container
       .querySelector("#a11y-clear-highlights")
       .addEventListener("click", () => this._clearHighlights());
+    this.container
+      .querySelector("#a11y-update-notice .a11y-audit-update-dismiss")
+      .addEventListener("click", () => {
+        this.container.querySelector("#a11y-update-notice").hidden = true;
+      });
+  }
+
+  /**
+   * Shows the "a newer version is available" notice. Called by
+   * checkForUpdates() only when a real update was found — never shown by
+   * default, and dismissing it just hides it for this session (nothing is
+   * persisted).
+   */
+  showUpdateNotice(remoteVersion) {
+    const notice = this.container?.querySelector("#a11y-update-notice");
+    if (!notice) return;
+
+    notice.querySelector("[data-update-message]").textContent =
+      `Hay una nueva versión disponible (${remoteVersion}).`;
+    notice.hidden = false;
   }
 
   /**
@@ -1144,6 +1224,53 @@ const WCAG = {
   LABELS_INSTRUCTIONS: { criterion: "3.3.2", level: "A" },
   NAME_ROLE_VALUE: { criterion: "4.1.2", level: "A" },
 };
+
+/**
+ * Optional, non-blocking check for a newer bookmarklet version. Fetches a
+ * small static JSON file hosted alongside the project and compares it
+ * against the version baked into this bundle at build time. Never sends
+ * anything about the audited page or the audit results — just a plain GET
+ * for a static file. Fails silently on any error (offline, blocked,
+ * hosting down, unreachable, etc): it must never interrupt the audit
+ * itself.
+ */
+const VERSION_CHECK_URL =
+  "https://raw.githubusercontent.com/CrisRuedaP/a11y-auditor/main/bookmarklets/page/version.json";
+const VERSION_CHECK_TIMEOUT_MS = 4000;
+
+function isNewerVersion(remote, current) {
+  const r = String(remote).split(".").map(Number);
+  const c = String(current).split(".").map(Number);
+
+  for (let i = 0; i < Math.max(r.length, c.length); i++) {
+    const rv = r[i] || 0;
+    const cv = c[i] || 0;
+    if (rv > cv) return true;
+    if (rv < cv) return false;
+  }
+
+  return false;
+}
+
+async function checkForUpdates(ui) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), VERSION_CHECK_TIMEOUT_MS);
+
+    const response = await fetch(VERSION_CHECK_URL, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+    if (data?.version && isNewerVersion(data.version, A11Y_AUDITOR_VERSION)) {
+      ui?.showUpdateNotice(data.version);
+    }
+  } catch {
+    // Silent on purpose: no network, blocked by CSP, hosting down, aborted
+    // by the timeout, malformed JSON, etc.
+  }
+}
 
 /**
  * Headings analyzer (h1-h6)
@@ -2890,6 +3017,9 @@ class JsonUtils {
 
     // Open panel
     ui.open();
+
+    // Non-blocking: never delays or interrupts opening the panel
+    checkForUpdates(ui);
 
     // Create options menu
     const contentContainer = ui.container.querySelector(".a11y-audit-content");
