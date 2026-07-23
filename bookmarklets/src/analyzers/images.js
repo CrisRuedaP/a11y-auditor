@@ -84,7 +84,7 @@ class ImagesAnalyzer extends Analyzer {
       } else {
         this.addIssue(
           "warning",
-          'SVG sin aria-hidden ni descripción accesible — si es decorativo, agregá aria-hidden="true"; si transmite información, agregá <title> o aria-label',
+          'SVG sin aria-hidden ni descripción accesible — si es decorativo, agrega aria-hidden="true"; si transmite información, agrega <title> o aria-label',
           svg,
           { tag: "svg", wcag: WCAG.NON_TEXT_CONTENT },
         );
