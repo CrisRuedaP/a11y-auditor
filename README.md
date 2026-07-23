@@ -1,113 +1,99 @@
 # A11Y Auditor
 
-Kit de bookmarklets para auditar la accesibilidad web (WCAG 2.1 y 2.2) de
-cualquier página, directamente en el navegador y en tiempo real.
+A11Y Auditor es un conjunto de **bookmarklets** para realizar auditorías rápidas de accesibilidad directamente sobre cualquier sitio web.
 
-Un clic ejecuta el análisis sobre la página que estés viendo, resalta los
-elementos problemáticos y copia un JSON exportable al portapapeles — listo
-para pegar en un LLM o compartir con el equipo. Sin build, sin cuenta, sin
-enviar nada a un servidor.
+Analiza criterios de **WCAG 2.1 y 2.2**, resalta los elementos afectados en la página y genera un informe en formato **JSON** listo para compartir con el equipo o utilizar como contexto para asistentes de IA.
 
-## Qué revisa
+Todo el análisis se ejecuta **localmente en el navegador**, sin instalar extensiones ni enviar información a servidores externos.
 
-| Analizador | Qué valida |
-|---|---|
-| **Headings** | Jerarquía h1–h6, niveles saltados, encabezados vacíos, H1 duplicados |
-| **Axe-core** | Auditoría WCAG 2.1 completa con el motor de [Deque](https://github.com/dequelabs/axe-core) |
-| **Imágenes** | Alt ausente/vacío/demasiado largo, SVGs sin nombre accesible |
-| **Contraste** | Ratio de color (AA 4.5:1, AAA 7:1) contra el fondo real del elemento |
-| **ARIA** | Roles válidos, `aria-labelledby`/`aria-describedby` apuntando a IDs reales |
-| **Formularios** | Labels asociados, tipos de input válidos, campos requeridos |
-| **Landmarks** | Regiones `main`/`nav`/`header`/`footer`, secciones sin encabezado |
-| **Teclado** | Navegación por Tab, foco visible, `tabindex` positivo |
-| **Links** | Texto genérico ("click aquí"), enlaces sin destino, `target="_blank"` sin aviso ni `rel="noopener"` |
+---
 
-## Uso rápido
+## Características
+
+- Auditoría de accesibilidad directamente desde el navegador.
+- Resaltado visual de los elementos con incidencias.
+- Exportación de resultados en formato JSON.
+- Compatible con flujos de trabajo asistidos por IA.
+- Todo el análisis ocurre localmente.
+- Disponible como auditoría completa o mediante bookmarklets individuales.
+- Basado en criterios de **WCAG 2.1**, **WCAG 2.2** y buenas prácticas de accesibilidad.
+
+---
+
+## Analizadores incluidos
+
+| Analizador      | Qué valida                                                            |
+| --------------- | ---------------------------------------------------------------------- |
+| **Headings**    | Jerarquía h1–h6, niveles saltados, encabezados vacíos y H1 duplicados |
+| **Axe-core**    | Auditoría WCAG mediante el motor de Deque                               |
+| **Imágenes**    | Texto alternativo, SVG accesibles y uso correcto de `alt`               |
+| **Contraste**   | Ratio de contraste respecto al fondo real del elemento                  |
+| **ARIA**        | Roles, atributos y referencias ARIA                                     |
+| **Formularios** | Labels, tipos de entrada y campos requeridos                            |
+| **Landmarks**   | Regiones semánticas y estructura del documento                          |
+| **Teclado**     | Navegación mediante Tab y orden de foco                                 |
+| **Links**       | Texto descriptivo, enlaces sin destino real y apertura segura de nuevas pestañas |
+
+---
+
+## Uso
 
 1. Clona o descarga este repositorio.
-2. Abre [`bookmarklets/page/index.html`](bookmarklets/page/index.html) en tu
-   navegador.
-3. Arrastra el bookmarklet que quieras a tu barra de marcadores (o usa
-   "Copiar código" y sigue la
-   [instalación manual](bookmarklets/page/install-guide.html#instalacion-manual)).
-4. Ve a la página que quieras auditar y haz clic en el marcador.
+2. Abre `bookmarklets/page/index.html` en tu navegador.
+3. Arrastra el bookmarklet que quieras a la barra de marcadores.
+4. Abre la página que desees auditar.
+5. Ejecuta el bookmarklet.
 
-No necesitas servidor ni build para usarlo: los archivos de `bookmarklets/page/`
-son estáticos y funcionan tanto abiertos localmente (`file://`) como servidos
-desde GitHub Pages o cualquier hosting estático.
+No necesitas instalar nada ni ejecutar un servidor: la página de instalación funciona tanto desde `file://` como desde cualquier hosting estático (por ejemplo, GitHub Pages).
 
-## Estructura del repositorio
-
-```
-bookmarklets/
-├── build.js        # genera los bookmarklets reales a partir de src/
-├── package.json    # `npm run build` (sin dependencias externas)
-├── src/
-│   ├── core/       # Analyzer (clase base), AuditUI (panel lateral), Auditor (orquestador)
-│   ├── analyzers/  # un archivo por analizador
-│   ├── utils/      # exportación JSON / portapapeles
-│   └── bookmarklets/
-│       ├── main.js         # menú con los 9 analizadores
-│       └── individual/     # 4 marcadores rápidos y ligeros
-├── dist/           # bookmarklets ya empaquetados (generado — no editar a mano)
-└── page/           # sitio estático: instalación, guía de uso, visor de resultados
-```
-
-Ver [`bookmarklets/src/ARCHITECTURE.md`](bookmarklets/src/ARCHITECTURE.md) para
-las decisiones de diseño detrás de cada analizador.
+---
 
 ## Desarrollo
 
-Los analizadores viven en `src/` como clases ES independientes (una por
-archivo, con `import`/`export`) porque es la forma más simple de mantenerlos
-por separado. Un bookmarklet, en cambio, tiene que ser un único script
-clásico. `build.js` une esas clases, quita el `import`/`export` y genera el
-`javascript:...` final:
-
 ```bash
 cd bookmarklets
+npm install
 npm run build
-```
-
-Esto regenera `bookmarklets/dist/*.bookmarklet.js` (versión legible, útil para
-revisar el código o copiarlo a mano) y `bookmarklets/page/bookmarklets.data.js`
-(que la página de instalación consume para armar los botones). Ejecuta el
-build después de tocar cualquier archivo en `src/`.
-
-```bash
 npm test
 ```
 
-Corre los 9 analizadores contra una página de prueba con casos normales y
-casos borde (ver [`bookmarklets/README.md`](bookmarklets/README.md#tests)).
-Es la única dependencia de npm del repo (Playwright) — solo para quien
-desarrolla el kit, nunca se empaqueta en el bookmarklet final.
+El proyecto utiliza **Playwright** para ejecutar pruebas automatizadas sobre una página de prueba y verificar el comportamiento de los analizadores en un navegador Chromium sin interfaz gráfica. Esto ayuda a detectar regresiones y validar casos límite antes de publicar cambios.
 
-Para añadir un analizador nuevo:
+La documentación técnica sobre la arquitectura del proyecto, el proceso de build y el funcionamiento interno de los analizadores se encuentra en:
 
-1. Crea `src/analyzers/mi-analizador.js` heredando de `Analyzer`
-   (`src/core/analyzer.js`).
-2. Añádelo al array de `src/core/auditor.js`.
-3. Ejecuta `npm run build`.
+- [`bookmarklets/README.md`](bookmarklets/README.md)
+- [`bookmarklets/src/ARCHITECTURE.md`](bookmarklets/src/ARCHITECTURE.md)
+
+---
 
 ## Privacidad
 
-- Todo el análisis corre localmente en tu navegador.
-- La única llamada de red es la carga de axe-core desde su CDN oficial
-  (solo para los bookmarklets que lo usan).
-- Los resultados solo se copian al portapapeles; nada se envía a ningún
-  servidor.
+- Todo el análisis se ejecuta localmente en el navegador.
+- La única petición de red corresponde a la carga de **axe-core** desde su CDN oficial (solo en los bookmarklets que lo utilizan).
+- Ningún resultado se envía a servidores externos.
 
-## Limitaciones
+---
 
-Un análisis automatizado detecta aproximadamente un 30% de los problemas de
-accesibilidad reales. Estos bookmarklets son un punto de partida rápido, no
-un sustituto de:
+## Alcance y limitaciones
 
-- Navegación real por teclado.
-- Pruebas con lectores de pantalla (NVDA, VoiceOver, JAWS).
-- Pruebas con personas usuarias con discapacidad.
+Las herramientas automáticas ayudan a detectar una parte importante de los problemas de accesibilidad, pero no sustituyen una evaluación manual.
+
+Se recomienda complementar los resultados con:
+
+- Navegación mediante teclado.
+- Pruebas con lectores de pantalla (NVDA, VoiceOver, JAWS, etc.).
+- Evaluaciones con personas usuarias con discapacidad.
+
+---
+
+## Origen del proyecto
+
+Este proyecto nació como parte del curso **Desarrollo Accesible con IA** de weAAAre.
+
+La versión publicada en este repositorio evolucionó significativamente respecto al proyecto original, incorporando nuevos analizadores, una arquitectura modular, automatización del proceso de build, pruebas automatizadas y múltiples mejoras de rendimiento, usabilidad y mantenibilidad.
+
+---
 
 ## Licencia
 
-[MIT](LICENSE) — úsalo libremente en proyectos personales y comerciales.
+Distribuido bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE) para más información.
