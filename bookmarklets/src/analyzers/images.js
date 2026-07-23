@@ -1,6 +1,6 @@
 /**
- * Analizador de Imágenes
- * Valida alt text, detecta imágenes decorativas, etc
+ * Images analyzer
+ * Validates alt text, detects decorative images, etc
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
@@ -13,7 +13,7 @@ class ImagesAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Encontrar todas las imágenes
+    // Find all images
     const images = this._querySelectorAll("img").filter((img) => this._isVisible(img));
     const svgs = this._querySelectorAll("svg").filter((svg) => this._isVisible(svg));
     const backgroundImages = this._findBackgroundImages();
@@ -25,7 +25,7 @@ class ImagesAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar IMG tags
+    // Analyze IMG tags
     images.forEach((img) => {
       const alt = img.getAttribute("alt");
       const ariaLabel = img.getAttribute("aria-label");
@@ -38,7 +38,7 @@ class ImagesAnalyzer extends Analyzer {
           wcag: WCAG.NON_TEXT_CONTENT,
         });
       } else if (alt === "") {
-        // alt vacío es válido si es decorativa
+        // an empty alt is valid if the image is decorative
         if (role !== "presentation" && role !== "none") {
           this.addIssue(
             "warning",
@@ -63,7 +63,7 @@ class ImagesAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar SVGs
+    // Analyze SVGs
     svgs.forEach((svg) => {
       const title = svg.querySelector("title");
       const desc = svg.querySelector("desc");
@@ -72,8 +72,8 @@ class ImagesAnalyzer extends Analyzer {
       const role = svg.getAttribute("role");
 
       const hasAccessibleName = !!(title || desc || ariaLabel || ariaLabelledBy);
-      // Un ícono decorativo se oculta a propósito de los lectores de
-      // pantalla — eso es lo correcto, no le hace falta ninguna descripción.
+      // A decorative icon is deliberately hidden from screen readers — that
+      // is correct, it doesn't need any description at all.
       const isMarkedDecorative =
         svg.getAttribute("aria-hidden") === "true" ||
         role === "presentation" ||
@@ -91,7 +91,7 @@ class ImagesAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar background images
+    // Analyze background images
     backgroundImages.forEach(({ element, url }) => {
       const ariaLabel = element.getAttribute("aria-label");
       const role = element.getAttribute("role");
@@ -108,7 +108,7 @@ class ImagesAnalyzer extends Analyzer {
   }
 
   /**
-   * Encuentra elementos con background-image
+   * Finds elements with a background-image
    * @private
    */
   _findBackgroundImages() {

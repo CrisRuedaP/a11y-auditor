@@ -1,8 +1,8 @@
 /**
- * BOOKMARKLET INDIVIDUAL - HEADINGS ANALYZER
- * Ejecuta rápidamente el análisis de headings
+ * INDIVIDUAL BOOKMARKLET - HEADINGS ANALYZER
+ * Quickly runs the headings analysis
  * 
- * Uso: javascript:(async()=>{...})()
+ * Usage: javascript:(async()=>{...})()
  */
 
 (async function runHeadingsAudit() {
@@ -10,7 +10,7 @@
     if (window.a11yHeadingsRunning) return;
     window.a11yHeadingsRunning = true;
 
-    // Inyectar estilos si no están
+    // Inject styles if they aren't there yet
     if (!document.getElementById('a11y-audit-styles')) {
       const style = document.createElement('style');
       style.id = 'a11y-audit-styles';
@@ -46,7 +46,7 @@
       document.head.appendChild(style);
     }
 
-    // Crear popup de resultados
+    // Create results popup
     const popup = document.createElement('div');
     popup.className = 'a11y-audit-popup';
     popup.innerHTML = '<div>Analizando headings...</div>';
@@ -59,7 +59,7 @@
 
     document.body.appendChild(popup);
 
-    // Ejecutar análisis
+    // Run analysis
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     if (headings.length === 0) {
@@ -74,7 +74,7 @@
       text: h.textContent.trim().substring(0, 60)
     }));
 
-    // Verificar H1
+    // Check H1
     const h1Count = headingLevels.filter((h) => h.level === 1).length;
     if (h1Count === 0) {
       issues.push('❌ No hay H1');
@@ -84,7 +84,7 @@
       issues.push('✓ H1 único');
     }
 
-    // Verificar saltos
+    // Check for jumps
     let lastLevel = 0;
     for (let i = 0; i < headingLevels.length; i++) {
       const { element, level } = headingLevels[i];
@@ -97,7 +97,7 @@
       lastLevel = level;
     }
 
-    // Mostrar resultados
+    // Show results
     let html = '<strong>📋 Análisis de Headings</strong><hr style="margin: 8px 0;"><ul style="margin: 0; padding-left: 20px; font-size: 12px;">';
     issues.forEach((issue) => {
       html += `<li>${issue}</li>`;

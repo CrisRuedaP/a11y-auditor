@@ -1,6 +1,6 @@
 /**
- * Analizador de Semántica HTML
- * Valida el uso correcto de etiquetas semánticas
+ * HTML Semantics analyzer
+ * Validates correct use of semantic tags
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
@@ -29,7 +29,7 @@ class SemanticAnalyzer extends Analyzer {
     let hasNavIssue = false;
     let mainCount = 0;
 
-    // Verificar main
+    // Check main
     const mains = this._querySelectorAll("main");
     if (mains.length === 0 && divCount > 10) {
       this.addIssue("warning", "No se encontró etiqueta <main>", null, {
@@ -53,7 +53,7 @@ class SemanticAnalyzer extends Analyzer {
       mainCount++;
     }
 
-    // Verificar nav
+    // Check nav
     const navs = this._querySelectorAll("nav");
     if (navs.length === 0 && this._querySelectorAll("ul, ol").length > 0) {
       this.addIssue(
@@ -70,7 +70,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar header
+    // Check header
     const headers = this._querySelectorAll("header");
     if (headers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <header>", null, {
@@ -81,7 +81,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar footer
+    // Check footer
     const footers = this._querySelectorAll("footer");
     if (footers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <footer>", null, {
@@ -92,7 +92,7 @@ class SemanticAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar sections
+    // Check sections
     const sections = this._querySelectorAll("section");
     sections.forEach((section) => {
       const heading = section.querySelector("h1, h2, h3, h4, h5, h6");
@@ -106,7 +106,7 @@ class SemanticAnalyzer extends Analyzer {
       }
     });
 
-    // Verificar articles
+    // Check articles
     const articles = this._querySelectorAll("article");
     articles.forEach((article) => {
       const heading = article.querySelector("h1, h2, h3, h4, h5, h6");
@@ -120,7 +120,7 @@ class SemanticAnalyzer extends Analyzer {
       }
     });
 
-    // Advertencia si hay muchos divs
+    // Warn if there are too many divs
     if (divCount > 50 && divCount > spanCount * 2) {
       this.addIssue(
         "info",

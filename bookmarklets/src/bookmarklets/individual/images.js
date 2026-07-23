@@ -1,8 +1,8 @@
 /**
- * BOOKMARKLET INDIVIDUAL - IMAGES ANALYZER
- * Valida alt text y accesibilidad de imágenes
+ * INDIVIDUAL BOOKMARKLET - IMAGES ANALYZER
+ * Validates alt text and image accessibility
  *
- * Uso: javascript:(async()=>{...})()
+ * Usage: javascript:(async()=>{...})()
  */
 
 (async function runImagesAudit() {
@@ -10,7 +10,7 @@
     if (window.a11yImagesRunning) return;
     window.a11yImagesRunning = true;
 
-    // Crear popup
+    // Create popup
     const popup = document.createElement("div");
     popup.className = "a11y-audit-popup";
     popup.style.cssText = `
@@ -36,7 +36,7 @@
 
     document.body.appendChild(popup);
 
-    // Analizar imágenes
+    // Analyze images
     const images = Array.from(document.querySelectorAll("img"));
     const svgs = Array.from(document.querySelectorAll("svg"));
 
@@ -62,7 +62,7 @@
       }
     });
 
-    // Mostrar resultados
+    // Show results
     let html = `<strong>🖼️ Análisis de Imágenes</strong><hr style="margin: 8px 0;">`;
     html += `<div style="font-size: 12px; margin-bottom: 8px;">`;
     html += `<strong>${images.length + svgs.length}</strong> imágenes encontradas<br>`;

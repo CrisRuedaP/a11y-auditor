@@ -1,15 +1,15 @@
 /**
- * BOOKMARKLET PRINCIPAL - A11Y AUDITOR
+ * MAIN BOOKMARKLET - A11Y AUDITOR
  *
- * Este archivo es la lógica de orquestación del bookmarklet principal.
- * `build.js` lo concatena junto con todas las clases de src/core y
- * src/analyzers dentro de un único IIFE para generar el bookmarklet final
- * (ver bookmarklets/dist/ tras ejecutar `npm run build`).
+ * This file is the orchestration logic for the main bookmarklet.
+ * `build.js` concatenates it together with all the classes from src/core
+ * and src/analyzers into a single IIFE to generate the final bookmarklet
+ * (see bookmarklets/dist/ after running `npm run build`).
  */
 
 (async function initAuditBookmarklet() {
   try {
-    // Evitar ejecutarse múltiples veces
+    // Avoid running multiple times
     if (window.a11yAuditRunning) {
       console.warn("Auditoría ya en ejecución");
       return;
@@ -17,16 +17,16 @@
 
     window.a11yAuditRunning = true;
 
-    // Crear UI
+    // Create UI
     const ui = new AuditUI();
 
-    // Crear auditor
+    // Create auditor
     const auditor = new Auditor(ui);
 
-    // Abrir panel
+    // Open panel
     ui.open();
 
-    // Crear menú de opciones
+    // Create options menu
     const contentContainer = ui.container.querySelector(".a11y-audit-content");
     const analyzerIcons = {
       Headings:
@@ -80,10 +80,10 @@
     `;
 
     // Event listeners
-    // Se buscan dentro de contentContainer, no en document: el bookmarklet
-    // se inyecta en páginas ajenas que pueden tener sus propios elementos
-    // con id="run-all" o clase "analyzer-btn", y una búsqueda global podría
-    // engancharse al elemento equivocado del sitio en vez de al del panel.
+    // Looked up inside contentContainer, not document: the bookmarklet is
+    // injected into third-party pages that may have their own elements with
+    // id="run-all" or class "analyzer-btn", and a global lookup could latch
+    // onto the wrong element from the site instead of the panel's own.
     contentContainer
       .querySelector("#run-all")
       .addEventListener("click", async () => {

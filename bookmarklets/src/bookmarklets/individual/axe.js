@@ -1,8 +1,8 @@
 /**
- * BOOKMARKLET INDIVIDUAL - AXECORE ANALYZER
- * Ejecuta axe-core para detectar issues de accesibilidad
+ * INDIVIDUAL BOOKMARKLET - AXECORE ANALYZER
+ * Runs axe-core to detect accessibility issues
  *
- * Uso: javascript:(async()=>{...})()
+ * Usage: javascript:(async()=>{...})()
  */
 
 (async function runAxeAudit() {
@@ -10,7 +10,7 @@
     if (window.a11yAxeRunning) return;
     window.a11yAxeRunning = true;
 
-    // Mostrar loading
+    // Show loading
     const popup = document.createElement("div");
     popup.className = "a11y-audit-popup";
     popup.style.cssText = `
@@ -37,7 +37,7 @@
 
     document.body.appendChild(popup);
 
-    // Cargar axe-core
+    // Load axe-core
     if (!window.axe) {
       const script = document.createElement("script");
       script.src =

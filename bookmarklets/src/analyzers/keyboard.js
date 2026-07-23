@@ -1,6 +1,6 @@
 /**
- * Analizador de Teclado/Navegación
- * Valida navegación por teclado, focus, tabindex, traps, etc
+ * Keyboard/Navigation analyzer
+ * Validates keyboard navigation, focus, tabindex, traps, etc
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG } from "../core/wcag.js";
@@ -22,14 +22,14 @@ class KeyboardAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar elementos interactivos
+    // Analyze interactive elements
     interactiveElements.forEach((element) => {
       const tabindex = element.getAttribute("tabindex");
       const disabled = element.disabled;
       const role = element.getAttribute("role");
       const hasClick = element.hasAttribute("onclick");
 
-      // Verificar tabindex negativo en elementos que deberían ser accesibles
+      // Check for negative tabindex on elements that should be accessible
       if (tabindex && parseInt(tabindex) < 0) {
         const isNaturallyFocusable = [
           "button",
@@ -53,7 +53,7 @@ class KeyboardAnalyzer extends Analyzer {
         }
       }
 
-      // Verificar tabindex > 0 (evitar)
+      // Check for tabindex > 0 (should be avoided)
       if (tabindex && parseInt(tabindex) > 0) {
         this.addIssue(
           "warning",
@@ -68,7 +68,7 @@ class KeyboardAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Verificar divs/spans con click handlers
+      // Check for divs/spans with click handlers
       if (
         hasClick &&
         !["button", "a"].includes(element.tagName.toLowerCase())
@@ -85,7 +85,7 @@ class KeyboardAnalyzer extends Analyzer {
           );
         }
 
-        // Verificar que sea navegable por teclado
+        // Check that it's keyboard-navigable
         if (tabindex === null || tabindex === undefined) {
           this.addIssue(
             "error",
@@ -101,11 +101,11 @@ class KeyboardAnalyzer extends Analyzer {
 
     });
 
-    // Nota: el indicador de foco visible (:focus-visible) NO se puede
-    // comprobar desde acá — ver "Limitaciones" en la guía de uso. No tiene
-    // sentido reportar un "no sé" como si fuera un hallazgo de la auditoría.
+    // Note: the visible focus indicator (:focus-visible) CANNOT be
+    // checked from here — see "Limitations" in the usage guide. Reporting a
+    // "don't know" as if it were an audit finding wouldn't make sense.
 
-    // Buscar modal traps (focus no puede escapar)
+    // Look for modal traps (focus can't escape)
     const modals = this._querySelectorAll('[role="dialog"], dialog');
     modals.forEach((modal) => {
       const focusableElements = modal.querySelectorAll(

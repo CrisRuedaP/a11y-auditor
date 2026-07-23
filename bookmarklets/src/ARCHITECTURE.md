@@ -1,23 +1,23 @@
-# Decisiones Arquitectónicas - Bookmarklets de Accesibilidad
+# Architectural Decisions - Accessibility Bookmarklets
 
-## Visión General
+## Overview
 
-Sistema modular de bookmarklets para auditoría de accesibilidad con panel visual interactivo y exportación JSON para uso con LLMs.
+Modular bookmarklet system for accessibility auditing with an interactive visual panel and JSON export for use with LLMs.
 
-## Decisiones Principales
+## Main Decisions
 
-### 1. Arquitectura de Módulos Independientes
+### 1. Independent Module Architecture
 
-**Decisión:** Cada analizador es una clase independiente que hereda de `Analyzer`
+**Decision:** Each analyzer is an independent class that extends `Analyzer`
 
-**Razón:**
+**Reason:**
 
-- Permite desarrollar en paralelo
-- Facilita agregar nuevos analizadores
-- Cada uno puede ejecutarse independientemente
-- Código reutilizable
+- Allows parallel development
+- Makes it easy to add new analyzers
+- Each one can run independently
+- Reusable code
 
-**Implementación:**
+**Implementation:**
 
 ```
 Analyzer (base)
@@ -32,349 +32,349 @@ Analyzer (base)
 └── LinksAnalyzer
 ```
 
-### 2. Panel Lateral No Invasivo
+### 2. Non-Invasive Side Panel
 
-**Decisión:** UI en panel lateral fijo en `position: fixed`, no popup flotante
+**Decision:** UI as a fixed sidebar panel using `position: fixed`, not a floating popup
 
-**Razón:**
+**Reason:**
 
-- No interfiere con navegación de página
-- Fácil de cerrar
-- Permite ver página y resultados simultáneamente
-- Responsive en mobile (se convierte en bottom sheet)
+- Doesn't interfere with page navigation
+- Easy to close
+- Lets you see the page and the results at the same time
+- Responsive on mobile (becomes a bottom sheet)
 
-### 3. Dos Formas de Acceso
+### 3. Two Ways to Access It
 
-**Decisión:** 1 bookmarklet principal + 4 individuales
+**Decision:** 1 main bookmarklet + 4 individual ones
 
-**Razón:**
+**Reason:**
 
-- Bookmarklet principal: auditoría completa, panel con menú
-- Bookmarklets individuales: auditoría rápida, popup ligero
-- Flexibilidad según necesidad del usuario
-- Usuarios rápidos vs usuarios profundos
+- Main bookmarklet: full audit, panel with a menu
+- Individual bookmarklets: quick audit, lightweight popup
+- Flexibility depending on what the user needs
+- Quick users vs. thorough users
 
-### 4. Exportación JSON Automática
+### 4. Automatic JSON Export
 
-**Decisión:** Console.log + portapapeles automático
+**Decision:** Console.log + automatic clipboard copy
 
-**Razón:**
+**Reason:**
 
-- No requiere servidor
-- LLMs pueden acceder directamente
-- Portapapeles permite workflow fluid
-- Console permite debugging
+- Requires no server
+- LLMs can access it directly
+- Clipboard enables a smooth workflow
+- Console enables debugging
 
-**No implementado:**
+**Not implemented:**
 
-- API/Webhooks (complejidad innecesaria)
-- Descarga de archivo (menos accesible)
+- API/Webhooks (unnecessary complexity)
+- File download (less accessible)
 
-### 5. Análisis de Página Completa
+### 5. Full-Page Analysis
 
-**Decisión:** Auditar todo el DOM, no solo viewport o elemento seleccionado
+**Decision:** Audit the entire DOM, not just the viewport or a selected element
 
-**Razón:**
+**Reason:**
 
-- Da vista completa de problemas
-- Más útil para auditorías iniciales
-- Usuario puede scrollear para ver resaltados
+- Gives a complete view of the issues
+- More useful for initial audits
+- User can scroll to see the highlights
 
-**Consideración futura:** Selector de elemento para análisis enfocados
+**Future consideration:** Element selector for focused analysis
 
-### 6. Estilos Inlineados
+### 6. Inlined Styles
 
-**Decisión:** CSS inyectado directamente en el `<style>` tag
+**Decision:** CSS injected directly into the `<style>` tag
 
-**Razón:**
+**Reason:**
 
-- No requiere archivo externo
-- Funciona en cualquier contexto (CORS, file://, etc)
-- Bookmarklet más autónomo
+- Requires no external file
+- Works in any context (CORS, file://, etc)
+- More self-contained bookmarklet
 
-### 7. Sin Librerías Externas (Excepto Axe-Core)
+### 7. No External Libraries (Except Axe-Core)
 
-**Decisión:** Código vanilla JavaScript, axe-core cargado dinámicamente
+**Decision:** Vanilla JavaScript code, axe-core loaded dynamically
 
-**Razón:**
+**Reason:**
 
-- Bookmarklets minificados más pequeños
-- Sin webpack/bundler requerido
-- Axe-core es estándar industria (excepción válida)
+- Smaller minified bookmarklets
+- No webpack/bundler required
+- Axe-core is an industry standard (valid exception)
 
-### 8. Severidad en Tres Niveles
+### 8. Three Severity Levels
 
-**Decisión:** error, warning, info
+**Decision:** error, warning, info
 
-**Razón:**
+**Reason:**
 
-- Priorización clara para usuario
-- Colores visuales consistentes
-- Facilita exportación a CSV/sistemas externos
+- Clear prioritization for the user
+- Consistent visual colors
+- Makes exporting to CSV/external systems easier
 
-### 9. Metadatos en Cada Issue
+### 9. Metadata on Every Issue
 
-**Decisión:** Guardar selector CSS, tag, id, classes, texto, metadata personalizada
+**Decision:** Store CSS selector, tag, id, classes, text, custom metadata
 
-**Razón:**
+**Reason:**
 
-- Usuario puede encontrar elemento después
-- LLM tiene contexto para recomendaciones
-- Debug más fácil
+- User can find the element afterward
+- LLM has context for recommendations
+- Easier debugging
 
-### 10. UI Modular Separada
+### 10. Separate Modular UI
 
-**Decisión:** Clase `AuditUI` independiente de `Auditor`
+**Decision:** `AuditUI` class independent from `Auditor`
 
-**Razón:**
+**Reason:**
 
-- Auditor puede usarse sin UI (testing, CLI)
-- UI puede reemplazarse por otra versión
-- Separación de responsabilidades
-- Testeable
+- Auditor can be used without a UI (testing, CLI)
+- UI can be swapped for another version
+- Separation of concerns
+- Testable
 
-## Analizadores Específicos
+## Specific Analyzers
 
 ### Headings
 
-**Lógica:**
+**Logic:**
 
-1. Buscar h1-h6
-2. Validar único H1
-3. Detectar saltos (h1 → h3)
-4. Detectar vacíos
+1. Find h1-h6
+2. Validate a single H1
+3. Detect jumps (h1 → h3)
+4. Detect empty ones
 
-**Decisión:** No validar orden alfabético de títulos
+**Decision:** Don't validate alphabetical order of titles
 
 ### Axe-Core
 
-**Lógica:**
+**Logic:**
 
-1. Cargar librería desde CDN
-2. Ejecutar `axe.run()`
-3. Procesar violations/passes
+1. Load the library from a CDN
+2. Run `axe.run()`
+3. Process violations/passes
 
-**Decisión:** Cargar dinámicamente para no aumentar tamaño bookmarklet
+**Decision:** Load dynamically to avoid increasing the bookmarklet's size
 
 ### Imágenes
 
-**Lógica:**
+**Logic:**
 
-1. Buscar IMG, SVG, background-images
-2. Validar alt/title/desc
-3. Detectar alt vacío
+1. Find IMG, SVG, background-images
+2. Validate alt/title/desc
+3. Detect empty alt
 
-**Decisión:** No hacer OCR de imágenes (fuera de alcance)
+**Decision:** Don't do image OCR (out of scope)
 
 ### Contraste
 
-**Lógica:**
+**Logic:**
 
-1. Calcular luminancia WCAG
-2. Obtener colores foreground/background
-3. Buscar en padres si background transparent
-4. Calcular ratio (Lighter + 0.05) / (Darker + 0.05)
+1. Calculate WCAG luminance
+2. Get foreground/background colors
+3. Look up through ancestors if the background is transparent
+4. Calculate ratio (Lighter + 0.05) / (Darker + 0.05)
 
-**Decisión:** Usar fórmula WCAG 2.0 estándar, no algoritmos propietarios
+**Decision:** Use the standard WCAG 2.0 formula, not proprietary algorithms
 
 ### ARIA
 
-**Lógica:**
+**Logic:**
 
-1. Validar roles contra lista ARIA 1.2
-2. Validar aria-labelledby/describedby apuntan a IDs reales
+1. Validate roles against the ARIA 1.2 list
+2. Validate that aria-labelledby/describedby point to real IDs
 
-**Decisión:** No validar propiedades ARIA complejas (demasiado contexto)
+**Decision:** Don't validate complex ARIA properties (too much context needed)
 
 ### Formularios
 
-**Lógica:**
+**Logic:**
 
-1. Buscar input, select, textarea
-2. Validar label con `for`
-3. Validar tipo de input
-4. Validar required/aria-required
+1. Find input, select, textarea
+2. Validate label via `for`
+3. Validate input type
+4. Validate required/aria-required
 
-**Decisión:** No validar lógica de validación custom
+**Decision:** Don't validate custom validation logic
 
 ### Semántica
 
-**Lógica:**
+**Logic:**
 
-1. Detectar presencia de main, header, footer
-2. Validar section/article tienen h1-h6
-3. Contar divs vs etiquetas semánticas
+1. Detect the presence of main, header, footer
+2. Validate that section/article have h1-h6
+3. Count divs vs. semantic tags
 
-**Decisión:** No imponer estructura específica (puede variar)
+**Decision:** Don't enforce a specific structure (it can vary)
 
 ### Teclado
 
-**Lógica:**
+**Logic:**
 
-1. Detectar elementos interactivos
-2. Validar tabindex positivo/negativo
-3. Detectar divs con onclick sin role
-4. Verificar focus visible
+1. Detect interactive elements
+2. Validate positive/negative tabindex
+3. Detect divs with onclick and no role
+4. Check visible focus
 
-**Decisión:** No automatizar prueba de orden Tab (requiere simulación)
+**Decision:** Don't automate testing Tab order (would require simulation)
 
 ### Links
 
-**Lógica:**
+**Logic:**
 
-1. Detectar texto de enlace genérico ("click aquí", "leer más", etc)
-2. Detectar enlaces sin `href` real (ausente, vacío, `#`, `javascript:void(0)`)
-3. Detectar `target="_blank"` sin aviso en el texto/aria-label ni `rel="noopener"`
+1. Detect generic link text ("click aquí", "leer más", etc)
+2. Detect links with no real `href` (missing, empty, `#`, `javascript:void(0)`)
+3. Detect `target="_blank"` with no warning in the text/aria-label and no `rel="noopener"`
 
-**Decisión:** No resolver si el destino responde (requeriría red); solo se valida markup
+**Decision:** Don't check whether the destination actually responds (would require a network call); only markup is validated
 
-## Estándares Usados
+## Standards Used
 
 ### WCAG 2.2
 
-- Nivel AA: Contraste 4.5:1 normal, 3:1 grande
-- Nivel AAA: Contraste 7:1 normal, 4.5:1 grande
+- Level AA: Contrast 4.5:1 normal, 3:1 large
+- Level AAA: Contrast 7:1 normal, 4.5:1 large
 
-### Fórmula de Contraste
+### Contrast Formula
 
 ```
 RsRGB = R/255
-Si RsRGB <= 0.03928 entonces RsRGB = RsRGB/12.92
-Si no, entonces RsRGB = ((RsRGB+0.055)/1.055) ^ 2.4
+If RsRGB <= 0.03928 then RsRGB = RsRGB/12.92
+Otherwise, RsRGB = ((RsRGB+0.055)/1.055) ^ 2.4
 
-Luminancia = 0.2126 * R + 0.7152 * G + 0.0722 * B
+Luminance = 0.2126 * R + 0.7152 * G + 0.0722 * B
 
 Contrast = (L1 + 0.05) / (L2 + 0.05)
-Donde L1 es luminancia más clara, L2 más oscura
+Where L1 is the lighter luminance, L2 the darker one
 ```
 
-### ARIA 1.2 Roles Válidos
+### ARIA 1.2 Valid Roles
 
-Lista de 51 roles validados contra especificación ARIA
+List of 51 roles validated against the ARIA specification
 
-## Sitio Web
+## Website
 
 ### index.html
 
-- Hero con un mockup de "página anotada" que reproduce el mismo lenguaje
-  visual del panel real (etiqueta + resaltado sobre el elemento con problema)
-- Grid de instalación conectado a `bookmarklets.data.js` (generado por
-  `build.js`), no a código de ejemplo
-- Grid de los 9 analizadores con un hallazgo real de ejemplo por analizador
+- Hero with an "annotated page" mockup that reproduces the same visual
+  language as the real panel (tag + highlight over the problematic element)
+- Install grid wired to `bookmarklets.data.js` (generated by `build.js`),
+  not to sample code
+- Grid of the 9 analyzers with one real example finding per analyzer
 
 ### results-viewer.html
 
-- Carga JSON desde portapapeles/archivo/textarea
-- Visualiza metadatos y resumen
-- Grid de analizadores con issues por severidad
+- Loads JSON from the clipboard/file/textarea
+- Displays metadata and a summary
+- Grid of analyzers with issues by severity
 
 ### install-guide.html
 
-- Instalación (arrastrar + manual)
-- Guía por analizador
-- FAQ como botones reales con `aria-expanded` (no divs con onclick)
+- Installation (drag + manual)
+- Guide per analyzer
+- FAQ as real buttons with `aria-expanded` (not divs with onclick)
 
 ## Performance
 
-### Optimizaciones
+### Optimizations
 
-- Lazy load de axe-core (solo si se solicita)
-- Análisis no bloquea UI (potencial: Web Workers)
-- Selector CSS cacheado
-- Estilos compilados en CSS (sin SASS)
+- Lazy load of axe-core (only when requested)
+- Analysis doesn't block the UI (potential: Web Workers)
+- Cached CSS selector
+- Styles compiled into CSS (no SASS)
 
-### Tamaño
+### Size
 
-- Bookmarklet principal: ~35KB codificado como `javascript:` URI
-- Bookmarklets individuales: ~5-8KB cada uno
-- No se minifica el código (comentarios incluidos): al ir codificado con
-  `encodeURIComponent` ya es una única línea válida para un marcador, y el
-  tamaño extra es irrelevante para uso local
+- Main bookmarklet: ~35KB encoded as a `javascript:` URI
+- Individual bookmarklets: ~5-8KB each
+- The code isn't minified (comments included): since it's already encoded
+  with `encodeURIComponent` it's already a single valid line for a
+  bookmark, and the extra size is irrelevant for local use
 
-## Consideraciones Futuras
+## Future Considerations
 
 ### High Priority
 
-- [ ] Soporte para Web Workers (análisis no bloqueante)
-- [ ] Historial de auditorías (localStorage)
-- [ ] Filtrado de resultados por tipo/severidad
+- [ ] Web Workers support (non-blocking analysis)
+- [ ] Audit history (localStorage)
+- [ ] Filter results by type/severity
 
 ### Medium Priority
 
-- [ ] Integración con herramientas (Jira, GitHub)
-- [ ] Comparación de auditorías (antes/después)
-- [ ] Exportación a PDF/HTML
-- [ ] Modo oscuro en panel
+- [ ] Integration with tools (Jira, GitHub)
+- [ ] Audit comparison (before/after)
+- [ ] Export to PDF/HTML
+- [ ] Dark mode in the panel
 
 ### Low Priority
 
-- [ ] Selector manual de elementos
-- [ ] Profiler de performance
-- [ ] Análisis de imágenes (OCR)
-- [ ] Integración con CI/CD
+- [ ] Manual element selector
+- [ ] Performance profiler
+- [ ] Image analysis (OCR)
+- [ ] CI/CD integration
 
 ## Testing
 
-### Pruebas Manuales Necesarias
+### Manual Tests Needed
 
-1. Página con issues conocidos de cada tipo
-2. Página grande (>10MB DOM)
-3. Página con frames/iframes
-4. Página con sombra DOM
-5. Página HTTPS/segura
+1. Page with known issues of each type
+2. Large page (>10MB DOM)
+3. Page with frames/iframes
+4. Page with shadow DOM
+5. HTTPS/secure page
 
-### No Automatizado
+### Not Automated
 
-- Lectura real con screen readers
-- Navegación con teclado en vivo
-- Experiencia de usuario real
+- Real reading with screen readers
+- Live keyboard navigation
+- Real user experience
 
-## Notas para Desarrolladores
+## Notes for Developers
 
-### Agregar Analizador
+### Adding an Analyzer
 
-1. Crear `src/analyzers/myanalyzer.js`
-2. Hereda de `Analyzer`
-3. Implementar `async run()`
-4. Llamar `addIssue()` para problemas
-5. Llamar `markPassed()` para éxitos
-6. Agregar a `auditor.js`
-7. Crear bookmarklet individual opcional
+1. Create `src/analyzers/myanalyzer.js`
+2. Extend `Analyzer`
+3. Implement `async run()`
+4. Call `addIssue()` for problems
+5. Call `markPassed()` for successes
+6. Add it to `auditor.js`
+7. Optionally create an individual bookmarklet
 
-### Debug
+### Debugging
 
 ```javascript
-// En consola del navegador:
-window.a11yAuditResults; // Últimos resultados
-window.a11yAuditorInstance; // Referencia al auditor
+// In the browser console:
+window.a11yAuditResults; // Latest results
+window.a11yAuditorInstance; // Reference to the auditor
 ```
 
-### Modificar UI
+### Modifying the UI
 
-Los estilos están en `core/ui.js` método `_injectStyles()`. CSS clase base `.a11y-audit-*`.
+The styles live in `core/ui.js`'s `_injectStyles()` method. Base CSS class `.a11y-audit-*`.
 
-## Decisiones Rechazadas
+## Rejected Decisions
 
 ### Chrome Extension
 
-**Por qué no:** Requiere instalación, permisos, menos portable
+**Why not:** Requires installation, permissions, less portable
 
-### Herramienta CLI Standalone
+### Standalone CLI Tool
 
-**Por qué no:** Desvía del propósito de bookmarklets, requiere Node.js
+**Why not:** Strays from the point of bookmarklets, requires Node.js
 
-### Base de Datos Remota
+### Remote Database
 
-**Por qué no:** Privacidad, GDPR, complejidad innecesaria
+**Why not:** Privacy, GDPR, unnecessary complexity
 
 ### React/Vue
 
-**Por qué no:** Tamaño bundle, overkill para UI simple
+**Why not:** Bundle size, overkill for a simple UI
 
-### Shadow DOM para UI
+### Shadow DOM for the UI
 
-**Por qué no:** Conflictos con estilos de página, complejidad
+**Why not:** Conflicts with page styles, complexity
 
 ---
 
-**Última actualización:** 2026-07-22
+**Last updated:** 2026-07-22

@@ -1,6 +1,6 @@
 /**
- * Analizador Axe-Core
- * Ejecuta la librería axe-core para detectar problemas de accesibilidad
+ * Axe-Core analyzer
+ * Runs the axe-core library to detect accessibility issues
  */
 import Analyzer from "../core/analyzer.js";
 import { BEST_PRACTICE } from "../core/wcag.js";
@@ -13,7 +13,7 @@ class AxeCoreAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Inyectar axe-core si no está cargado
+    // Inject axe-core if it isn't loaded yet
     if (!window.axe) {
       await this._loadAxeCore();
     }
@@ -26,8 +26,8 @@ class AxeCoreAnalyzer extends Analyzer {
     }
 
     try {
-      // Excluir el propio panel del auditor: si no, axe-core también analiza
-      // el sidebar que acabamos de inyectar y contamina los resultados.
+      // Exclude the auditor's own panel: otherwise axe-core also analyzes
+      // the sidebar we just injected and contaminates the results.
       const context = document.getElementById("a11y-audit-sidebar")
         ? { exclude: [["#a11y-audit-sidebar"]] }
         : document;
@@ -38,7 +38,7 @@ class AxeCoreAnalyzer extends Analyzer {
         });
       });
 
-      // Procesar violations
+      // Process violations
       results.violations?.forEach((violation) => {
         const wcag = this._parseWcagTags(violation.tags);
         violation.nodes?.forEach((node) => {
@@ -57,14 +57,14 @@ class AxeCoreAnalyzer extends Analyzer {
         });
       });
 
-      // Contar passes
+      // Count passes
       results.passes?.forEach((pass) => {
         pass.nodes?.forEach(() => {
           this.markPassed();
         });
       });
 
-      // Agregar metadata
+      // Add metadata
       this.results.inapplicable = results.inapplicable?.length || 0;
       this.results.timestamp = new Date().toISOString();
 
@@ -83,9 +83,9 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * axe-core ya trae sus propias etiquetas WCAG en cada regla (ej.
-   * ["wcag2aa", "wcag143", ...] para contraste) — las leemos en vez de
-   * adivinar un criterio nosotros mismos.
+   * axe-core already ships its own WCAG tags on every rule (e.g.
+   * ["wcag2aa", "wcag143", ...] for contrast) — we read those instead of
+   * guessing a criterion ourselves.
    * @private
    */
   _parseWcagTags(tags) {
@@ -109,9 +109,9 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * axe-core a veces devuelve selectores compuestos (arrays, para elementos
-   * dentro de iframes/shadow DOM) o selectores que document.querySelector
-   * no puede resolver. Nunca debe tirar abajo el resto del análisis.
+   * axe-core sometimes returns composite selectors (arrays, for elements
+   * inside iframes/shadow DOM) or selectors that document.querySelector
+   * can't resolve. This should never take down the rest of the analysis.
    * @private
    */
   _safeQuerySelector(target) {
@@ -125,7 +125,7 @@ class AxeCoreAnalyzer extends Analyzer {
   }
 
   /**
-   * Carga axe-core desde CDN
+   * Loads axe-core from a CDN
    * @private
    */
   _loadAxeCore() {
@@ -134,7 +134,7 @@ class AxeCoreAnalyzer extends Analyzer {
       script.src =
         "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.2/axe.min.js";
       script.onload = () => resolve();
-      script.onerror = () => resolve(); // Resolver aunque falle
+      script.onerror = () => resolve(); // Resolve even if it fails
       document.head.appendChild(script);
     });
   }

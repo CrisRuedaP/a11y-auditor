@@ -1,6 +1,6 @@
 /**
- * Analizador de ARIA
- * Valida atributos ARIA, roles, propiedades, etc
+ * ARIA analyzer
+ * Validates ARIA attributes, roles, properties, etc
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG } from "../core/wcag.js";
@@ -99,7 +99,7 @@ class AriaAnalyzer extends Analyzer {
       const ariaLabelledBy = element.getAttribute("aria-labelledby");
       const ariaDescribedBy = element.getAttribute("aria-describedby");
 
-      // Validar role
+      // Validate role
       if (role && !validRoles.includes(role)) {
         this.addIssue("error", `Rol ARIA inválido: "${role}"`, element, {
           invalidRole: role,
@@ -109,7 +109,7 @@ class AriaAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Validar aria-labelledby
+      // Validate aria-labelledby
       if (ariaLabelledBy) {
         const ids = ariaLabelledBy.split(" ");
         let allExist = true;
@@ -134,7 +134,7 @@ class AriaAnalyzer extends Analyzer {
         }
       }
 
-      // Validar aria-describedby
+      // Validate aria-describedby
       if (ariaDescribedBy) {
         const ids = ariaDescribedBy.split(" ");
         let allExist = true;
@@ -159,7 +159,7 @@ class AriaAnalyzer extends Analyzer {
         }
       }
 
-      // Validar que elementos interactivos tengan accesibilidad
+      // Validate that interactive elements have an accessible name
       const tagName = element.tagName.toLowerCase();
       const isInteractive = [
         "button",
@@ -169,8 +169,8 @@ class AriaAnalyzer extends Analyzer {
         "textarea",
       ].includes(tagName);
 
-      // aria-hidden="true" saca al elemento del árbol de accesibilidad a
-      // propósito: pedirle un nombre accesible ahí no tiene sentido.
+      // aria-hidden="true" deliberately removes the element from the
+      // accessibility tree: requiring an accessible name there makes no sense.
       const isHiddenFromAT = element.getAttribute("aria-hidden") === "true";
 
       if (

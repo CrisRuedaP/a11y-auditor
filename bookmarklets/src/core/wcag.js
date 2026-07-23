@@ -1,10 +1,10 @@
 /**
- * Constantes compartidas para etiquetar cada hallazgo con su criterio WCAG
- * (2.1/2.2) y nivel de conformancia, o "buena práctica" cuando el chequeo
- * es una convención razonable pero WCAG no lo exige puntualmente.
+ * Shared constants for tagging each finding with its WCAG criterion
+ * (2.1/2.2) and conformance level, or "buena práctica" (best practice) when
+ * the check is a reasonable convention but WCAG doesn't strictly require it.
  *
- * Importado por todos los analizadores — vive en un solo lugar para que
- * build.js pueda concatenarlo sin choques de nombres entre archivos.
+ * Imported by every analyzer — lives in a single place so build.js can
+ * concatenate it without name clashes across files.
  */
 export const BEST_PRACTICE = { criterion: null, level: "buena práctica" };
 

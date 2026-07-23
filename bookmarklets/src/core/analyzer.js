@@ -1,6 +1,6 @@
 /**
- * Clase base para todos los analizadores de accesibilidad
- * Proporciona estructura común y métodos estándar
+ * Base class for all accessibility analyzers
+ * Provides shared structure and standard methods
  */
 class Analyzer {
   constructor(name, description) {
@@ -15,8 +15,8 @@ class Analyzer {
   }
 
   /**
-   * Ejecuta el análisis
-   * Debe ser sobrescrito por subclases
+   * Runs the analysis
+   * Must be overridden by subclasses
    */
   async run() {
     throw new Error(
@@ -25,7 +25,7 @@ class Analyzer {
   }
 
   /**
-   * Valida que los resultados tengan la estructura correcta
+   * Validates that the results have the correct structure
    */
   validate() {
     return (
@@ -37,11 +37,11 @@ class Analyzer {
   }
 
   /**
-   * Formatea un issue para los resultados
+   * Formats an issue for the results
    * @param {string} severity - 'error', 'warning', 'info'
-   * @param {string} message - Descripción del problema
-   * @param {HTMLElement} element - Elemento problemático (opcional)
-   * @param {object} metadata - Información adicional
+   * @param {string} message - Description of the problem
+   * @param {HTMLElement} element - Problematic element (optional)
+   * @param {object} metadata - Additional information
    */
   addIssue(severity, message, element = null, metadata = {}) {
     const issue = {
@@ -63,7 +63,7 @@ class Analyzer {
 
     this.results.issues.push(issue);
 
-    // Contar por severidad
+    // Count by severity
     if (severity === "error") {
       this.results.failed++;
     } else if (severity === "warning") {
@@ -72,7 +72,7 @@ class Analyzer {
   }
 
   /**
-   * Genera un selector CSS único para un elemento
+   * Generates a unique CSS selector for an element
    * @private
    */
   _generateSelector(element) {
@@ -107,7 +107,7 @@ class Analyzer {
   }
 
   /**
-   * Resetea los resultados
+   * Resets the results
    */
   reset() {
     this.results = {
@@ -119,7 +119,7 @@ class Analyzer {
   }
 
   /**
-   * Obtiene un resumen de los resultados
+   * Gets a summary of the results
    */
   getSummary() {
     return {
@@ -131,16 +131,16 @@ class Analyzer {
   }
 
   /**
-   * Marca un análisis como pasado
+   * Marks a check as passed
    */
   markPassed() {
     this.results.passed++;
   }
 
   /**
-   * Obtiene elementos de un tipo específico con un filtro.
-   * Excluye el propio panel del auditor: si no, cada analizador terminaría
-   * auditando su propia UI en vez de (solo) la página de la persona usuaria.
+   * Gets elements of a given type with a filter applied.
+   * Excludes the auditor's own panel: otherwise every analyzer would end up
+   * auditing its own UI instead of (only) the user's page.
    * @protected
    */
   _querySelectorAll(selector) {
@@ -150,7 +150,7 @@ class Analyzer {
   }
 
   /**
-   * Obtiene estilos computados de un elemento
+   * Gets an element's computed styles
    * @protected
    */
   _getComputedStyle(element) {
@@ -158,9 +158,9 @@ class Analyzer {
   }
 
   /**
-   * Un elemento oculto por CSS (display:none o visibility:hidden) no es
-   * perceivable por nadie ahora mismo, así que no debería contar para
-   * chequeos que dependen de lo que la página muestra realmente.
+   * An element hidden via CSS (display:none or visibility:hidden) isn't
+   * perceivable by anyone right now, so it shouldn't count for checks that
+   * depend on what the page actually shows.
    * @protected
    */
   _isVisible(element) {

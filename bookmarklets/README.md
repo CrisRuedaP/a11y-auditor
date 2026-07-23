@@ -1,18 +1,18 @@
 # A11Y Auditor — bookmarklets
 
-Documentación técnica del kit. Para la instalación y el uso general, ver el
-[README de la raíz](../README.md) o abrir
-[`page/index.html`](page/index.html) directamente.
+Technical documentation for the kit. For installation and general usage, see the
+[root README](../README.md) or open
+[`page/index.html`](page/index.html) directly.
 
-## Estructura
+## Structure
 
 ```
 src/
 ├── core/
-│   ├── analyzer.js   # clase base: addIssue(), markPassed(), getSummary()
-│   ├── ui.js          # panel lateral (tabs, resumen, resaltado, copiar JSON)
-│   └── auditor.js     # orquesta los 9 analizadores y compila el resultado
-├── analyzers/          # un archivo por analizador, todos extienden Analyzer
+│   ├── analyzer.js   # base class: addIssue(), markPassed(), getSummary()
+│   ├── ui.js          # sidebar panel (tabs, summary, highlighting, copy JSON)
+│   └── auditor.js     # orchestrates the 9 analyzers and compiles the result
+├── analyzers/          # one file per analyzer, all extend Analyzer
 │   ├── headings.js
 │   ├── axeCore.js
 │   ├── images.js
@@ -22,81 +22,84 @@ src/
 │   ├── semantic.js
 │   ├── keyboard.js
 │   └── links.js
-├── utils/json.js       # stringify, copiar al portapapeles, exportar CSV
+├── utils/json.js       # stringify, copy to clipboard, export CSV
 └── bookmarklets/
-    ├── main.js         # menú con los 9 analizadores + panel completo
-    └── individual/      # headings, axe, images, contrast — autocontenidos
+    ├── main.js         # menu with the 9 analyzers + full panel
+    └── individual/      # headings, axe, images, contrast — self-contained
 
-build.js                 # empaqueta src/ en bookmarklets javascript: reales
-dist/                     # salida de build.js (generada, no editar a mano)
-page/                     # sitio estático de instalación / guía / visor
-test/                     # suite de regresión (ver más abajo)
+build.js                 # packages src/ into real javascript: bookmarklets
+dist/                     # build.js output (generated, don't edit by hand)
+page/                     # static install/guide/viewer site
+test/                     # regression suite (see below)
 ```
 
 ## Build
 
-`src/` está escrito como módulos ES (`import`/`export`) porque es la forma
-más simple de mantener cada analizador en su propio archivo. Un bookmarklet
-tiene que ser un único script clásico sin `import`/`export`, así que
-`build.js` concatena las clases, quita esas líneas y envuelve el resultado en
-un IIFE:
+`src/` is written as ES modules (`import`/`export`) because that's the
+simplest way to keep each analyzer in its own file. A bookmarklet has to be
+a single classic script with no `import`/`export`, so `build.js`
+concatenates the classes, strips those lines, and wraps the result in an
+IIFE:
 
 ```bash
 npm run build
 ```
 
-Genera:
+Generates:
 
-- `dist/main.bookmarklet.js`, `dist/headings.bookmarklet.js`, etc. — el
-  código final, legible, listo para copiar a mano si lo prefieres.
-- `page/bookmarklets.data.js` — mismo código como `javascript:` + URI
-  encodeado, que `page/index.html` usa para poblar los botones de instalar.
+- `dist/main.bookmarklet.js`, `dist/headings.bookmarklet.js`, etc. — the
+  final, readable code, ready to copy by hand if you prefer.
+- `page/bookmarklets.data.js` — the same code as a `javascript:` + URI-
+  encoded string, which `page/index.html` uses to populate the install
+  buttons.
 
-No hay dependencias de npm; el script solo usa `fs` y `path` del propio Node.
+There are no npm dependencies; the script only uses Node's own `fs` and
+`path`.
 
 ## Tests
 
-`npm test` corre los 9 analizadores contra `test/fixtures/audit.html` (una
-página con casos normales y casos borde a propósito) y compara el resultado
-contra lo esperado, usando Playwright para ejecutar el bookmarklet real en un
-Chromium sin cabeza:
+`npm test` runs the 9 analyzers against `test/fixtures/audit.html` (a page
+with normal cases and deliberate edge cases) and compares the result
+against what's expected, using Playwright to run the real bookmarklet in a
+headless Chromium:
 
 ```bash
 npm test
 ```
 
-Esta es la **única** dependencia de npm del repo, y es solo para quien
-desarrolla/mantiene el kit — el bookmarklet que instala una persona usuaria
-final sigue siendo JS puro sin dependencias. La primera vez que corras los
-tests puede que necesites descargar el navegador de Playwright:
+This is the repo's **only** npm dependency, and it's only for whoever
+develops/maintains the kit — the bookmarklet a real end user installs is
+still plain dependency-free JS. The first time you run the tests you may
+need to download Playwright's browser:
 
 ```bash
 npx playwright install chromium
 ```
 
-Los casos borde en `test/fixtures/audit.html` existen porque ya atraparon
-bugs reales (falsos positivos) antes de que llegaran a producción:
+The edge cases in `test/fixtures/audit.html` exist because they already
+caught real bugs (false positives) before they reached production:
 
-- Un `<div>` que envuelve un `<span>` con su propio color no es quien pinta
-  el texto — evaluar el contraste del div daba resultados sin sentido.
-- Un fondo con gradiente/imagen (`background-image`, sin `background-color`)
-  no se puede calcular de forma confiable; el analizador ahora lo dice en
-  vez de asumir negro.
-- Un elemento oculto por CSS (`display:none`) no debería contar para
-  chequeos de "cuántos H1/links hay" — no es perceivable por nadie ahora.
-- `aria-hidden="true"` saca al elemento del árbol de accesibilidad: pedirle
-  un nombre accesible ahí no tiene sentido.
-- Un `<label>` que envuelve un `<input>` (label implícito, sin `for`/`id`)
-  es una forma válida de asociar la etiqueta.
-- El indicador de foco (`:focus-visible`) **no se puede comprobar de forma
-  confiable desde un bookmarklet**: en cuanto el navegador registra el clic
-  que dispara el propio bookmarklet, dejar de aplicar `:focus-visible` a
-  cualquier `focus()` programático posterior es una protección real del
-  navegador (evita que un script simule "esto se enfocó por teclado"). El
-  analizador de Teclado avisa esto una sola vez en vez de inventar un
-  veredicto por elemento.
+- A `<div>` wrapping a `<span>` with its own color isn't the one painting
+  the text — evaluating the div's contrast gave nonsensical results.
+- A gradient/image background (`background-image`, no `background-color`)
+  can't be reliably calculated; the analyzer now says so instead of
+  assuming black.
+- An element hidden via CSS (`display:none`) shouldn't count toward "how
+  many H1s/links are there" checks — it isn't perceivable by anyone right
+  now.
+- `aria-hidden="true"` removes the element from the accessibility tree:
+  requiring an accessible name there doesn't make sense.
+- A `<label>` wrapping an `<input>` (implicit label, no `for`/`id`) is a
+  valid way to associate the label.
+- The focus indicator (`:focus-visible`) **can't be reliably checked from
+  a bookmarklet**: as soon as the browser registers the click that
+  triggers the bookmarklet itself, it stops applying `:focus-visible` to
+  any subsequent programmatic `focus()` — that's a real browser protection
+  (it prevents a script from faking "this was focused via keyboard"). The
+  Keyboard analyzer flags this once instead of making up a per-element
+  verdict.
 
-## Formato de resultados (JSON)
+## Results format (JSON)
 
 ```json
 {
@@ -134,58 +137,57 @@ bugs reales (falsos positivos) antes de que llegaran a producción:
 }
 ```
 
-Severidades: `error` (bloquea accesibilidad), `warning` (revisar), `info`
-(sugerencia opcional).
+Severities: `error` (blocks accessibility), `warning` (should be reviewed),
+`info` (optional suggestion).
 
-`metadata.wcag` indica el criterio y nivel de conformancia de cada
-hallazgo (`{ "criterion": "1.4.3", "level": "AA" }`), o
-`{ "criterion": null, "level": "buena práctica" }` cuando el chequeo es
-una convención razonable pero no algo que WCAG exija puntualmente. Las
-constantes viven en un solo lugar, [`src/core/wcag.js`](src/core/wcag.js),
-e importadas por cada analizador — evitá declarar una constante `wcag`
-local en un analizador nuevo, porque `build.js` concatena todos los
-archivos en el mismo scope y un nombre repetido rompe el bookmarklet
-generado (ver "Tests" arriba: es exactamente el tipo de bug que
-`npm test` existe para atrapar). Para Axe-Core, el criterio sale de las
-etiquetas reales que ya trae cada regla de axe-core, no de una
-suposición nuestra.
+`metadata.wcag` indicates each finding's criterion and conformance level
+(`{ "criterion": "1.4.3", "level": "AA" }`), or
+`{ "criterion": null, "level": "buena práctica" }` when the check is a
+reasonable convention but not something WCAG strictly requires. The
+constants live in a single place, [`src/core/wcag.js`](src/core/wcag.js),
+imported by every analyzer — avoid declaring a local `wcag` constant in a
+new analyzer, since `build.js` concatenates every file into the same
+scope and a repeated name breaks the generated bookmarklet (see "Tests"
+above: this is exactly the kind of bug `npm test` exists to catch). For
+Axe-Core, the criterion comes from the real tags each axe-core rule
+already ships with, not from a guess on our part.
 
-## Añadir un analizador
+## Adding an analyzer
 
-1. Crea `src/analyzers/mi-analizador.js`:
+1. Create `src/analyzers/my-analyzer.js`:
 
    ```js
    import Analyzer from "../core/analyzer.js";
 
-   class MiAnalizador extends Analyzer {
+   class MyAnalyzer extends Analyzer {
      constructor() {
-       super("Mi Analizador", "Qué revisa, en una frase");
+       super("My Analyzer", "What it checks, in one sentence");
      }
 
      async run() {
        this.reset();
-       // this.addIssue("error", "mensaje", elemento, metadata)
+       // this.addIssue("error", "message", element, metadata)
        // this.markPassed()
        return this.getSummary();
      }
    }
 
-   export default MiAnalizador;
+   export default MyAnalyzer;
    ```
 
-2. Regístralo en `src/core/auditor.js` (import + añadir al array
-   `this.analyzers`).
+2. Register it in `src/core/auditor.js` (import + add it to the
+   `this.analyzers` array).
 3. `npm run build`.
 
-Un bookmarklet individual es opcional: solo hace falta si quieres poder
-ejecutar ese analizador por separado, sin abrir el panel completo (ver
-`src/bookmarklets/individual/` para el patrón: un IIFE autocontenido con su
-propio popup, sin depender de las clases de `core/`).
+An individual bookmarklet is optional: you only need one if you want to be
+able to run that analyzer on its own, without opening the full panel (see
+`src/bookmarklets/individual/` for the pattern: a self-contained IIFE with
+its own popup, not depending on the `core/` classes).
 
-## Decisiones de diseño
+## Design decisions
 
-Ver [`src/ARCHITECTURE.md`](src/ARCHITECTURE.md).
+See [`src/ARCHITECTURE.md`](src/ARCHITECTURE.md).
 
-## Licencia
+## License
 
-MIT, ver [LICENSE](../LICENSE) en la raíz del repositorio.
+MIT, see [LICENSE](../LICENSE) at the repo root.

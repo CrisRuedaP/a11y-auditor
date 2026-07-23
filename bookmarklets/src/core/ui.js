@@ -1,6 +1,6 @@
 /**
- * Módulo UI para el panel lateral (sidebar) de auditoría
- * Maneja la visualización de resultados y la interacción del usuario
+ * UI module for the audit sidebar panel
+ * Handles displaying results and user interaction
  */
 class AuditUI {
   constructor() {
@@ -16,7 +16,7 @@ class AuditUI {
   }
 
   /**
-   * Inicializa y abre el panel sidebar
+   * Initializes and opens the sidebar panel
    */
   open() {
     if (this.isOpen) return;
@@ -30,7 +30,7 @@ class AuditUI {
   }
 
   /**
-   * Cierra el panel sidebar
+   * Closes the sidebar panel
    */
   close() {
     if (!this.isOpen) return;
@@ -42,10 +42,10 @@ class AuditUI {
   }
 
   /**
-   * Corre el contenido de la página (igual que WAVE) para que no quede
-   * debajo del panel: en vez de superponerse, empuja el <html> con un
-   * margen del mismo tamaño que ocupa el panel. En el layout móvil (panel
-   * abajo, a todo el ancho) empuja hacia arriba en vez de hacia la derecha.
+   * Shifts the page content (same as WAVE) so it doesn't end up underneath
+   * the panel: instead of overlapping, it pushes the <html> element with a
+   * margin the same size as the panel. Under the mobile layout (panel at
+   * the bottom, full width) it pushes up instead of to the right.
    * @private
    */
   _shiftPage() {
@@ -69,7 +69,7 @@ class AuditUI {
   }
 
   /**
-   * Deshace el corrimiento de _shiftPage()
+   * Undoes the shift applied by _shiftPage()
    * @private
    */
   _unshiftPage() {
@@ -80,7 +80,7 @@ class AuditUI {
   }
 
   /**
-   * Alterna entre abrir y cerrar el panel
+   * Toggles the panel open/closed
    */
   toggle() {
     if (this.isOpen) {
@@ -91,9 +91,9 @@ class AuditUI {
   }
 
   /**
-   * Agrega resultados de un analizador al panel
-   * @param {string} analyzerName - Nombre del analizador
-   * @param {object} results - Resultados del análisis
+   * Adds an analyzer's results to the panel
+   * @param {string} analyzerName - Analyzer name
+   * @param {object} results - Analysis results
    */
   addResults(analyzerName, results) {
     this.results[analyzerName] = results;
@@ -101,16 +101,15 @@ class AuditUI {
   }
 
   /**
-   * Inyecta los estilos CSS necesarios
+   * Injects the required CSS styles
    * @private
    */
   _injectStyles() {
-    // Siempre se sobrescribe el contenido en vez de saltar la inyección
-    // cuando ya existe la etiqueta: si la página quedó con una ejecución
-    // previa del bookmarklet (código viejo) sin recargar, el CSS se
-    // queda desactualizado mientras el HTML sí se reconstruye con la
-    // estructura nueva, produciendo un desajuste (iconos sin tamaño,
-    // colores viejos).
+    // The tag's content is always overwritten instead of skipping injection
+    // when it already exists: if the page was left over from a previous run
+    // of the bookmarklet (old code) without a reload, the CSS would stay
+    // stale while the HTML does get rebuilt with the new structure,
+    // producing a mismatch (unsized icons, old colors).
     let style = document.getElementById("a11y-audit-styles");
     if (!style) {
       style = document.createElement("style");
@@ -118,7 +117,7 @@ class AuditUI {
       document.head.appendChild(style);
     }
     style.textContent = `
-      /* Panel Principal */
+      /* Main panel */
       .a11y-audit-sidebar {
         display: none;
         position: fixed;
@@ -228,7 +227,7 @@ class AuditUI {
         background: rgba(255, 255, 255, 0.25);
       }
 
-      /* Resumen */
+      /* Summary */
       .a11y-audit-summary {
         padding: 12px 16px;
         background: #f0f0f0;
@@ -297,7 +296,7 @@ class AuditUI {
         font-weight: 600;
       }
 
-      /* Contenido */
+      /* Content */
       .a11y-audit-content {
         flex: 1;
         overflow-y: auto;
@@ -392,8 +391,8 @@ class AuditUI {
         color: #1a1a1a;
       }
 
-      /* Resaltado "recién clickeado" en la página auditada, para distinguirlo
-         de otros elementos ya resaltados antes */
+      /* "Just clicked" highlight on the audited page, to tell it apart
+         from other elements already highlighted before */
       .a11y-audit-highlight-pulse {
         animation: a11yAuditPulse 1.6s ease-out;
       }
@@ -418,7 +417,7 @@ class AuditUI {
         }
       }
 
-      /* Etiqueta flotante sobre el elemento resaltado en la página */
+      /* Floating tag over the highlighted element on the page */
       .a11y-audit-floating-tag {
         position: fixed;
         z-index: 1000000;
@@ -521,7 +520,7 @@ class AuditUI {
         border-color: #333333;
       }
 
-      /* Highlight en elementos */
+      /* Element highlight */
       .a11y-audit-highlight {
         outline: 2px solid #a6331f !important;
         outline-offset: 2px !important;
@@ -545,15 +544,15 @@ class AuditUI {
   }
 
   /**
-   * Crea la estructura del panel sidebar
+   * Builds the sidebar panel's structure
    * @private
    */
   _createPanel() {
     if (this.container) return;
 
-    // Si el bookmarklet ya se corrió antes en esta misma pestaña (sin
-    // recargar), puede quedar un panel viejo en el DOM que esta nueva
-    // instancia de AuditUI no conoce: lo quitamos para no duplicar IDs.
+    // If the bookmarklet already ran before in this same tab (without a
+    // reload), an old panel may still be sitting in the DOM that this new
+    // AuditUI instance doesn't know about: remove it to avoid duplicate IDs.
     document.getElementById("a11y-audit-sidebar")?.remove();
 
     this.container = document.createElement("div");
@@ -628,7 +627,7 @@ class AuditUI {
   }
 
   /**
-   * Actualiza la interfaz con los resultados
+   * Refreshes the UI with the results
    * @private
    */
   _updateUI() {
@@ -646,10 +645,10 @@ class AuditUI {
     let totalWarnings = 0;
     let totalPassed = 0;
 
-    // Cada analizador termina en un momento distinto (axe-core en particular
-    // puede tardar bastante en páginas grandes), y cada uno dispara un
-    // re-render completo. Si no recordáramos qué pestaña eligió la persona
-    // usuaria, cada re-render la resetearía a la primera pestaña disponible.
+    // Each analyzer finishes at a different time (axe-core in particular
+    // can take a while on large pages), and each one triggers a full
+    // re-render. If we didn't remember which tab the user picked, every
+    // re-render would reset it back to the first available tab.
     const activeTabExists =
       this.activeTab && Object.prototype.hasOwnProperty.call(this.results, this.activeTab);
     if (!activeTabExists) {
@@ -703,7 +702,7 @@ class AuditUI {
   }
 
   /**
-   * Cambia a una pestaña específica
+   * Switches to a specific tab
    * @private
    */
   _switchTab(analyzerName) {
@@ -724,8 +723,8 @@ class AuditUI {
   }
 
   /**
-   * Construye la fila de un issue. Si tiene selector, es clickeable
-   * (mouse y teclado) para resaltar y hacer scroll hasta el elemento real.
+   * Builds an issue row. If it has a selector, it's clickable (mouse and
+   * keyboard) to highlight and scroll to the real element.
    * @private
    */
   _buildIssueElement(issue) {
@@ -780,8 +779,8 @@ class AuditUI {
   }
 
   /**
-   * "1.4.3 · Nivel AA" o "Buena práctica" cuando no hay un criterio WCAG
-   * estricto que aplique.
+   * "1.4.3 · Nivel AA" (or "Buena práctica" / best practice) when no strict
+   * WCAG criterion applies.
    * @private
    */
   _describeWcag(wcag) {
@@ -790,7 +789,7 @@ class AuditUI {
   }
 
   /**
-   * Arma una descripción legible del elemento (mejor que solo el tag)
+   * Builds a readable description of the element (better than just the tag)
    * @private
    */
   _describeElement(info) {
@@ -804,7 +803,7 @@ class AuditUI {
   }
 
   /**
-   * Busca el elemento real por su selector, hace scroll y lo resalta.
+   * Finds the real element by its selector, scrolls to it and highlights it.
    * @private
    */
   _jumpToIssue(issue, issueEl, hintEl) {
@@ -820,30 +819,29 @@ class AuditUI {
       return;
     }
 
-    // Un solo elemento resaltado a la vez: si dejáramos acumular los
-    // clics anteriores, después de un rato no se distingue cuál hallazgo
-    // es cuál.
+    // Only one highlighted element at a time: if we let previous clicks
+    // pile up, after a while it's impossible to tell which finding is which.
     this._clearHighlights();
     this.highlightElement(element);
     element.classList.add("a11y-audit-highlight-pulse");
     setTimeout(() => element.classList.remove("a11y-audit-highlight-pulse"), 1600);
     element.scrollIntoView({ behavior: "smooth", block: "center" });
 
-    // El scroll suave tarda un instante; recién cuando termina sabemos
-    // dónde va a quedar el elemento en pantalla para poner la etiqueta.
+    // The smooth scroll takes a moment; only once it's done do we know
+    // where the element will land on screen to place the tag.
     setTimeout(() => this._showFloatingTag(element, issue), 350);
   }
 
   /**
-   * Etiqueta flotante sobre el elemento resaltado, con el mensaje real del
-   * hallazgo — el mismo lenguaje visual que usa la página de instalación.
+   * Floating tag over the highlighted element, with the finding's real
+   * message — the same visual language used on the install page.
    * @private
    */
   _showFloatingTag(element, issue) {
     this._removeFloatingTag();
 
     const rect = element.getBoundingClientRect();
-    if (rect.width === 0 && rect.height === 0) return; // ya no está en pantalla
+    if (rect.width === 0 && rect.height === 0) return; // no longer on screen
 
     const tag = document.createElement("div");
     tag.className = `a11y-audit-floating-tag ${issue.severity}`;
@@ -867,7 +865,7 @@ class AuditUI {
   }
 
   /**
-   * Reemplaza temporalmente el texto de una pista y lo restaura
+   * Temporarily swaps a hint's text and restores it afterwards
    * @private
    */
   _flashHint(hintEl, text) {
@@ -880,7 +878,7 @@ class AuditUI {
   }
 
   /**
-   * Resalta un elemento en la página
+   * Highlights an element on the page
    * @private
    */
   highlightElement(element) {
@@ -890,7 +888,7 @@ class AuditUI {
   }
 
   /**
-   * Limpia todos los resaltados
+   * Clears all highlights
    * @private
    */
   _clearHighlights() {
@@ -902,20 +900,20 @@ class AuditUI {
   }
 
   /**
-   * Copia los resultados al portapapeles en formato JSON
+   * Copies the results to the clipboard as JSON
    * @private
    */
   _copyResultsToClipboard() {
-    // Si hay un Auditor conectado, usa el JSON completo (metadata + summary
-    // + resultados) — es el mismo formato que espera el visor de
-    // resultados. Sin Auditor, cae al mapa interno como antes.
+    // If an Auditor is connected, use the full JSON (metadata + summary +
+    // results) — the same format the results viewer expects. Without an
+    // Auditor, fall back to the internal map like before.
     const payload =
       typeof this.getFullResults === "function"
         ? this.getFullResults()
         : this.results;
     const json = JSON.stringify(payload, null, 2);
     navigator.clipboard.writeText(json).then(() => {
-      // Feedback visual
+      // Visual feedback
       const button = this.container?.querySelector("#a11y-copy-json");
       const originalText = button?.textContent;
       button.textContent = "✓ Copiado!";
@@ -923,14 +921,14 @@ class AuditUI {
         button.textContent = originalText;
       }, 2000);
 
-      // También loguear en consola
+      // Also log to the console
       console.log("📋 Resultados de auditoría copiados al portapapeles");
       console.log(JSON.parse(json));
     });
   }
 
   /**
-   * Escapa caracteres HTML
+   * Escapes HTML characters
    * @private
    */
   _escapeHtml(text) {
@@ -940,7 +938,7 @@ class AuditUI {
   }
 
   /**
-   * Destruye el panel y limpia
+   * Destroys the panel and cleans up
    */
   destroy() {
     this._clearHighlights();

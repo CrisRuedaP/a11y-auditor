@@ -1,6 +1,6 @@
 /**
- * Analizador de Headings (h1-h6)
- * Valida jerarquía, detecta saltos de nivel, h1 duplicados, etc
+ * Headings analyzer (h1-h6)
+ * Validates hierarchy, detects level jumps, duplicate h1s, etc
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
@@ -32,7 +32,7 @@ class HeadingsAnalyzer extends Analyzer {
       text: h.textContent.trim().substring(0, 60),
     }));
 
-    // Verificar H1 único
+    // Check for a single H1
     const h1Count = headingLevels.filter((h) => h.level === 1).length;
     if (h1Count === 0) {
       this.addIssue("error", "No hay H1 en la página", null, {
@@ -50,7 +50,7 @@ class HeadingsAnalyzer extends Analyzer {
       this.markPassed();
     }
 
-    // Verificar saltos de nivel
+    // Check for level jumps
     let lastLevel = 0;
     for (let i = 0; i < headingLevels.length; i++) {
       const { element, level, text } = headingLevels[i];
@@ -77,7 +77,7 @@ class HeadingsAnalyzer extends Analyzer {
       lastLevel = level;
     }
 
-    // Verificar headings vacíos
+    // Check for empty headings
     headingLevels.forEach(({ element, level, text }) => {
       if (!text) {
         this.addIssue("error", `H${level} vacío sin texto`, element, {

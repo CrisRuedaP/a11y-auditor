@@ -32,8 +32,8 @@ function serveFixtures() {
 }
 
 /**
- * Abre una fixture, inyecta el bookmarklet principal, corre "Ejecutar Todos"
- * y deja la página + resultados listos para hacer aserciones.
+ * Opens a fixture, injects the main bookmarklet, runs "Ejecutar Todos",
+ * and leaves the page + results ready for assertions.
  */
 async function openAuditedPage(fixtureFile) {
   const { server, baseUrl } = await serveFixtures();
@@ -45,9 +45,9 @@ async function openAuditedPage(fixtureFile) {
   await page.goto(`${baseUrl}/${fixtureFile}`);
   await page.evaluate(readBookmarklet("main"));
   await page.waitForTimeout(200);
-  // Acotado al panel del propio bookmarklet: la fixture de colisión de IDs
-  // trae su propio #run-all ajeno, y un selector sin acotar clickearía ese
-  // en vez del botón real del panel.
+  // Scoped to the bookmarklet's own panel: the ID-collision fixture brings
+  // its own unrelated #run-all, and an unscoped selector would click that
+  // one instead of the panel's real button.
   await page.click("#a11y-audit-sidebar #run-all");
   await page.waitForFunction(
     () => window.a11yAuditResults && window.a11yAuditResults.summary.analyzersRun === 9,
@@ -65,10 +65,10 @@ async function openAuditedPage(fixtureFile) {
   };
 }
 
-/** Mensajes+selector de issues de un analizador, para buscar con .some()/.every() */
+/** An analyzer's issue messages+selector, for searching with .some()/.every() */
 function issueLines(results, analyzerName) {
   const analyzer = results.results[analyzerName];
-  if (!analyzer) throw new Error(`No existe el analizador "${analyzerName}"`);
+  if (!analyzer) throw new Error(`No such analyzer: "${analyzerName}"`);
   return analyzer.issues.map((issue) => `${issue.message} :: ${issue.selector || ""}`);
 }
 

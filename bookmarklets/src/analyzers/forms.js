@@ -1,6 +1,6 @@
 /**
- * Analizador de Formularios
- * Valida labels, inputs, validación accesible, etc
+ * Forms analyzer
+ * Validates labels, inputs, accessible validation, etc
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
@@ -23,7 +23,7 @@ class FormsAnalyzer extends Analyzer {
       return this.getSummary();
     }
 
-    // Analizar inputs
+    // Analyze inputs
     inputs.forEach((input) => {
       const id = input.getAttribute("id");
       const name = input.getAttribute("name");
@@ -34,7 +34,7 @@ class FormsAnalyzer extends Analyzer {
         input.getAttribute("required") || input.getAttribute("aria-required");
       const disabled = input.disabled;
 
-      // Validar tipo
+      // Validate type
       const validTypes = [
         "text",
         "password",
@@ -68,7 +68,7 @@ class FormsAnalyzer extends Analyzer {
         );
       }
 
-      // Validar etiqueta
+      // Validate label
       let hasLabel = false;
 
       if (ariaLabel || ariaLabelledBy) {
@@ -76,11 +76,11 @@ class FormsAnalyzer extends Analyzer {
       } else if (id && document.querySelector(`label[for="${id}"]`)) {
         hasLabel = true;
       } else if (input.closest("label")) {
-        // Label implícito: <label>Nombre <input></label>, válido sin for/id
+        // Implicit label: <label>Name <input></label>, valid without for/id
         hasLabel = true;
       }
 
-      // Algunos tipos no requieren label
+      // Some types don't require a label
       if (
         !hasLabel &&
         type !== "hidden" &&
@@ -102,12 +102,12 @@ class FormsAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Validar atributos requeridos
+      // Validate required attributes
       if (required) {
         this.markPassed();
       }
 
-      // Validar que input disabled tenga indicación visual
+      // Validate that a disabled input has a visual indication
       if (disabled) {
         const style = this._getComputedStyle(input);
         if (style.opacity !== "1") {
@@ -116,14 +116,14 @@ class FormsAnalyzer extends Analyzer {
       }
     });
 
-    // Analizar labels
+    // Analyze labels
     labels.forEach((label) => {
       const forAttr = label.getAttribute("for");
       const text = label.textContent.trim();
       const wrapsAControl = !!label.querySelector("input, select, textarea");
 
       if (!forAttr && wrapsAControl) {
-        // Label implícito: <label>Nombre <input></label>, no necesita "for"
+        // Implicit label: <label>Name <input></label>, doesn't need "for"
         this.markPassed();
       } else if (!forAttr) {
         this.addIssue(

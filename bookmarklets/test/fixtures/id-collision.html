@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Fixture: colisión de IDs con el propio bookmarklet</title>
+    <title>Fixture: ID collision with the bookmarklet itself</title>
   </head>
   <body>
     <!--
-      Simula un sitio real que ya trae sus propios elementos con el mismo
-      id/clase que usa el menú del bookmarklet ("run-all", "analyzer-btn").
-      Si el bookmarklet buscara esos selectores con document.getElementById
-      en vez de acotarlos a su propio panel, el click del usuario en el
-      botón real terminaría sin ningún listener enganchado.
+      Simulates a real site that already ships its own elements with the
+      same id/class the bookmarklet's menu uses ("run-all", "analyzer-btn").
+      If the bookmarklet looked up those selectors with
+      document.getElementById instead of scoping them to its own panel, the
+      user's click on the real button would end up with no listener attached.
     -->
     <button id="run-all" class="analyzer-btn" data-analyzer="no-existe">
-      Botón ajeno del sitio, mismo id/clase
+      Unrelated site button, same id/class
     </button>
-    <h1>Página de prueba</h1>
+    <h1>Test page</h1>
     <img id="img-no-alt" src="x.png" />
   </body>
 </html>

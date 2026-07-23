@@ -1,6 +1,6 @@
 /**
- * Analizador de Links
- * Valida texto de enlace, destino real y avisos de nueva pestaña
+ * Links analyzer
+ * Validates link text, the real destination, and new-tab warnings
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
@@ -48,7 +48,7 @@ class LinksAnalyzer extends Analyzer {
       const hasImgAlt = !!link.querySelector("img[alt]:not([alt=''])");
       const accessibleName = ariaLabel || text;
 
-      // Texto de enlace
+      // Link text
       if (!accessibleName && !hasImgAlt) {
         this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {
           wcag: WCAG.LINK_PURPOSE,
@@ -67,7 +67,7 @@ class LinksAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Destino real
+      // Real destination
       const href = link.getAttribute("href");
       if (href === null) {
         this.addIssue(
@@ -87,7 +87,7 @@ class LinksAnalyzer extends Analyzer {
         this.markPassed();
       }
 
-      // Nueva pestaña sin aviso
+      // New tab without a warning
       if (link.getAttribute("target") === "_blank") {
         const warnsUser = NEW_TAB_WARNING_PATTERN.test(
           `${ariaLabel || ""} ${text}`,

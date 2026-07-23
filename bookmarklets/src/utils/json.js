@@ -1,9 +1,9 @@
 /**
- * Utilidades para manejo de JSON y portapapeles
+ * Utilities for handling JSON and the clipboard
  */
 class JsonUtils {
   /**
-   * Serializa resultados a JSON
+   * Serializes results to JSON
    */
   static stringify(results, pretty = true) {
     try {
@@ -15,7 +15,7 @@ class JsonUtils {
   }
 
   /**
-   * Copia JSON al portapapeles
+   * Copies JSON to the clipboard
    */
   static async copyToClipboard(results) {
     try {
@@ -31,7 +31,7 @@ class JsonUtils {
     } catch (error) {
       console.error("Error copiando al portapapeles:", error);
 
-      // Fallback si clipboard API no funciona
+      // Fallback in case the clipboard API doesn't work
       try {
         const textArea = document.createElement("textarea");
         textArea.value = this.stringify(results, true);
@@ -50,7 +50,7 @@ class JsonUtils {
   }
 
   /**
-   * Loguea resultados en consola de forma legible
+   * Logs results to the console in a readable way
    */
   static logResults(results) {
     console.group(
@@ -83,7 +83,7 @@ class JsonUtils {
     console.log("Severidad: %c%s", "font-weight: bold;", summary.severity);
     console.groupEnd();
 
-    // Resultados por analizador
+    // Results per analyzer
     console.group(
       "%c📋 Resultados por Analizador",
       "color: #06b6d4; font-weight: bold;",
@@ -127,7 +127,7 @@ class JsonUtils {
   }
 
   /**
-   * Exporta resultados a CSV
+   * Exports results to CSV
    */
   static exportToCsv(results) {
     const rows = [];
@@ -157,7 +157,7 @@ class JsonUtils {
   }
 
   /**
-   * Descarga resultados como archivo JSON
+   * Downloads results as a JSON file
    */
   static downloadJson(results, filename = "a11y-audit.json") {
     const json = this.stringify(results, true);
@@ -173,7 +173,7 @@ class JsonUtils {
   }
 
   /**
-   * Descarga resultados como archivo CSV
+   * Downloads results as a CSV file
    */
   static downloadCsv(results, filename = "a11y-audit.csv") {
     const csv = this.exportToCsv(results);

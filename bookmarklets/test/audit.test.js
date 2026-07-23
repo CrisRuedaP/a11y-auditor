@@ -2,7 +2,7 @@ const { describe, it, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const { openAuditedPage, issueLines } = require("./helpers.js");
 
-describe("Auditoría completa sobre fixtures/audit.html", () => {
+describe("Full audit over fixtures/audit.html", () => {
   let session;
   let results;
 
@@ -15,21 +15,21 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
     await session.close();
   });
 
-  it("no genera errores de JavaScript al correr", () => {
+  it("doesn't throw any JavaScript errors while running", () => {
     assert.deepEqual(session.errors, []);
   });
 
-  it("corrió los 9 analizadores", () => {
+  it("ran all 9 analyzers", () => {
     assert.equal(results.summary.analyzersRun, 9);
   });
 
-  it("empuja el contenido de la página (margin-right en <html>) en vez de taparlo, y lo deshace al cerrar", async () => {
+  it("shifts the page content (margin-right on <html>) instead of covering it, and undoes it on close", async () => {
     const marginWhileOpen = await session.page.evaluate(
       () => document.documentElement.style.marginRight,
     );
     assert.ok(
       marginWhileOpen && parseFloat(marginWhileOpen) > 0,
-      `debería tener un margin-right positivo mientras el panel está abierto, fue: "${marginWhileOpen}"`,
+      `should have a positive margin-right while the panel is open, was: "${marginWhileOpen}"`,
     );
 
     await session.page.click("#a11y-audit-sidebar .a11y-audit-close");
@@ -39,81 +39,81 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
   });
 
   describe("Headings", () => {
-    it("detecta el salto de nivel h1 -> h3", () => {
+    it("detects the h1 -> h3 level jump", () => {
       const lines = issueLines(results, "Headings");
       assert.ok(lines.some((l) => l.includes("h-skip")));
     });
 
-    it("no cuenta un h1 oculto con display:none como un segundo H1", () => {
+    it("doesn't count a display:none-hidden h1 as a second H1", () => {
       const lines = issueLines(results, "Headings");
       assert.ok(
         !lines.some((l) => /varios? h1|debe haber solo 1/i.test(l)),
-        `no debería reportar H1 duplicado: ${JSON.stringify(lines)}`,
+        `shouldn't report a duplicate H1: ${JSON.stringify(lines)}`,
       );
     });
   });
 
   describe("Imágenes", () => {
-    it("detecta la imagen sin alt", () => {
+    it("detects the image without alt", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(lines.some((l) => l.includes("img-no-alt")));
     });
 
-    it("detecta la imagen sin alt dentro de <picture>", () => {
+    it("detects the image without alt inside a <picture>", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(lines.some((l) => l.includes("img-in-picture-no-alt")));
     });
 
-    it("NO marca la imagen con alt real como problema", () => {
+    it("does NOT flag the image with a real alt as a problem", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(!lines.some((l) => l.includes("img-good-alt")));
     });
 
-    it("genera un selector válido para ids con caracteres especiales (React useId, etc)", async () => {
+    it("generates a valid selector for ids with special characters (React useId, etc)", async () => {
       const analyzer = results.results["Imágenes"];
       const issue = analyzer.issues.find((i) => i.message.includes("sin atributo alt") && i.selector?.includes("r-weird-id"));
-      assert.ok(issue, "debería reportar la imagen con id raro");
+      assert.ok(issue, "should report the image with the odd id");
       const foundInPage = await session.page.evaluate(
         (selector) => !!document.querySelector(selector),
         issue.selector,
       );
-      assert.ok(foundInPage, `el selector "${issue.selector}" debería encontrar el elemento real`);
+      assert.ok(foundInPage, `the selector "${issue.selector}" should find the real element`);
     });
 
-    it("detecta el SVG sin título/descripción", () => {
+    it("detects the SVG without a title/description", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(lines.some((l) => l.includes("svg-no-desc")));
     });
 
-    it("NO marca el SVG que sí tiene <title>", () => {
+    it("does NOT flag the SVG that does have a <title>", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(!lines.some((l) => l.includes("svg-with-title")));
     });
 
-    it("NO marca un ícono decorativo con aria-hidden (está bien oculto, no le hace falta descripción)", () => {
+    it("does NOT flag a decorative icon with aria-hidden (correctly hidden, doesn't need a description)", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(
         !lines.some((l) => l.includes("svg-decorative-hidden")),
-        `un SVG aria-hidden no debería necesitar descripción: ${JSON.stringify(lines)}`,
+        `an aria-hidden SVG shouldn't need a description: ${JSON.stringify(lines)}`,
       );
     });
   });
 
   describe("Contraste", () => {
-    it("NO marca el <div> envoltorio (el texto real está en su <span> hijo)", () => {
+    it("does NOT flag the wrapper <div> (the real text is in its child <span>)", () => {
       const lines = issueLines(results, "Contraste");
       assert.ok(
         !lines.some((l) => l.includes("contrast-wrapper-good")),
-        `no debería marcar el wrapper: ${JSON.stringify(lines)}`,
+        `shouldn't flag the wrapper: ${JSON.stringify(lines)}`,
       );
     });
 
-    it("SÍ marca el texto realmente poco legible", () => {
+    it("DOES flag the genuinely hard-to-read text", () => {
       const lines = issueLines(results, "Contraste");
       assert.ok(lines.some((l) => l.includes("contrast-real-bad")));
     });
 
-    it("etiqueta el hallazgo con el criterio WCAG real (1.4.3, nivel AA)", () => {
+    it("tags the finding with the real WCAG criterion (1.4.3, level AA)", () => {
       const issue = results.results["Contraste"].issues.find((i) =>
         i.selector?.includes("contrast-real-bad"),
       );
@@ -122,75 +122,75 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
   });
 
   describe("ARIA", () => {
-    it("NO marca un botón sin nombre si está aria-hidden (no expuesto a AT)", () => {
+    it("does NOT flag a nameless button if it's aria-hidden (not exposed to AT)", () => {
       const lines = issueLines(results, "ARIA");
       assert.ok(
         !lines.some((l) => l.includes("aria-hidden-btn")),
-        `no debería marcar un botón aria-hidden: ${JSON.stringify(lines)}`,
+        `shouldn't flag an aria-hidden button: ${JSON.stringify(lines)}`,
       );
     });
 
-    it("SÍ marca un botón visible sin nombre accesible", () => {
+    it("DOES flag a visible button with no accessible name", () => {
       const lines = issueLines(results, "ARIA");
       assert.ok(lines.some((l) => l.includes("aria-visible-unlabeled")));
     });
 
-    it("detecta el role inválido", () => {
+    it("detects the invalid role", () => {
       const lines = issueLines(results, "ARIA");
       assert.ok(lines.some((l) => l.includes("aria-bad-role")));
     });
   });
 
   describe("Formularios", () => {
-    it("NO marca un input con label implícito (envolvente, sin for/id)", () => {
+    it("does NOT flag an input with an implicit label (wrapping, no for/id)", () => {
       const lines = issueLines(results, "Formularios");
       assert.ok(
         !lines.some((l) => l.includes("form-implicit-input")),
-        `no debería marcar el input con label implícito: ${JSON.stringify(lines)}`,
+        `shouldn't flag the input with an implicit label: ${JSON.stringify(lines)}`,
       );
     });
 
-    it("SÍ marca el input sin ningún label", () => {
+    it("DOES flag the input with no label at all", () => {
       const lines = issueLines(results, "Formularios");
       assert.ok(lines.some((l) => l.includes("form-input-no-label")));
     });
 
-    it("NO marca el input con label explícito (for/id)", () => {
+    it("does NOT flag the input with an explicit label (for/id)", () => {
       const lines = issueLines(results, "Formularios");
       assert.ok(!lines.some((l) => l.includes('"form-explicit-input"')));
     });
 
-    it('NO marca el <label> implícito como "sin atributo for"', () => {
+    it('does NOT flag the implicit <label> as "missing the for attribute"', () => {
       const lines = issueLines(results, "Formularios");
       assert.ok(
         !lines.some((l) => l.includes("form-implicit-label")),
-        `un label que envuelve su input no necesita "for": ${JSON.stringify(lines)}`,
+        `a label wrapping its input doesn't need "for": ${JSON.stringify(lines)}`,
       );
     });
   });
 
   describe("Links", () => {
-    it("detecta el texto de enlace genérico", () => {
+    it("detects generic link text", () => {
       const lines = issueLines(results, "Links");
       assert.ok(lines.some((l) => l.includes("link-generic")));
     });
 
-    it("NO marca un link con texto descriptivo", () => {
+    it("does NOT flag a link with descriptive text", () => {
       const lines = issueLines(results, "Links");
       assert.ok(!lines.some((l) => l.includes("link-good")));
     });
 
-    it("detecta el link sin href", () => {
+    it("detects the link with no href", () => {
       const lines = issueLines(results, "Links");
       assert.ok(lines.some((l) => l.includes("link-no-href")));
     });
 
-    it("detecta target=_blank sin aviso", () => {
+    it("detects target=_blank with no warning", () => {
       const lines = issueLines(results, "Links");
       assert.ok(lines.some((l) => l.includes("link-blank-no-warning")));
     });
 
-    it('marca "sin rel=noopener" como buena práctica, no como un criterio WCAG inventado', () => {
+    it('flags "missing rel=noopener" as a best practice, not a made-up WCAG criterion', () => {
       const issue = results.results["Links"].issues.find((i) =>
         i.message.includes("rel"),
       );
@@ -202,12 +202,12 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
   });
 
   describe("Teclado", () => {
-    it("detecta el div con onclick sin rol ni tabindex", () => {
+    it("detects the div with onclick and no role or tabindex", () => {
       const lines = issueLines(results, "Teclado");
       assert.ok(lines.some((l) => l.includes("kbd-onclick-no-role")));
     });
 
-    it("no reporta nada sobre foco visible (no se puede comprobar de forma confiable vía script, y no tiene sentido reportar un 'no sé')", () => {
+    it("reports nothing about the visible focus indicator (can't be reliably checked via script, and reporting a 'don't know' wouldn't make sense)", () => {
       const lines = issueLines(results, "Teclado");
       assert.ok(!lines.some((l) => l.includes("kbd-good-focus-style")));
       assert.ok(!lines.some((l) => l.includes("kbd-bad-focus-style")));
@@ -216,14 +216,14 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
   });
 });
 
-describe("Colisión de IDs con el sitio auditado", () => {
+describe("ID collisions with the audited site", () => {
   let session;
 
   after(async () => {
     await session?.close();
   });
 
-  it('el clic en "Ejecutar Todos" funciona aunque el sitio ya tenga su propio #run-all/.analyzer-btn', async () => {
+  it('the "Ejecutar Todos" click works even if the site already has its own #run-all/.analyzer-btn', async () => {
     session = await openAuditedPage("id-collision.html");
     const results = await session.results();
     assert.equal(results.summary.analyzersRun, 9);

@@ -1,6 +1,6 @@
 /**
- * Analizador de Contraste
- * Valida relación de contraste según WCAG
+ * Contrast analyzer
+ * Validates contrast ratio per WCAG
  */
 import Analyzer from "../core/analyzer.js";
 import { WCAG } from "../core/wcag.js";
@@ -13,7 +13,7 @@ class ContrastAnalyzer extends Analyzer {
   async run() {
     this.reset();
 
-    // Obtener todos los elementos con texto
+    // Get all elements with text
     const textElements = this._querySelectorAll(
       "p, span, a, h1, h2, h3, h4, h5, h6, button, label, li, td, th, div",
     );
@@ -22,13 +22,13 @@ class ContrastAnalyzer extends Analyzer {
     let skippedCount = 0;
 
     textElements.forEach((element) => {
-      // Solo evaluar elementos que renderizan texto directamente. Un <div>
-      // que solo envuelve a un <span> con su propio color no es quien
-      // pinta el texto: comparar SU color contra el fondo da un resultado
-      // que no corresponde a nada visible en la página.
+      // Only evaluate elements that render text directly. A <div> that
+      // just wraps a <span> with its own color isn't the one painting the
+      // text: comparing ITS color against the background gives a result
+      // that doesn't correspond to anything visible on the page.
       if (!this._hasOwnVisibleText(element)) return;
 
-      // Saltar elementos ocultos
+      // Skip hidden elements
       const style = this._getComputedStyle(element);
       if (style.display === "none" || style.visibility === "hidden") return;
 
@@ -66,7 +66,7 @@ class ContrastAnalyzer extends Analyzer {
     });
 
     if (checkedCount === 0 && skippedCount === 0) {
-      // No había ningún elemento de texto que evaluar en la página.
+      // There was no text element on the page to evaluate.
       this.markPassed();
     } else if (skippedCount > 0) {
       this.addIssue(
@@ -81,8 +81,8 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Detecta si un elemento tiene un nodo de texto propio (hijo directo),
-   * en vez de texto que solo existe porque un descendiente lo aporta.
+   * Detects whether an element has its own text node (a direct child),
+   * instead of text that only exists because a descendant provides it.
    * @private
    */
   _hasOwnVisibleText(element) {
@@ -103,7 +103,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Obtiene información de colores de un elemento
+   * Gets color information for an element
    * @private
    */
   _getColorInfo(element) {
@@ -113,7 +113,7 @@ class ContrastAnalyzer extends Analyzer {
     let sawBackgroundImage =
       style.backgroundImage && style.backgroundImage !== "none";
 
-    // Si el background es transparente, buscar en los padres
+    // If the background is transparent, look up through the ancestors
     let parent = element.parentElement;
     while (this._isTransparent(backgroundColor) && parent) {
       const parentStyle = this._getComputedStyle(parent);
@@ -128,13 +128,13 @@ class ContrastAnalyzer extends Analyzer {
 
     if (this._isTransparent(backgroundColor)) {
       if (sawBackgroundImage) {
-        // El fondo real viene de una imagen o gradiente (background-image):
-        // no podemos calcularlo de forma confiable sin renderizar el
-        // elemento. Mejor no evaluar que asumir un color equivocado.
+        // The real background comes from an image or gradient
+        // (background-image): we can't reliably calculate it without
+        // rendering the element. Better to skip than assume a wrong color.
         return null;
       }
-      // Nadie definió background-color ni background-image en la cadena:
-      // es el lienzo blanco por defecto del navegador.
+      // Nobody set a background-color or background-image anywhere in the
+      // chain: it's the browser's default white canvas.
       backgroundColor = "rgb(255, 255, 255)";
     }
 
@@ -147,7 +147,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Convierte RGB a Hex
+   * Converts RGB to Hex
    * @private
    */
   _rgbToHex(rgb) {
@@ -168,7 +168,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Calcula la relación de contraste WCAG
+   * Calculates the WCAG contrast ratio
    * @private
    */
   _calculateContrastRatio(foreground, background) {
@@ -184,7 +184,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Calcula la luminancia relativa de un color
+   * Calculates a color's relative luminance
    * @private
    */
   _getLuminance(hex) {
@@ -202,7 +202,7 @@ class ContrastAnalyzer extends Analyzer {
   }
 
   /**
-   * Verifica si cumple WCAG AA (4.5:1 normal, 3:1 large)
+   * Checks whether it meets WCAG AA (4.5:1 normal, 3:1 large)
    * @private
    */
   _isWCAGAA(ratio, element) {
@@ -210,7 +210,7 @@ class ContrastAnalyzer extends Analyzer {
     const fontSize = parseInt(style.fontSize);
     const fontWeight = style.fontWeight;
 
-    // Large text: 18pt (24px) o 14pt (18.66px) bold
+    // Large text: 18pt (24px) or 14pt (18.66px) bold
     const isLargeText =
       fontSize >= 24 ||
       (fontSize >= 18 &&

@@ -1,6 +1,6 @@
 /**
- * Motor principal de auditoría
- * Orquesta la ejecución de todos los analizadores y compila resultados
+ * Main audit engine
+ * Orchestrates running all the analyzers and compiles the results
  */
 import HeadingsAnalyzer from "../analyzers/headings.js";
 import AxeCoreAnalyzer from "../analyzers/axeCore.js";
@@ -29,16 +29,15 @@ class Auditor {
     this.results = {};
     this.isRunning = false;
 
-    // Le da al panel una forma de pedir el JSON completo (con metadata y
-    // summary), no solo el mapa interno de analizadores que usa para
-    // pintar las pestañas.
+    // Gives the panel a way to request the full JSON (with metadata and
+    // summary), not just the internal analyzer map it uses to render tabs.
     if (this.ui) {
       this.ui.getFullResults = () => this.getResults();
     }
   }
 
   /**
-   * Ejecuta todos los analizadores
+   * Runs all the analyzers
    */
   async runAll() {
     if (this.isRunning) return;
@@ -48,7 +47,7 @@ class Auditor {
 
     this.ui?.open();
 
-    // Ejecutar todos los analizadores
+    // Run every analyzer
     const promises = this.analyzers.map((analyzer) =>
       this._runAnalyzer(analyzer),
     );
@@ -60,7 +59,7 @@ class Auditor {
   }
 
   /**
-   * Ejecuta un analizador específico
+   * Runs a specific analyzer
    */
   async runAnalyzer(analyzerName) {
     const analyzer = this.analyzers.find((a) => a.name === analyzerName);
@@ -77,7 +76,7 @@ class Auditor {
   }
 
   /**
-   * Ejecuta un analizador y maneja errores
+   * Runs an analyzer and handles errors
    * @private
    */
   async _runAnalyzer(analyzer) {
@@ -107,7 +106,7 @@ class Auditor {
   }
 
   /**
-   * Obtiene los resultados compilados
+   * Gets the compiled results
    */
   getResults(analyzerName = null) {
     if (analyzerName) {
@@ -130,7 +129,7 @@ class Auditor {
   }
 
   /**
-   * Genera un resumen de todos los resultados
+   * Generates a summary of all the results
    * @private
    */
   _generateSummary() {
@@ -160,7 +159,7 @@ class Auditor {
   }
 
   /**
-   * Calcula la severidad general
+   * Calculates overall severity
    * @private
    */
   _calculateSeverity(errors, warnings) {
@@ -171,14 +170,14 @@ class Auditor {
   }
 
   /**
-   * Obtiene el nombre de todos los analizadores
+   * Gets the names of all the analyzers
    */
   getAnalyzerNames() {
     return this.analyzers.map((a) => a.name);
   }
 
   /**
-   * Limpia todos los resultados
+   * Clears all results
    */
   reset() {
     this.results = {};
