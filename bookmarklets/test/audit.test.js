@@ -23,6 +23,21 @@ describe("Auditoría completa sobre fixtures/audit.html", () => {
     assert.equal(results.summary.analyzersRun, 9);
   });
 
+  it("empuja el contenido de la página (margin-right en <html>) en vez de taparlo, y lo deshace al cerrar", async () => {
+    const marginWhileOpen = await session.page.evaluate(
+      () => document.documentElement.style.marginRight,
+    );
+    assert.ok(
+      marginWhileOpen && parseFloat(marginWhileOpen) > 0,
+      `debería tener un margin-right positivo mientras el panel está abierto, fue: "${marginWhileOpen}"`,
+    );
+
+    await session.page.click("#a11y-audit-sidebar .a11y-audit-close");
+    await session.page.waitForFunction(
+      () => document.documentElement.style.marginRight === "",
+    );
+  });
+
   describe("Headings", () => {
     it("detecta el salto de nivel h1 -> h3", () => {
       const lines = issueLines(results, "Headings");

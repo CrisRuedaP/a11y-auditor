@@ -10,6 +10,9 @@ class AuditUI {
     this.floatingTag = null;
     this.results = {};
     this.activeTab = null;
+    this._onResize = () => {
+      if (this.isOpen) this._shiftPage();
+    };
   }
 
   /**
@@ -22,6 +25,8 @@ class AuditUI {
     this._createPanel();
     this.isOpen = true;
     this.container?.classList.add("a11y-audit-open");
+    this._shiftPage();
+    window.addEventListener("resize", this._onResize);
   }
 
   /**
@@ -32,6 +37,46 @@ class AuditUI {
     this._clearHighlights();
     this.container?.classList.remove("a11y-audit-open");
     this.isOpen = false;
+    this._unshiftPage();
+    window.removeEventListener("resize", this._onResize);
+  }
+
+  /**
+   * Corre el contenido de la página (igual que WAVE) para que no quede
+   * debajo del panel: en vez de superponerse, empuja el <html> con un
+   * margen del mismo tamaño que ocupa el panel. En el layout móvil (panel
+   * abajo, a todo el ancho) empuja hacia arriba en vez de hacia la derecha.
+   * @private
+   */
+  _shiftPage() {
+    if (!this.container) return;
+
+    const rect = this.container.getBoundingClientRect();
+    const isBottomLayout = window.matchMedia("(max-width: 768px)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const html = document.documentElement;
+
+    html.style.transition = reduceMotion ? "none" : "margin 0.2s ease";
+    if (isBottomLayout) {
+      html.style.marginRight = "";
+      html.style.marginBottom = `${rect.height}px`;
+    } else {
+      html.style.marginBottom = "";
+      html.style.marginRight = `${rect.width}px`;
+    }
+  }
+
+  /**
+   * Deshace el corrimiento de _shiftPage()
+   * @private
+   */
+  _unshiftPage() {
+    const html = document.documentElement;
+    html.style.marginRight = "";
+    html.style.marginBottom = "";
+    html.style.transition = "";
   }
 
   /**
