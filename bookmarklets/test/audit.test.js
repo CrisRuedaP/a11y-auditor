@@ -23,6 +23,13 @@ describe("Full audit over fixtures/audit.html", () => {
     assert.equal(results.summary.analyzersRun, 9);
   });
 
+  it("doesn't show the update notice when already on the latest version", async () => {
+    const hidden = await session.page.evaluate(
+      () => document.querySelector("#a11y-update-notice")?.hidden,
+    );
+    assert.equal(hidden, true);
+  });
+
   it("shifts the page content (margin-right on <html>) instead of covering it, and undoes it on close", async () => {
     const marginWhileOpen = await session.page.evaluate(
       () => document.documentElement.style.marginRight,
@@ -243,5 +250,59 @@ describe("ID collisions with the audited site", () => {
     session = await openAuditedPage("id-collision.html");
     const results = await session.results();
     assert.equal(results.summary.analyzersRun, 9);
+  });
+});
+
+describe("Optional version check", () => {
+  it("shows the update notice with the remote version when a newer one is available", async () => {
+    const session = await openAuditedPage("audit.html", { remoteVersion: "999.0.0" });
+    try {
+      await session.page.waitForFunction(
+        () => document.querySelector("#a11y-update-notice")?.hidden === false,
+        { timeout: 5000 },
+      );
+      const message = await session.page.evaluate(
+        () => document.querySelector("#a11y-update-notice [data-update-message]").textContent,
+      );
+      assert.ok(
+        message.includes("999.0.0"),
+        `notice should mention the new version: "${message}"`,
+      );
+
+      await session.page.click("#a11y-update-notice .a11y-audit-update-dismiss");
+      const hidden = await session.page.evaluate(
+        () => document.querySelector("#a11y-update-notice").hidden,
+      );
+      assert.equal(hidden, true, "dismiss button should hide the notice");
+    } finally {
+      await session.close();
+    }
+  });
+
+  it("doesn't show the notice for an older or equal remote version", async () => {
+    const session = await openAuditedPage("audit.html", { remoteVersion: "0.0.1" });
+    try {
+      const hidden = await session.page.evaluate(
+        () => document.querySelector("#a11y-update-notice")?.hidden,
+      );
+      assert.equal(hidden, true);
+    } finally {
+      await session.close();
+    }
+  });
+
+  it("fails silently and never breaks the audit if the version check request fails", async () => {
+    const session = await openAuditedPage("audit.html", { remoteVersion: false });
+    try {
+      assert.deepEqual(session.errors, []);
+      const results = await session.results();
+      assert.equal(results.summary.analyzersRun, 9);
+      const hidden = await session.page.evaluate(
+        () => document.querySelector("#a11y-update-notice")?.hidden,
+      );
+      assert.equal(hidden, true);
+    } finally {
+      await session.close();
+    }
   });
 });

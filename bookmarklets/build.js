@@ -28,6 +28,7 @@ const vm = require("vm");
 const SRC = path.join(__dirname, "src");
 const DIST = path.join(__dirname, "dist");
 const PAGE = path.join(__dirname, "page");
+const VERSION = require("./package.json").version;
 
 function readSrc(relativePath) {
   return fs.readFileSync(path.join(SRC, relativePath), "utf8");
@@ -55,7 +56,12 @@ function toBookmarkletHref(code) {
 }
 
 // --- Main bookmarklet: all the classes + main.js's menu ---
-const CORE_FILES = ["core/analyzer.js", "core/ui.js", "core/wcag.js"];
+const CORE_FILES = [
+  "core/analyzer.js",
+  "core/ui.js",
+  "core/wcag.js",
+  "core/updateCheck.js",
+];
 const ANALYZER_FILES = [
   "analyzers/headings.js",
   "analyzers/axeCore.js",
@@ -70,9 +76,13 @@ const ANALYZER_FILES = [
 const REST_FILES = ["core/auditor.js", "utils/json.js"];
 
 function buildMainBundle() {
-  const parts = [...CORE_FILES, ...ANALYZER_FILES, ...REST_FILES].map(
-    (file) => stripModuleSyntax(readSrc(file)).trim(),
-  );
+  const versionConst = `const A11Y_AUDITOR_VERSION = ${JSON.stringify(VERSION)};`;
+  const parts = [
+    versionConst,
+    ...[...CORE_FILES, ...ANALYZER_FILES, ...REST_FILES].map((file) =>
+      stripModuleSyntax(readSrc(file)).trim(),
+    ),
+  ];
 
   const mainLogic = readSrc("bookmarklets/main.js").trim();
   parts.push(mainLogic);

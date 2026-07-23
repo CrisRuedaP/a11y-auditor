@@ -69,8 +69,9 @@ La documentación técnica sobre la arquitectura del proyecto, el proceso de bui
 ## Privacidad
 
 - Todo el análisis se ejecuta localmente en el navegador.
-- La única petición de red corresponde a la carga de **axe-core** desde su CDN oficial (solo en los bookmarklets que lo utilizan).
+- Las únicas peticiones de red son la carga de **axe-core** desde su CDN oficial (solo en los bookmarklets que lo utilizan) y la comprobación opcional de versión descrita abajo.
 - Ningún resultado se envía a servidores externos.
+- Opcionalmente, los bookmarklets pueden comprobar si existe una versión más reciente consultando un pequeño archivo de metadatos alojado junto al proyecto. Esta comprobación no envía información sobre la página analizada ni sobre los resultados de la auditoría.
 
 ---
 

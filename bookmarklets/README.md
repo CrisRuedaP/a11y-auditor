@@ -56,6 +56,25 @@ Generates:
 There are no npm dependencies; the script only uses Node's own `fs` and
 `path`.
 
+## Optional version check
+
+`build.js` reads `package.json`'s `version` field and bakes it into the
+main bookmarklet as `const A11Y_AUDITOR_VERSION = "1.0.0";`. On open, the
+panel does a single non-blocking `fetch` (`src/core/updateCheck.js`)
+against a static `version.json` hosted alongside the project
+(`page/version.json`, served from GitHub via
+`raw.githubusercontent.com`) and compares it against that constant. If
+the hosted file's version is newer, it shows a small dismissible notice
+linking to the repo; otherwise, or if the request fails for any reason
+(offline, blocked, hosting down), nothing happens — same resilience
+pattern as `_loadAxeCore()`.
+
+Bumping the version for a release means updating `package.json` and
+`page/version.json` together, then running `npm run build`.
+
+This check only applies to the main bookmarklet, not the 4 individual
+ones (they're standalone popups, not the full panel).
+
 ## Tests
 
 `npm test` runs the 9 analyzers against `test/fixtures/audit.html` (a page

@@ -520,6 +520,53 @@ class AuditUI {
         border-color: #333333;
       }
 
+      /* Update notice */
+      .a11y-audit-update-notice {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #f0f0f0;
+        border-bottom: 1px solid #e1dedd;
+        font-size: 14px;
+        color: #1a1a1a;
+      }
+
+      .a11y-audit-update-notice span {
+        flex: 1;
+      }
+
+      .a11y-audit-update-notice a {
+        color: #1a1a1a;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .a11y-audit-update-dismiss {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: none;
+        color: #6b6866;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .a11y-audit-update-dismiss:hover {
+        background: #e1dedd;
+        color: #1a1a1a;
+      }
+
+      .a11y-audit-update-dismiss .icon {
+        width: 14px;
+        height: 14px;
+      }
+
       /* Element highlight */
       .a11y-audit-highlight {
         outline: 2px solid #a6331f !important;
@@ -566,6 +613,17 @@ class AuditUI {
           Auditoría de Accesibilidad
         </h2>
         <button class="a11y-audit-close" aria-label="Cerrar panel">
+          <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18" />
+            <line x1="18" y1="6" x2="6" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="a11y-audit-update-notice" id="a11y-update-notice" hidden>
+        <span data-update-message></span>
+        <a href="https://github.com/CrisRuedaP/a11y-auditor" target="_blank" rel="noopener">Ver más</a>
+        <button class="a11y-audit-update-dismiss" aria-label="Cerrar aviso de actualización">
           <svg viewBox="0 0 24 24" class="icon" aria-hidden="true">
             <line x1="6" y1="6" x2="18" y2="18" />
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -624,6 +682,26 @@ class AuditUI {
     this.container
       .querySelector("#a11y-clear-highlights")
       .addEventListener("click", () => this._clearHighlights());
+    this.container
+      .querySelector("#a11y-update-notice .a11y-audit-update-dismiss")
+      .addEventListener("click", () => {
+        this.container.querySelector("#a11y-update-notice").hidden = true;
+      });
+  }
+
+  /**
+   * Shows the "a newer version is available" notice. Called by
+   * checkForUpdates() only when a real update was found — never shown by
+   * default, and dismissing it just hides it for this session (nothing is
+   * persisted).
+   */
+  showUpdateNotice(remoteVersion) {
+    const notice = this.container?.querySelector("#a11y-update-notice");
+    if (!notice) return;
+
+    notice.querySelector("[data-update-message]").textContent =
+      `Hay una nueva versión disponible (${remoteVersion}).`;
+    notice.hidden = false;
   }
 
   /**

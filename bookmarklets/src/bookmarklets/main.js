@@ -26,6 +26,9 @@
     // Open panel
     ui.open();
 
+    // Non-blocking: never delays or interrupts opening the panel
+    checkForUpdates(ui);
+
     // Create options menu
     const contentContainer = ui.container.querySelector(".a11y-audit-content");
     const analyzerIcons = {
