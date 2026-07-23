@@ -151,7 +151,7 @@ class AuditUI {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 8px;
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .a11y-audit-stat {
@@ -166,7 +166,7 @@ class AuditUI {
 
       .a11y-audit-stat-label {
         color: #6b7280;
-        font-size: 11px;
+        font-size: 14px;
         margin-top: 2px;
       }
 
@@ -195,7 +195,7 @@ class AuditUI {
         border: none;
         background: none;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 16px;
         color: #6b7280;
         white-space: nowrap;
         transition: all 0.2s;
@@ -235,7 +235,7 @@ class AuditUI {
         border-left: 4px solid;
         background: #f9fafb;
         border-radius: 4px;
-        font-size: 12px;
+        font-size: 16px;
       }
 
       .a11y-audit-issue.error {
@@ -261,7 +261,7 @@ class AuditUI {
 
       .a11y-audit-issue-wcag {
         display: inline-block;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: 600;
         color: #4b5563;
         background: rgba(255, 255, 255, 0.6);
@@ -274,7 +274,7 @@ class AuditUI {
       .a11y-audit-issue-selector {
         color: #6b7280;
         font-family: 'Courier New', monospace;
-        font-size: 11px;
+        font-size: 14px;
         word-break: break-all;
         margin-top: 4px;
       }
@@ -284,7 +284,7 @@ class AuditUI {
         padding-top: 6px;
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         color: #6b7280;
-        font-size: 11px;
+        font-size: 14px;
       }
 
       .a11y-audit-issue[role="button"] {
@@ -302,7 +302,7 @@ class AuditUI {
 
       .a11y-audit-issue-hint {
         margin-top: 6px;
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 600;
         color: #2563eb;
       }
@@ -341,7 +341,7 @@ class AuditUI {
         padding: 6px 12px;
         border-radius: 999px;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         color: #fff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -401,7 +401,7 @@ class AuditUI {
         background: #f9fafb;
         display: flex;
         gap: 8px;
-        font-size: 12px;
+        font-size: 16px;
       }
 
       .a11y-audit-button {
@@ -411,7 +411,7 @@ class AuditUI {
         background: white;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 16px;
         font-weight: 500;
         transition: all 0.2s;
       }
