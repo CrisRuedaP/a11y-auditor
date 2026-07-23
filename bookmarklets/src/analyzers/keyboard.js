@@ -3,6 +3,7 @@
  * Valida navegación por teclado, focus, tabindex, traps, etc
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG } from "../core/wcag.js";
 
 class KeyboardAnalyzer extends Analyzer {
   constructor() {
@@ -46,6 +47,7 @@ class KeyboardAnalyzer extends Analyzer {
             {
               tabindex,
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.KEYBOARD,
             },
           );
         }
@@ -59,6 +61,7 @@ class KeyboardAnalyzer extends Analyzer {
           element,
           {
             tabindex,
+            wcag: WCAG.FOCUS_ORDER,
           },
         );
       } else {
@@ -77,6 +80,7 @@ class KeyboardAnalyzer extends Analyzer {
             element,
             {
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         }
@@ -89,6 +93,7 @@ class KeyboardAnalyzer extends Analyzer {
             element,
             {
               tag: element.tagName.toLowerCase(),
+              wcag: WCAG.KEYBOARD,
             },
           );
         }
@@ -96,20 +101,9 @@ class KeyboardAnalyzer extends Analyzer {
 
     });
 
-    if (interactiveElements.length > 0) {
-      // No podemos comprobar el indicador de foco automáticamente: el
-      // propio bookmarklet solo se dispara con un clic de mouse, y en
-      // cuanto el navegador registra un clic deja de aplicar
-      // :focus-visible a los foco()s programáticos siguientes (es una
-      // protección del navegador contra scripts que simulan teclado, no
-      // algo que se pueda evitar). Revisar manualmente con Tab.
-      this.addIssue(
-        "info",
-        "El indicador de foco (:focus-visible) no se puede comprobar desde un bookmarklet — navegá la página con Tab y revisalo a simple vista",
-        null,
-        { interactiveElements: interactiveElements.length },
-      );
-    }
+    // Nota: el indicador de foco visible (:focus-visible) NO se puede
+    // comprobar desde acá — ver "Limitaciones" en la guía de uso. No tiene
+    // sentido reportar un "no sé" como si fuera un hallazgo de la auditoría.
 
     // Buscar modal traps (focus no puede escapar)
     const modals = this._querySelectorAll('[role="dialog"], dialog');
@@ -125,6 +119,7 @@ class KeyboardAnalyzer extends Analyzer {
           modal,
           {
             tag: modal.tagName.toLowerCase(),
+            wcag: WCAG.KEYBOARD,
           },
         );
       }

@@ -373,7 +373,11 @@
               <ul>
                 <li>Todas las imágenes tienen atributo alt</li>
                 <li>Alt vacío solo si es realmente decorativa</li>
-                <li>SVGs con &lt;title&gt; o &lt;desc&gt;</li>
+                <li>
+                  SVGs: si son decorativos, marcados con
+                  <code>aria-hidden="true"</code>; si no, con
+                  &lt;title&gt;/&lt;desc&gt; o aria-label
+                </li>
               </ul>
             </div>
           </div>
@@ -432,9 +436,18 @@
             <div class="analyzer-checks">
               <ul>
                 <li>Elementos interactivos navegables por Tab</li>
-                <li>Foco visible</li>
                 <li>Sin tabindex positivo</li>
+                <li>onclick en elementos no nativos, sin rol ni tabindex</li>
+                <li>Modales/diálogos sin ningún elemento focuseable</li>
               </ul>
+              <p style="margin-top: 8px; font-size: 12px">
+                <strong>No revisa</strong> el indicador de foco visible
+                (<code>:focus-visible</code>): en cuanto el navegador
+                registra el clic que dispara el propio bookmarklet, deja de
+                aplicarlo a cualquier <code>focus()</code> hecho por script
+                — es una protección real del navegador, no algo evitable.
+                Navegá la página con Tab y revisalo a simple vista.
+              </p>
             </div>
           </div>
 
@@ -476,6 +489,16 @@
               </tr>
             </tbody>
           </table>
+
+          <h3>Nivel WCAG</h3>
+          <p>
+            Cada hallazgo también indica a qué criterio de WCAG corresponde
+            (ej. <code>WCAG 1.4.3 · Nivel AA</code>) o, si el chequeo es una
+            convención razonable pero no algo que WCAG exija puntualmente
+            (como "debería haber un solo H1"), lo marca como
+            <strong>"Buena práctica"</strong> en vez de inventarle un
+            criterio que no corresponde.
+          </p>
 
           <h3>JSON exportado</h3>
           <p>Al terminar, el resultado se copia al portapapeles:</p>
