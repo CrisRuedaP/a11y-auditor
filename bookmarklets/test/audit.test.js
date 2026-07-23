@@ -69,6 +69,22 @@ describe("Full audit over fixtures/audit.html", () => {
       assert.ok(!lines.some((l) => l.includes("img-good-alt")));
     });
 
+    it('flags alt="" with no role as "empty alt", NOT as "missing alt" (alt="" is falsy in JS, easy to conflate with a missing attribute)', () => {
+      const analyzer = results.results["Imágenes"];
+      const issue = analyzer.issues.find((i) =>
+        i.selector?.includes("img-empty-alt-no-role"),
+      );
+      assert.ok(issue, "should report the empty-alt image");
+      assert.ok(
+        issue.message.includes("alt vacío"),
+        `expected the "empty alt" message, got: "${issue.message}"`,
+      );
+      assert.ok(
+        !issue.message.includes("sin atributo alt"),
+        `alt="" must not be reported as a missing alt attribute: "${issue.message}"`,
+      );
+    });
+
     it("generates a valid selector for ids with special characters (React useId, etc)", async () => {
       const analyzer = results.results["Imágenes"];
       const issue = analyzer.issues.find((i) => i.message.includes("sin atributo alt") && i.selector?.includes("r-weird-id"));

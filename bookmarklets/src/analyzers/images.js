@@ -32,7 +32,7 @@ class ImagesAnalyzer extends Analyzer {
       const ariaLabelledBy = img.getAttribute("aria-labelledby");
       const role = img.getAttribute("role");
 
-      if (!alt && !ariaLabel && !ariaLabelledBy) {
+      if (alt === null && !ariaLabel && !ariaLabelledBy) {
         this.addIssue("error", "Imagen sin atributo alt", img, {
           src: img.src?.substring(0, 100),
           wcag: WCAG.NON_TEXT_CONTENT,
