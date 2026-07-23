@@ -3,6 +3,7 @@
  * Valida jerarquía, detecta saltos de nivel, h1 duplicados, etc
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
 
 class HeadingsAnalyzer extends Analyzer {
   constructor() {
@@ -20,7 +21,7 @@ class HeadingsAnalyzer extends Analyzer {
         "warning",
         "No se encontraron encabezados en la página",
         null,
-        { severity: "critical" },
+        { severity: "critical", wcag: WCAG.INFO_RELATIONSHIPS },
       );
       return this.getSummary();
     }
@@ -36,13 +37,14 @@ class HeadingsAnalyzer extends Analyzer {
     if (h1Count === 0) {
       this.addIssue("error", "No hay H1 en la página", null, {
         severity: "critical",
+        wcag: BEST_PRACTICE,
       });
     } else if (h1Count > 1) {
       this.addIssue(
         "warning",
         `Se encontraron ${h1Count} H1 (debe haber solo 1)`,
         null,
-        { count: h1Count },
+        { count: h1Count, wcag: BEST_PRACTICE },
       );
     } else {
       this.markPassed();
@@ -59,14 +61,14 @@ class HeadingsAnalyzer extends Analyzer {
           "warning",
           `El primer encabezado es H${level}, debería ser H1`,
           element,
-          { level, expectedLevel: 1 },
+          { level, expectedLevel: 1, wcag: BEST_PRACTICE },
         );
       } else if (diff > 1 && lastLevel !== 0) {
         this.addIssue(
           "warning",
           `Salto de jerarquía: de H${lastLevel} a H${level}`,
           element,
-          { from: lastLevel, to: level },
+          { from: lastLevel, to: level, wcag: WCAG.INFO_RELATIONSHIPS },
         );
       } else {
         this.markPassed();
@@ -78,7 +80,10 @@ class HeadingsAnalyzer extends Analyzer {
     // Verificar headings vacíos
     headingLevels.forEach(({ element, level, text }) => {
       if (!text) {
-        this.addIssue("error", `H${level} vacío sin texto`, element, { level });
+        this.addIssue("error", `H${level} vacío sin texto`, element, {
+          level,
+          wcag: WCAG.INFO_RELATIONSHIPS,
+        });
       }
     });
 

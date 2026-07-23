@@ -3,6 +3,7 @@
  * Valida el uso correcto de etiquetas semánticas
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
 
 class SemanticAnalyzer extends Analyzer {
   constructor() {
@@ -34,6 +35,7 @@ class SemanticAnalyzer extends Analyzer {
       this.addIssue("warning", "No se encontró etiqueta <main>", null, {
         divCount,
         severity: "medium",
+        wcag: WCAG.BYPASS_BLOCKS,
       });
       hasMainIssue = true;
     } else if (mains.length > 1) {
@@ -43,6 +45,7 @@ class SemanticAnalyzer extends Analyzer {
         null,
         {
           count: mains.length,
+          wcag: BEST_PRACTICE,
         },
       );
     } else {
@@ -59,6 +62,7 @@ class SemanticAnalyzer extends Analyzer {
         null,
         {
           severity: "low",
+          wcag: BEST_PRACTICE,
         },
       );
       hasNavIssue = true;
@@ -71,6 +75,7 @@ class SemanticAnalyzer extends Analyzer {
     if (headers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <header>", null, {
         severity: "low",
+        wcag: BEST_PRACTICE,
       });
     } else {
       this.markPassed();
@@ -81,6 +86,7 @@ class SemanticAnalyzer extends Analyzer {
     if (footers.length === 0) {
       this.addIssue("warning", "No se encontró etiqueta <footer>", null, {
         severity: "low",
+        wcag: BEST_PRACTICE,
       });
     } else {
       this.markPassed();
@@ -93,6 +99,7 @@ class SemanticAnalyzer extends Analyzer {
       if (!heading) {
         this.addIssue("warning", "<section> sin encabezado", section, {
           tag: "section",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -106,6 +113,7 @@ class SemanticAnalyzer extends Analyzer {
       if (!heading) {
         this.addIssue("warning", "<article> sin encabezado", article, {
           tag: "article",
+          wcag: BEST_PRACTICE,
         });
       } else {
         this.markPassed();
@@ -122,6 +130,7 @@ class SemanticAnalyzer extends Analyzer {
           divCount,
           spanCount,
           severity: "suggestion",
+          wcag: BEST_PRACTICE,
         },
       );
     } else {

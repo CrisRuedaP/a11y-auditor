@@ -3,6 +3,7 @@
  * Valida atributos ARIA, roles, propiedades, etc
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG } from "../core/wcag.js";
 
 class AriaAnalyzer extends Analyzer {
   constructor() {
@@ -102,6 +103,7 @@ class AriaAnalyzer extends Analyzer {
       if (role && !validRoles.includes(role)) {
         this.addIssue("error", `Rol ARIA inválido: "${role}"`, element, {
           invalidRole: role,
+          wcag: WCAG.NAME_ROLE_VALUE,
         });
       } else if (role) {
         this.markPassed();
@@ -124,6 +126,7 @@ class AriaAnalyzer extends Analyzer {
             element,
             {
               aria_labelledby: ariaLabelledBy,
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         } else {
@@ -148,6 +151,7 @@ class AriaAnalyzer extends Analyzer {
             element,
             {
               aria_describedby: ariaDescribedBy,
+              wcag: WCAG.NAME_ROLE_VALUE,
             },
           );
         } else {
@@ -182,6 +186,7 @@ class AriaAnalyzer extends Analyzer {
           element,
           {
             tag: tagName,
+            wcag: WCAG.NAME_ROLE_VALUE,
           },
         );
       }

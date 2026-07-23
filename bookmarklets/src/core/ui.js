@@ -259,6 +259,18 @@ class AuditUI {
         margin-bottom: 4px;
       }
 
+      .a11y-audit-issue-wcag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        color: #4b5563;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 999px;
+        padding: 1px 8px;
+        margin-bottom: 4px;
+      }
+
       .a11y-audit-issue-selector {
         color: #6b7280;
         font-family: 'Courier New', monospace;
@@ -612,6 +624,13 @@ class AuditUI {
     messageEl.textContent = issue.message;
     issueEl.appendChild(messageEl);
 
+    if (issue.metadata?.wcag) {
+      const wcagEl = document.createElement("span");
+      wcagEl.className = "a11y-audit-issue-wcag";
+      wcagEl.textContent = this._describeWcag(issue.metadata.wcag);
+      issueEl.appendChild(wcagEl);
+    }
+
     if (issue.elementInfo) {
       const metaEl = document.createElement("div");
       metaEl.className = "a11y-audit-issue-metadata";
@@ -645,6 +664,16 @@ class AuditUI {
     }
 
     return issueEl;
+  }
+
+  /**
+   * "1.4.3 · Nivel AA" o "Buena práctica" cuando no hay un criterio WCAG
+   * estricto que aplique.
+   * @private
+   */
+  _describeWcag(wcag) {
+    if (!wcag.criterion) return "Buena práctica";
+    return `WCAG ${wcag.criterion} · Nivel ${wcag.level}`;
   }
 
   /**

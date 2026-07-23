@@ -3,6 +3,7 @@
  * Valida texto de enlace, destino real y avisos de nueva pestaña
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG, BEST_PRACTICE } from "../core/wcag.js";
 
 const GENERIC_LINK_TEXTS = [
   "click aquí",
@@ -49,7 +50,9 @@ class LinksAnalyzer extends Analyzer {
 
       // Texto de enlace
       if (!accessibleName && !hasImgAlt) {
-        this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {});
+        this.addIssue("error", "Enlace sin texto ni etiqueta accesible", link, {
+          wcag: WCAG.LINK_PURPOSE,
+        });
       } else if (
         !ariaLabel &&
         GENERIC_LINK_TEXTS.includes(text.toLowerCase())
@@ -58,7 +61,7 @@ class LinksAnalyzer extends Analyzer {
           "warning",
           `Texto de enlace genérico: "${text}" (no describe el destino)`,
           link,
-          { text },
+          { text, wcag: WCAG.LINK_PURPOSE },
         );
       } else {
         this.markPassed();
@@ -71,14 +74,14 @@ class LinksAnalyzer extends Analyzer {
           "warning",
           "Elemento <a> sin atributo href (no es navegable ni focuseable)",
           link,
-          {},
+          { wcag: WCAG.KEYBOARD },
         );
       } else if (href === "" || href === "#" || /^javascript:void\(0?\)$/.test(href)) {
         this.addIssue(
           "warning",
           "Enlace sin destino real (href vacío, '#' o javascript:void(0))",
           link,
-          { href },
+          { href, wcag: WCAG.LINK_PURPOSE },
         );
       } else {
         this.markPassed();
@@ -95,7 +98,7 @@ class LinksAnalyzer extends Analyzer {
             "warning",
             "Se abre en una pestaña nueva sin avisarlo en el texto o aria-label",
             link,
-            { target: "_blank" },
+            { target: "_blank", wcag: WCAG.CHANGE_ON_REQUEST },
           );
         } else {
           this.markPassed();
@@ -107,7 +110,7 @@ class LinksAnalyzer extends Analyzer {
             "warning",
             'target="_blank" sin rel="noopener" (riesgo de seguridad y rendimiento)',
             link,
-            { rel },
+            { rel, wcag: BEST_PRACTICE },
           );
         } else {
           this.markPassed();

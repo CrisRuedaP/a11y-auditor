@@ -3,6 +3,7 @@
  * Valida relación de contraste según WCAG
  */
 import Analyzer from "../core/analyzer.js";
+import { WCAG } from "../core/wcag.js";
 
 class ContrastAnalyzer extends Analyzer {
   constructor() {
@@ -57,7 +58,8 @@ class ContrastAnalyzer extends Analyzer {
             required: wcagAA.required,
             foreground: colors.foreground,
             background: colors.background,
-            level: wcagAA.level,
+            textSize: wcagAA.level,
+            wcag: WCAG.CONTRAST_MINIMUM,
           },
         );
       }

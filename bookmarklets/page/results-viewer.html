@@ -203,6 +203,18 @@
         border-color: var(--accent-focus);
       }
 
+      .issue-wcag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: var(--paper-raised);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 1px 8px;
+        margin-bottom: 4px;
+      }
+
       .issue-message {
         font-weight: 600;
         margin-bottom: 4px;
@@ -326,7 +338,21 @@
           <div class="card summary" id="summarySection"></div>
 
           <div>
-            <h2 style="font-size: 20px; margin-bottom: 16px">Resultados por analizador</h2>
+            <div
+              style="
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 16px;
+              "
+            >
+              <h2 style="font-size: 20px">Resultados por analizador</h2>
+              <button class="btn btn-outline" type="button" onclick="downloadCsv()">
+                Descargar CSV
+              </button>
+            </div>
             <div class="analyzers-grid" id="analyzersGrid"></div>
           </div>
         </section>
@@ -345,6 +371,8 @@
     </footer>
 
     <script>
+      let lastParsedData = null;
+
       function handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -372,6 +400,7 @@
 
         try {
           const data = JSON.parse(jsonText);
+          lastParsedData = data;
           displayResults(data);
           document.getElementById("resultsSection").classList.add("active");
           document.getElementById("emptyState").style.display = "none";
@@ -447,8 +476,10 @@
         if (issues.length > 0) {
           issuesHtml = issues
             .map((issue) => {
+              const wcag = issue.metadata?.wcag;
               return `
                 <div class="issue ${issue.severity}">
+                  ${wcag ? `<div class="issue-wcag">${escapeHtml(describeWcag(wcag))}</div>` : ""}
                   <div class="issue-message">${escapeHtml(issue.message)}</div>
                   ${issue.selector ? `<div class="issue-details">${escapeHtml(issue.selector)}</div>` : ""}
                 </div>
@@ -479,6 +510,11 @@
         const div = document.createElement("div");
         div.textContent = String(text);
         return div.innerHTML;
+      }
+
+      function describeWcag(wcag) {
+        if (!wcag.criterion) return "Buena práctica";
+        return `WCAG ${wcag.criterion} · Nivel ${wcag.level}`;
       }
 
       function loadSampleData() {
@@ -537,6 +573,35 @@
         setTimeout(() => {
           errorEl.classList.remove("active");
         }, 5000);
+      }
+
+      function downloadCsv() {
+        if (!lastParsedData) {
+          showError("Primero cargá o procesá unos resultados.");
+          return;
+        }
+
+        const rows = [["Analizador", "Severidad", "Mensaje", "Selector"]];
+        for (const [name, result] of Object.entries(lastParsedData.results || {})) {
+          for (const issue of result.issues || []) {
+            rows.push([name, issue.severity, issue.message, issue.selector || ""]);
+          }
+        }
+
+        const csv = rows
+          .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+          .join("\n");
+
+        // Excel necesita el BOM de UTF-8 para no romper acentos/eñes
+        const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "a11y-auditor-resultados.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
     </script>
   </body>
