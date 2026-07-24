@@ -1,0 +1,324 @@
+/* ---- hero ---- */
+.hero {
+  padding: 56px 0 40px;
+}
+
+.hero .wrap {
+  max-width: 760px;
+}
+
+.hero h1 {
+  font-size: clamp(2.125rem, 5vw, 3.25rem);
+  margin: 20px 0 22px;
+}
+
+.hero .lede {
+  font-size: 1.0625rem;
+  max-width: 52ch;
+  margin-bottom: 28px;
+}
+
+/* ---- mockup de 3 paneles (instalación / ejecución / reporte) ---- */
+.demo-card {
+  padding: 28px;
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.demo-panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  padding-top: 34px;
+  min-height: 10rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-panel-label {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.demo-install {
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-btn);
+  padding: 6px;
+}
+
+.demo-install .btn {
+  font-size: 0.875rem;
+  min-height: auto;
+  padding: 8px 16px;
+  pointer-events: none;
+}
+
+.demo-run {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-run-img {
+  height: 46px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--paper-raised) 0 6px,
+    #ece1dc 6px 12px
+  );
+  border: 2px solid var(--accent-flag);
+  position: relative;
+}
+
+.demo-run .tag {
+  align-self: flex-start;
+}
+
+.demo-run-line {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  width: 70%;
+}
+
+.demo-report {
+  width: 100%;
+  background: var(--ink);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #d7f2df;
+}
+
+.demo-report .k {
+  color: #9fb4ff;
+}
+.demo-report .s {
+  color: #ffd08a;
+}
+
+@media (max-width: 720px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- pasos con icono ---- */
+.steps {
+  padding: 44px 0;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.step-card .icon-tile {
+  margin-bottom: 14px;
+}
+
+.step-card h3 {
+  font-size: 1.0625rem;
+  margin-bottom: 6px;
+}
+
+.step-card p {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- instalación ---- */
+.install {
+  padding: 40px 0;
+}
+
+.section-head {
+  margin-bottom: 24px;
+  max-width: 60ch;
+}
+
+.section-head h2 {
+  font-size: 1.75rem;
+  margin-bottom: 8px;
+}
+
+.section-head p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.install-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.install-card {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.install-card.main {
+  border-color: var(--ink);
+  grid-column: span 2;
+}
+
+.install-card h3 {
+  font-size: 1.0625rem;
+}
+
+.install-card p {
+  font-size: 1rem;
+  margin-bottom: 4px;
+  flex: 1;
+}
+
+.install-card .btn-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.install-card .btn-row a.btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0.625rem 1rem;
+  line-height: 1.25;
+}
+
+.drag-hint {
+  font-size: 0.875rem;
+  color: var(--accent-focus);
+  background: var(--accent-focus-bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+@media (max-width: 720px) {
+  .install-card.main {
+    grid-column: span 1;
+  }
+}
+
+/* ---- analizadores ---- */
+.analyzers {
+  padding: 40px 0;
+}
+
+.analyzers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.analyzer-card {
+  padding: 22px;
+}
+
+.analyzer-card .icon-tile {
+  margin-bottom: 14px;
+}
+
+.analyzer-card h3 {
+  font-size: 1.0625rem;
+  margin-bottom: 10px;
+}
+
+.analyzer-card .tag {
+  margin-bottom: 10px;
+}
+
+.analyzer-card p {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .analyzers-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .analyzers-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- callouts secundarios ---- */
+.callouts {
+  padding: 40px 0;
+}
+
+.callouts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.callout-card {
+  padding: 26px;
+  display: block;
+  text-decoration: none;
+}
+
+.callout-card .icon-tile {
+  margin-bottom: 14px;
+}
+
+.callout-card h3 {
+  font-size: 1.125rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.callout-card p {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+/* ---- nota de límites ---- */
+.limits {
+  padding: 24px 0 56px;
+}
+
+.limits .card {
+  padding: 20px 24px;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.limits strong {
+  color: var(--ink);
+}

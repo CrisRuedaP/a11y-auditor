@@ -1,0 +1,230 @@
+.page-header {
+  padding: 48px 0 36px;
+}
+
+.page-header h1 {
+  font-size: clamp(1.875rem, 4.5vw, 2.625rem);
+  margin: 14px 0 10px;
+}
+
+.page-header p {
+  max-width: 60ch;
+  font-size: 1rem;
+}
+
+main .wrap {
+  max-width: 820px;
+}
+
+.section {
+  padding: 36px 0;
+  border-top: 1px solid var(--line);
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.section h3 {
+  font-size: 1.125rem;
+  margin: 20px 0 8px;
+}
+
+.section ul,
+.section ol {
+  margin: 0 0 16px;
+  padding-left: 22px;
+  color: var(--ink-soft);
+}
+
+.section li {
+  margin-bottom: 8px;
+}
+
+.step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+.step-index {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.step p {
+  margin: 4px 0 0;
+}
+
+.code-block {
+  background: var(--ink);
+  color: #d7f2df;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  margin: 12px 0;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.tip {
+  background: var(--accent-focus-bg);
+  border-left: 3px solid var(--accent-focus);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0;
+  color: var(--ink);
+}
+
+.tip p,
+.tip code {
+  color: var(--ink);
+}
+
+.tip-title {
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+}
+
+.warning {
+  background: var(--accent-warn-bg);
+  border-left: 3px solid var(--accent-warn);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  margin: 16px 0;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: var(--accent-warn);
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+}
+
+.analyzer-guide {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 12px 0;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  gap: 14px;
+}
+
+.analyzer-guide .icon-tile {
+  margin-top: 2px;
+}
+
+.analyzer-title {
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--ink);
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.analyzer-description {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.analyzer-checks {
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 1rem;
+}
+
+.table th {
+  background: var(--paper);
+  font-weight: 600;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--line);
+  border-radius: 8px 8px 0 0;
+}
+
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+/* FAQ: <button> real con aria-expanded, no un div con onclick */
+.faq-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin: 10px 0;
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+
+.faq-question-heading {
+  margin: 0;
+}
+
+.faq-question {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.faq-question .chevron {
+  transition: transform 0.15s ease;
+  flex: none;
+}
+
+.faq-question[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  transition: max-height 0.2s ease;
+}
+
+.faq-answer[data-open] {
+  padding: 0 16px 16px;
+  max-height: 400px;
+}
