@@ -294,6 +294,11 @@ class AuditUI {
     style.textContent = `
       /* Main panel */
       .a11y-audit-sidebar {
+        /* Tells the browser this panel has its own fixed, intentional
+           palette — without this, some browsers' automatic dark-mode
+           heuristics "helpfully" recolor text/icons on our dark header,
+           washing them out instead of leaving the explicit colors alone. */
+        color-scheme: light;
         display: none;
         position: fixed;
         right: 0;
