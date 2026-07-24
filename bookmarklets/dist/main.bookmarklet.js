@@ -294,10 +294,11 @@ class AuditUI {
     style.textContent = `
       /* Main panel */
       .a11y-audit-sidebar {
-        /* Tells the browser this panel has its own fixed, intentional
-           palette — without this, some browsers' automatic dark-mode
-           heuristics "helpfully" recolor text/icons on our dark header,
-           washing them out instead of leaving the explicit colors alone. */
+        /* General defensive measure: tells the browser this panel has its
+           own fixed palette, so it won't try to auto-dark-mode-adjust it.
+           (Note: the actual washed-out-title bug reported after this was
+           added turned out to be unrelated — see .a11y-audit-title below —
+           but this is still worth keeping as a standard opt-out.) */
         color-scheme: light;
         display: none;
         position: fixed;
@@ -356,6 +357,12 @@ class AuditUI {
       }
 
       .a11y-audit-title {
+        /* Explicit, not inherited from .a11y-audit-header: the panel is
+           injected straight into the host page's <body> (no Shadow DOM),
+           so a host stylesheet rule that directly matches "h2" (even a
+           bare, unscoped one) overrides an inherited color regardless of
+           specificity — inheritance always loses to any direct match. */
+        color: #f0f0f0;
         margin: 0;
         font-size: 18px;
         font-weight: 600;
