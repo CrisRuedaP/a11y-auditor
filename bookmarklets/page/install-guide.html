@@ -197,6 +197,10 @@
         background: var(--paper-raised);
       }
 
+      .faq-question-heading {
+        margin: 0;
+      }
+
       .faq-question {
         width: 100%;
         text-align: left;
@@ -667,47 +671,79 @@
           <h2>Dudas comunes</h2>
 
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              <span>¿Funciona en todos los navegadores?</span>
-              <span class="chevron" aria-hidden="true">⌄</span>
-            </button>
-            <div class="faq-answer">
-              Sí, en Chrome, Firefox, Safari, Edge y navegadores basados en
-              Chromium modernos.
+            <h3 class="faq-question-heading">
+              <button
+                class="faq-question"
+                aria-expanded="false"
+                aria-controls="faq-answer-1"
+              >
+                <span>¿Funciona en todos los navegadores?</span>
+                <span class="chevron" aria-hidden="true">⌄</span>
+              </button>
+            </h3>
+            <div class="faq-answer" id="faq-answer-1">
+              <p>
+                Sí, en Chrome, Firefox, Safari, Edge y navegadores basados en
+                Chromium modernos.
+              </p>
             </div>
           </div>
 
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              <span>¿Los resultados se envían a algún servidor?</span>
-              <span class="chevron" aria-hidden="true">⌄</span>
-            </button>
-            <div class="faq-answer">
-              No. Todo se ejecuta en tu navegador; axe-core se descarga de
-              su CDN oficial y los resultados solo se copian al
-              portapapeles.
+            <h3 class="faq-question-heading">
+              <button
+                class="faq-question"
+                aria-expanded="false"
+                aria-controls="faq-answer-2"
+              >
+                <span>¿Los resultados se envían a algún servidor?</span>
+                <span class="chevron" aria-hidden="true">⌄</span>
+              </button>
+            </h3>
+            <div class="faq-answer" id="faq-answer-2">
+              <p>
+                No. Todo se ejecuta en tu navegador; axe-core se descarga de
+                su CDN oficial y los resultados solo se copian al
+                portapapeles.
+              </p>
             </div>
           </div>
 
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              <span>¿Puedo usarlo en una página muy grande?</span>
-              <span class="chevron" aria-hidden="true">⌄</span>
-            </button>
-            <div class="faq-answer">
-              Sí. En páginas con mucho DOM el análisis puede tardar unos
-              segundos más; es normal.
+            <h3 class="faq-question-heading">
+              <button
+                class="faq-question"
+                aria-expanded="false"
+                aria-controls="faq-answer-3"
+              >
+                <span>¿Puedo usarlo en una página muy grande?</span>
+                <span class="chevron" aria-hidden="true">⌄</span>
+              </button>
+            </h3>
+            <div class="faq-answer" id="faq-answer-3">
+              <p>
+                Sí. En páginas con mucho DOM el análisis puede tardar unos
+                segundos más; es normal.
+              </p>
             </div>
           </div>
 
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
-              <span>¿Reemplaza las pruebas manuales?</span>
-              <span class="chevron" aria-hidden="true">⌄</span>
-            </button>
-            <div class="faq-answer">
-              No. Es un punto de partida rápido; sigue siendo necesario
-              probar con teclado y lectores de pantalla reales.
+            <h3 class="faq-question-heading">
+              <button
+                class="faq-question"
+                aria-expanded="false"
+                aria-controls="faq-answer-4"
+              >
+                <span>¿Reemplaza las pruebas manuales?</span>
+                <span class="chevron" aria-hidden="true">⌄</span>
+              </button>
+            </h3>
+            <div class="faq-answer" id="faq-answer-4">
+              <p>
+                No. Es un punto de partida rápido; sigue siendo necesario
+                probar con teclado y lectores de pantalla reales.
+              </p>
             </div>
           </div>
         </section>
@@ -725,7 +761,7 @@
 
     <script>
       document.querySelectorAll(".faq-question").forEach(function (button) {
-        var answer = button.nextElementSibling;
+        var answer = document.getElementById(button.getAttribute("aria-controls"));
         button.addEventListener("click", function () {
           var expanded = button.getAttribute("aria-expanded") === "true";
           button.setAttribute("aria-expanded", String(!expanded));
