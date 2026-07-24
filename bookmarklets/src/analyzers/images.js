@@ -73,9 +73,13 @@ class ImagesAnalyzer extends Analyzer {
 
       const hasAccessibleName = !!(title || desc || ariaLabel || ariaLabelledBy);
       // A decorative icon is deliberately hidden from screen readers — that
-      // is correct, it doesn't need any description at all.
+      // is correct, it doesn't need any description at all. aria-hidden
+      // cascades to descendants, so an ancestor marked aria-hidden="true"
+      // (a common wrapper pattern, e.g. <div class="icon-tile" aria-hidden>)
+      // already hides this SVG too, even without the attribute on the SVG
+      // itself.
       const isMarkedDecorative =
-        svg.getAttribute("aria-hidden") === "true" ||
+        svg.closest('[aria-hidden="true"]') !== null ||
         role === "presentation" ||
         role === "none";
 

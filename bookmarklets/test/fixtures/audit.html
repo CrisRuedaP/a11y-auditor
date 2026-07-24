@@ -34,6 +34,13 @@
     <svg id="svg-decorative-hidden" aria-hidden="true" viewBox="0 0 10 10">
       <circle cx="5" cy="5" r="4" />
     </svg>
+    <!-- Common wrapper pattern: aria-hidden on the parent, not the SVG
+         itself. Still correctly hidden, since aria-hidden cascades down. -->
+    <div aria-hidden="true">
+      <svg id="svg-decorative-hidden-by-ancestor" viewBox="0 0 10 10">
+        <circle cx="5" cy="5" r="4" />
+      </svg>
+    </div>
 
     <!-- ===== Contraste ===== -->
     <div style="background: #1a1a1f; padding: 10px">

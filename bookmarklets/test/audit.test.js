@@ -116,8 +116,16 @@ describe("Full audit over fixtures/audit.html", () => {
     it("does NOT flag a decorative icon with aria-hidden (correctly hidden, doesn't need a description)", () => {
       const lines = issueLines(results, "Imágenes");
       assert.ok(
-        !lines.some((l) => l.includes("svg-decorative-hidden")),
+        !lines.some((l) => l.endsWith("#svg-decorative-hidden")),
         `an aria-hidden SVG shouldn't need a description: ${JSON.stringify(lines)}`,
+      );
+    });
+
+    it('does NOT flag an SVG hidden via an ancestor\'s aria-hidden="true" (a common wrapper pattern, e.g. an icon-tile div) — aria-hidden cascades to descendants', () => {
+      const lines = issueLines(results, "Imágenes");
+      assert.ok(
+        !lines.some((l) => l.includes("svg-decorative-hidden-by-ancestor")),
+        `an SVG hidden by an ancestor's aria-hidden shouldn't need its own: ${JSON.stringify(lines)}`,
       );
     });
   });
